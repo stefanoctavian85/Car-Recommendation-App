@@ -1,9 +1,13 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import { connectToDatabase, createAdminUser } from './models/index.js';
 
 const app = express();
 app.use(express.json());
 dotenv.config();
+
+connectToDatabase();
+createAdminUser();
 
 const PORT = process.env.PORT || 5000;
 
