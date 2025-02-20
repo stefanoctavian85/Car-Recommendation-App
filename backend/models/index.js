@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
-import User from './user.js';
+import bcrypt from 'bcrypt';
+import User from './User.js';
 
 dotenv.config();
 
@@ -18,7 +19,9 @@ async function createAdminUser() {
     const email = process.env.ADMIN_EMAIL;
     let admin = await User.findOne({ email });
     if (!admin) {
-        admin = await User.create({ email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD, status: "admin" });
+        const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+        admin = await User.create({ email: process.env.ADMIN_EMAIL, password: hashedPassword, firstname: process.env.ADMIN_FIRSTNAME,
+            lastname: process.env.ADMIN_LASTNAME, status: "admin" });
         await admin.save();
         console.log("Admin user has been created!");
     } else {
@@ -28,5 +31,6 @@ async function createAdminUser() {
 
 export default {
     connectToDatabase,
-    createAdminUser
+    createAdminUser,
+    User
 };
