@@ -11,6 +11,10 @@ function Register() {
 
     const navigate = useNavigate();
 
+    function validateCredentials() {
+        
+    }
+
     async function register() {
         const userCredentials = {
             email, firstname, lastname, password,

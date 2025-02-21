@@ -38,6 +38,7 @@ const login = async (req, res, next) => {
 
 const register = async (req, res, next) => {
     const { email, firstname, lastname, password } = req.body;
+
     try {
         const userExists = await models.User.findOne({ email: email });
         if (!userExists) {
