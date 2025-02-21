@@ -1,25 +1,31 @@
 import './Login.css';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SERVER } from '../../config/global.js';
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const navigate = useNavigate();
+
     async function login() {
         const userCredentials = {
             email, password,
-        }
+        };
+
         const response = await fetch(`${SERVER}/auth/login`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(userCredentials)
-        })
+        });
         
         const data = await response.json();
-        console.log(data);
+        const token = data.token;
+        localStorage.setItem("token", token);
+        navigate("/");
     }
 
     return (

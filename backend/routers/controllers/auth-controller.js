@@ -51,7 +51,7 @@ const register = async (req, res, next) => {
             });
             res.status(200).json({
                 token,
-            })
+            });
         } else {
             res.status(400).json({
                 message: "A user with this email already exists!",
