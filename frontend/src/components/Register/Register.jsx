@@ -8,14 +8,42 @@ function Register() {
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
     const [password, setPassword] = useState("");
+    const [error, setError] = useState('');
 
     const navigate = useNavigate();
 
     function validateCredentials() {
-        
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        if (!emailRegex.test(email)) {
+            setError("Invalid email address!");
+            return false;
+        }
+
+        if (firstname.length < 3 || firstname.length > 20) {
+            setError("First name length must be between 3 and 20!");
+            return false;
+        }
+
+        if (lastname.length < 3 || lastname.length > 20) {
+            setError("Last name length must be between 3 and 20!");
+            return false;
+        }
+
+        if (password.length < 5 || password.length > 64) {
+            setError("Password length must be between 5 and 64!");
+            return false;
+        }
+
+        setError('');
+        return true;
     }
 
     async function register() {
+        if (!validateCredentials()) {
+            return;
+        }
+
         const userCredentials = {
             email, firstname, lastname, password,
         };
@@ -29,9 +57,14 @@ function Register() {
         });
 
         const data = await response.json();
-        const token = data.token;
-        localStorage.setItem("token", token);
-        navigate("/");
+        if (response.ok) {
+            const token = data.token;
+            localStorage.setItem("token", token);
+            navigate("/");
+        } else {
+            setError(data.message);
+            console.log(data.message);
+        }
     }
 
     return (
@@ -43,7 +76,7 @@ function Register() {
                     <label htmlFor='email-input'>Email</label>
                     <input
                         id='email-input'
-                        type='text'
+                        type='email'
                         placeholder='Enter your email...'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -56,6 +89,8 @@ function Register() {
                         id='firstname-input'
                         type='text'
                         placeholder='Enter your first name...'
+                        minLength="3"
+                        maxLength="20"
                         value={firstname}
                         onChange={(e) => setFirstname(e.target.value)}
                         required
@@ -67,6 +102,8 @@ function Register() {
                         id='lastname-input'
                         type='text'
                         placeholder='Enter your last name...'
+                        minLength="3"
+                        maxLength="20"
                         value={lastname}
                         onChange={(e) => setLastname(e.target.value)}
                         required
@@ -85,6 +122,7 @@ function Register() {
                 </div>
                 <button className='register-button' type='button' onClick={register}>Register</button>
             </form>
+            <p className='register-error'>{error}</p>
         </div>
     );
 }

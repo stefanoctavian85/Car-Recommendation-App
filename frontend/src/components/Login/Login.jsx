@@ -4,12 +4,34 @@ import { useNavigate } from 'react-router-dom';
 import { SERVER } from '../../config/global.js';
 
 function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
     const navigate = useNavigate();
 
+    function validateCredentials() {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        if (!emailRegex.test(email)) {
+            setError("Invalid email address!");
+            return false;
+        }
+
+        if (password.length < 5 || password.length > 64) {
+            setError("Password length must be between 5 and 64!");
+            return false;
+        }
+
+        setError('');
+        return true;
+    }
+
     async function login() {
+        if (!validateCredentials()) {
+            return;
+        }
+
         const userCredentials = {
             email, password,
         };
@@ -23,9 +45,14 @@ function Login() {
         });
         
         const data = await response.json();
-        const token = data.token;
-        localStorage.setItem("token", token);
-        navigate("/");
+        if (response.ok) {
+            const token = data.token;
+            localStorage.setItem("token", token);
+            navigate("/");
+        } else {
+            setError(data.message);
+            console.log(data.message);
+        }
     }
 
     return (
@@ -57,6 +84,7 @@ function Login() {
                 </div>
                 <button className='login-button' type='button' onClick={login}>Log in</button>
             </form>
+            <p className='login-error'>{error}</p>
         </div>
     );
 }
