@@ -1,7 +1,7 @@
 import './Register.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SERVER } from '../../config/global.js';
+import { SERVER } from '../../config/global.jsx';
 
 function Register() {
     const [email, setEmail] = useState('');
