@@ -25,6 +25,14 @@ class AuthStore {
         this.isAuthenticated = true;
     }
 
+    setIsAuthenticated(isAuthenticated) {
+        this.isAuthenticated = isAuthenticated;
+    }
+
+    getAuthStatus() {
+        return this.isAuthenticated;
+    }
+
     login(token) {
         localStorage.setItem("token", JSON.stringify(token));
         this.isAuthenticated = true;

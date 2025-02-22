@@ -1,16 +1,23 @@
 import './Register.css';
-import React, { useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
+import AppContext from '../../state/AppContext.jsx';
 
 function Register() {
+    const { auth, isAuthenticated, setIsAuthenticated } = useContext(AppContext);
     const [email, setEmail] = useState('');
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastname] = useState('');
     const [password, setPassword] = useState("");
     const [error, setError] = useState('');
-
     const navigate = useNavigate();
+
+    useEffect(() => {
+            if (isAuthenticated) {
+                navigate('/profile');
+            }
+        }, [isAuthenticated]);
 
     function validateCredentials() {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -60,6 +67,8 @@ function Register() {
         if (response.ok) {
             const token = data.token;
             localStorage.setItem("token", JSON.stringify(token));
+            auth.login(token);
+            setIsAuthenticated(auth.getAuthStatus());
             navigate("/");
         } else {
             setError(data.message);

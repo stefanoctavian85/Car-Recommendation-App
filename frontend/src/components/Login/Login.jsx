@@ -5,10 +5,10 @@ import { SERVER } from '../../config/global.jsx';
 import AppContext from '../../state/AppContext.jsx';
 
 function Login() {
+    const { auth, isAuthenticated, setIsAuthenticated } = useContext(AppContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { auth, isAuthenticated } = useContext(AppContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -56,6 +56,7 @@ function Login() {
             const token = data.token;
             localStorage.setItem("token", JSON.stringify(token));
             auth.login(token);
+            setIsAuthenticated(auth.getAuthStatus());
             navigate("/");
         } else {
             setError(data.message);
