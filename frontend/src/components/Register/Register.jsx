@@ -59,11 +59,10 @@ function Register() {
         const data = await response.json();
         if (response.ok) {
             const token = data.token;
-            localStorage.setItem("token", token);
+            localStorage.setItem("token", JSON.stringify(token));
             navigate("/");
         } else {
             setError(data.message);
-            console.log(data.message);
         }
     }
 

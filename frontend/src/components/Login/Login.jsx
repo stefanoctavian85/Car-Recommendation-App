@@ -1,14 +1,21 @@
 import './Login.css';
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
+import AppContext from '../../state/AppContext.jsx';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-
+    const { auth, isAuthenticated } = useContext(AppContext);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/profile');
+        }
+    }, [isAuthenticated]);
 
     function validateCredentials() {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -43,15 +50,15 @@ function Login() {
             },
             body: JSON.stringify(userCredentials)
         });
-        
+
         const data = await response.json();
         if (response.ok) {
             const token = data.token;
-            localStorage.setItem("token", token);
+            localStorage.setItem("token", JSON.stringify(token));
+            auth.login(token);
             navigate("/");
         } else {
             setError(data.message);
-            console.log(data.message);
         }
     }
 
