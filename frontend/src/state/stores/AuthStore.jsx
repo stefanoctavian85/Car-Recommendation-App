@@ -40,7 +40,7 @@ class AuthStore {
 
     logout() {
         localStorage.removeItem("token");
-        this.isAuthenticated = false;
+        this.setIsAuthenticated = false;
     }
 }
 

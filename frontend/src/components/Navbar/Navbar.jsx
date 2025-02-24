@@ -4,11 +4,13 @@ import AppContext from '../../state/AppContext';
 import { useNavigate, Link } from 'react-router-dom';
 
 function Navbar() {
-    const { isAuthenticated } = useContext(AppContext);
+    const { auth, isAuthenticated, setIsAuthenticated } = useContext(AppContext);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // console.log(isAuthenticated);
+        if (!isAuthenticated) {
+            navigate('/');
+        }
     }, [isAuthenticated]);
 
     function handleLoginStatus() {
@@ -16,6 +18,20 @@ function Navbar() {
             navigate('/profile');
         }
         else {
+            navigate('/login');
+        }
+    }
+
+    function logout() {
+        auth.logout();
+        setIsAuthenticated(false);
+        navigate("/");
+    }
+
+    function completeForm() {
+        if (isAuthenticated) {
+            navigate('/form');
+        } else {
             navigate('/login');
         }
     }
@@ -33,6 +49,18 @@ function Navbar() {
                             onClick={handleLoginStatus}
                         >
                             {isAuthenticated ? "Your account" : "Log in"}
+                        </button>
+                        <button
+                            className='navbar-button-logout'
+                            onClick={logout}
+                        >
+                            Log out
+                        </button>
+                        <button
+                            className='navbar-form'
+                            onClick={completeForm}
+                        >
+                            Form
                         </button>
                     </li>
                 </ul>

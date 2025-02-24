@@ -5,7 +5,6 @@ import AppContext from '../../state/AppContext';
 
 function ProtectedRoute() {
     const { isAuthenticated } = useContext(AppContext);
-
     return isAuthenticated ? <Outlet /> : <Navigate to='/login' />
 }
 
