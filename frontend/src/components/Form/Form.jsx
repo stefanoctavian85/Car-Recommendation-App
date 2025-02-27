@@ -3,14 +3,17 @@ import data from '../../assets/data.jsx';
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
+import { SERVER } from '../../config/global.jsx';
+import { jwtDecode } from 'jwt-decode'; 
 
 function Form() {
-    const { isAuthenticated } = useContext(AppContext);
+    const { isAuthenticated, token } = useContext(AppContext);
     const [index, setIndex] = useState(0);
     const [rangeValue, setRangeValue] = useState(0);
     const [responses, setResponses] = useState([]);
     const [validResponse, setValidResponse] = useState(false);
     const [finalResponse, setFinalResponse] = useState('');
+    const [prediction, setPrediction] = useState('');
     const navigate = useNavigate();
 
     let maxQuestions = data.length;
@@ -51,8 +54,24 @@ function Form() {
         }
     }
 
-    function submitForm() {
-        console.log(responses);
+    async function submitForm() {
+        const userId = jwtDecode(token).id;
+        const updatedResponses = [...responses, finalResponse];
+
+        const response = await fetch(`${SERVER}/api/users/${userId}/forms`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({responses: updatedResponses}),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setPrediction(data.cars);
+            setIndex(index+1);
+        }
     }
 
     return (
@@ -60,7 +79,7 @@ function Form() {
             <h1>Recommendation Form</h1>
             <div className='form-container'>
                 {
-                    index < maxQuestions - 1 ? (
+                    index < maxQuestions ? (
                         <div>
                             <div className='form-question'>
                                 <p>{index + 1}. {data[index].question}</p>
@@ -132,7 +151,23 @@ function Form() {
                         </div>
                     ) : (
                         <div>
-                            <p>TO DO</p>
+                            {
+                                prediction.length > 0 ? (
+                                    <div>
+                                        <ul>
+                                            {
+                                                prediction.map((element, index) => (
+                                                    <li key={index}>{element}</li>
+                                                ))
+                                            }
+                                        </ul>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <p>Something went wrong!</p>
+                                    </div>
+                                )
+                            }
                         </div>
                     )
                 }

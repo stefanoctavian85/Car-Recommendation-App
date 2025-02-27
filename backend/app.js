@@ -13,6 +13,7 @@ database.connectToDatabase();
 database.createAdminUser();
 
 app.use('/auth', routers.authRouter);
+app.use('/api', routers.apiRouter);
 
 const PORT = process.env.PORT || 5000;
 

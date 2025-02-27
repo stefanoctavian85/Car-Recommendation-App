@@ -15,10 +15,12 @@ import AuthStore from './state/stores/AuthStore.jsx';
 function App() {
   const [authStore] = useState(new AuthStore());
   const [isAuthenticated, setIsAuthenticated] = useState(authStore.getAuthStatus());
+  const [token, setToken] = useState(authStore.getToken());
 
   useEffect(() => {
     authStore.checkAuthStatus();
     setIsAuthenticated(authStore.getAuthStatus());
+    setToken(authStore.getToken());
   }, [authStore]);
 
   return (
@@ -26,7 +28,9 @@ function App() {
       <AppContext.Provider value={{
         auth: authStore,
         isAuthenticated,
-        setIsAuthenticated
+        setIsAuthenticated,
+        token,
+        setToken
       }}>
         <BrowserRouter>
           <Navbar />

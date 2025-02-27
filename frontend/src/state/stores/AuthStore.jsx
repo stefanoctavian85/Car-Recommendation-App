@@ -1,13 +1,16 @@
 class AuthStore {
     constructor() {
         this.isAuthenticated = false;
+        this.token = '';
     }
 
     checkAuthStatus() {
         const token = JSON.parse(localStorage.getItem("token"));
+        this.token = token;
 
         if (!token) {
             this.isAuthenticated = false;
+            this.token = '';
             return;
         }
 
@@ -19,10 +22,12 @@ class AuthStore {
         if (expirationTime < currentTime) {
             localStorage.removeItem("token");
             this.isAuthenticated = false;
+            this.token = '';
             return;
         }
 
         this.isAuthenticated = true;
+        this.token = token;
     }
 
     setIsAuthenticated(isAuthenticated) {
@@ -33,14 +38,24 @@ class AuthStore {
         return this.isAuthenticated;
     }
 
+    setToken(token) {
+        this.token = token;
+    }
+
+    getToken() {
+        return this.token;
+    }
+
     login(token) {
         localStorage.setItem("token", JSON.stringify(token));
         this.isAuthenticated = true;
+        this.token = token;
     }
 
     logout() {
         localStorage.removeItem("token");
         this.setIsAuthenticated = false;
+        this.setToken('');
     }
 }
 

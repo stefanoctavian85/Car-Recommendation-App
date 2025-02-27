@@ -2,7 +2,7 @@ const data = [
     {
         question: "Culoare",
         type: 'choice',
-        options: ['Alb', 'Albastru', 'Argint', 'Gri', 'Maro', 'Negru', 'Rosu'],
+        options: ['Alb', 'Albastru', 'Argint', 'Gri', 'Maro', 'Negru', 'Rosu', 'Alte culori'],
     },
     {
         question: "Anul productiei",
@@ -24,7 +24,7 @@ const data = [
     {
         question: "Selectati cutia de viteze dorita",
         type: 'choice',
-        options: ["Cutie de viteze manuala", "Cutie de viteze automata"],
+        options: ["Manuala", "Automata"],
     },
     {
         question: "Ce tip de caroserie preferati?",
@@ -49,13 +49,6 @@ const data = [
         options: ["Fata", "Spate", "4x4"],
     },
     {
-        question: "Bugetul mediu pentru masina",
-        type: 'range',
-        min: 1000,
-        max: 336000,
-        step: 1000
-    },
-    {
         question: "Consum urban mediu",
         type: 'number',
         min: 3,
@@ -66,6 +59,13 @@ const data = [
         type: 'number',
         min: 3,
         max: 13,
+    },
+    {
+        question: "Bugetul mediu pentru masina",
+        type: 'range',
+        min: 1000,
+        max: 336000,
+        step: 1000
     }
 ];
 

@@ -5,7 +5,7 @@ import { SERVER } from '../../config/global.jsx';
 import AppContext from '../../state/AppContext.jsx';
 
 function Login() {
-    const { auth, isAuthenticated, setIsAuthenticated } = useContext(AppContext);
+    const { auth, isAuthenticated, setIsAuthenticated, setToken } = useContext(AppContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -56,6 +56,7 @@ function Login() {
             const token = data.token;
             localStorage.setItem("token", JSON.stringify(token));
             auth.login(token);
+            setToken(token);
             setIsAuthenticated(auth.getAuthStatus());
             navigate("/");
         } else {
