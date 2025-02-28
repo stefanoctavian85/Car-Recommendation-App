@@ -1,7 +1,5 @@
 import models from "../../models/index.js";
 import fetch from 'node-fetch';
-import csv from 'csv-parser';
-import fs from 'fs';
 
 const predict = async (req, res, next) => {
     try {
@@ -42,20 +40,20 @@ const predict = async (req, res, next) => {
 const offer = async (req, res, next) => {
     try {
         const { uid, car } = req.params;
-        const results = [];
         
-        fs.createReadStream('./assets/cars_cleaned_dataset.csv')
-            .pipe(csv())
-            .on('data', (data) => {
-                if (data.Masina === car) {
-                    results.push(data);
-                }
-            })
-            .on('end', () => {
-                return res.status(200).json({
-                    cars: results,
-                });
+        const cars = await models.Car.find({
+            Masina: car,
+        });
+
+        if (!cars) {
+            return res.status(404).json({
+                message: "Cars not found!"
             });
+        }
+
+        return res.status(200).json({
+            cars
+        });
     } catch (err) {
         next(err);
     }
