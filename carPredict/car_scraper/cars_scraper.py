@@ -29,7 +29,7 @@ page_number = 0
 
 car_data_list = []
 
-while True and number < 10:
+while True:
     try:
         WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "article.ooa-16cop2i.e1oaf45v0")))
         cars_paragraphs = driver.find_elements(By.CSS_SELECTOR, "article.ooa-16cop2i.e1oaf45v0")
