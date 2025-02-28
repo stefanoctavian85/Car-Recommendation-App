@@ -12,23 +12,31 @@ function CarDetails() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setSelectedCar(cars.carsStore.cars);
-        const userId = jwtDecode(auth.token).id;
+        
+    }, []);
 
-        fetch(`${SERVER}/api/users/${userId}/cars/${cars.carsStore.cars}`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${auth.token}`,
-            },
-        })
-            .then((res) => {
-                if (res.ok) {
-                    return res.json();
-                }
+    useEffect(() => {
+        if (cars.carsStore.cars.length === 0) {
+            navigate('/form');
+        } else {
+            setSelectedCar(cars.carsStore.cars);
+            const userId = jwtDecode(auth.token).id;
+    
+            fetch(`${SERVER}/api/users/${userId}/cars/${cars.carsStore.cars}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${auth.token}`,
+                },
             })
-            .then((data) => {
-                setCarOffers(data.cars);
-            });
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    setCarOffers(data.cars);
+                });
+        }
     }, [cars]);
 
     return (
@@ -43,10 +51,10 @@ function CarDetails() {
                                     <div key={index}>
                                         <li>
                                             <p>{element.Masina}</p>
-                                            <p>Culoare: {element.Culoare}</p>
-                                            <p>Pret: {element.Pret}</p>
-                                            <p>An: {element['Anul productiei']}</p>
-                                            <p>Consum mediu: {Math.round(parseFloat(element['Consum Urban']) + parseFloat(element['Consum Extraurban'])) / 2}</p>
+                                            <p>Color: {element.Culoare}</p>
+                                            <p>Price: {element.Pret} EURO</p>
+                                            <p>Year: {element['Anul productiei']}</p>
+                                            <p>Average consumption: {Math.round(parseFloat(element['Consum Urban']) + parseFloat(element['Consum Extraurban'])) / 2}</p>
                                         </li>
                                         <button>Select</button>
                                     </div>

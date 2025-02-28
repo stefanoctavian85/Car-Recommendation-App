@@ -29,7 +29,6 @@ function App() {
 
   useEffect(() => {
     setCars(carsStore.getCars());
-    console.log(cars);
   }, [carsStore]);
 
   return (
