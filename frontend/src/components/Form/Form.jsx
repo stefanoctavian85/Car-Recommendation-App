@@ -4,27 +4,27 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
-import { jwtDecode } from 'jwt-decode'; 
+import { jwtDecode } from 'jwt-decode';
 
 function Form() {
-    const { isAuthenticated, token } = useContext(AppContext);
+    const { auth, cars } = useContext(AppContext);
     const [index, setIndex] = useState(0);
     const [rangeValue, setRangeValue] = useState(0);
     const [responses, setResponses] = useState([]);
     const [validResponse, setValidResponse] = useState(false);
     const [finalResponse, setFinalResponse] = useState('');
-    const [prediction, setPrediction] = useState('');
+    const [predictions, setPredictions] = useState('');
     const navigate = useNavigate();
 
     let maxQuestions = data.length;
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (!auth.isAuthenticated) {
             navigate('/login');
         } else {
             navigate('/form');
         }
-    }, [isAuthenticated]);
+    }, [auth.isAuthenticated]);
 
     function handleFinalResponse(e) {
         if (e.target.value !== '') {
@@ -55,23 +55,30 @@ function Form() {
     }
 
     async function submitForm() {
-        const userId = jwtDecode(token).id;
+        const userId = jwtDecode(auth.token).id;
+
         const updatedResponses = [...responses, finalResponse];
 
         const response = await fetch(`${SERVER}/api/users/${userId}/forms`, {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${auth.token}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({responses: updatedResponses}),
+            body: JSON.stringify({ responses: updatedResponses }),
         });
 
         if (response.ok) {
             const data = await response.json();
-            setPrediction(data.cars);
-            setIndex(index+1);
+            setPredictions(data.cars);
+            cars.carsStore.setCars(data.cars);
+            setIndex(index + 1);
         }
+    }
+
+    function selectCar(indexCar) {
+        cars.carsStore.setCars(predictions[indexCar]);
+        navigate('/car-details');
     }
 
     return (
@@ -151,23 +158,16 @@ function Form() {
                         </div>
                     ) : (
                         <div>
-                            {
-                                prediction.length > 0 ? (
-                                    <div>
-                                        <ul>
-                                            {
-                                                prediction.map((element, index) => (
-                                                    <li key={index}>{element}</li>
-                                                ))
-                                            }
-                                        </ul>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <p>Something went wrong!</p>
-                                    </div>
-                                )
-                            }
+                            <ul>
+                                {
+                                    predictions.map((element, indexCar) => (
+                                        <div key={indexCar}>
+                                            <li>{element}</li>
+                                            <button onClick={() => selectCar(indexCar)}>Select</button>
+                                        </div>
+                                    ))
+                                }
+                            </ul>
                         </div>
                     )
                 }

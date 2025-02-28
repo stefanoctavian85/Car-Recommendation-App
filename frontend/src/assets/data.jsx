@@ -1,22 +1,5 @@
 const data = [
     {
-        question: "Culoare",
-        type: 'choice',
-        options: ['Alb', 'Albastru', 'Argint', 'Gri', 'Maro', 'Negru', 'Rosu', 'Alte culori'],
-    },
-    {
-        question: "Anul productiei",
-        type: 'number',
-        min: 1995,
-        max: 2025,
-    },
-    {
-        question: "Numar locuri",
-        type: 'number',
-        min: 2,
-        max: 9,
-    },
-    {
         question: "Selectati tipul de combustibil preferat",
         type: 'choice',
         options: ["Benzina", "Diesel", "Hibrid"],
