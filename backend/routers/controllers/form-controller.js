@@ -43,7 +43,7 @@ const offer = async (req, res, next) => {
         
         const cars = await models.Car.find({
             Masina: car,
-            Status: "Available",
+            Status: "Available"
         });
 
         if (!cars) {
