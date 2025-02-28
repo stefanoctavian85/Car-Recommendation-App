@@ -12,10 +12,6 @@ function CarDetails() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        
-    }, []);
-
-    useEffect(() => {
         if (cars.carsStore.cars.length === 0) {
             navigate('/form');
         } else {
