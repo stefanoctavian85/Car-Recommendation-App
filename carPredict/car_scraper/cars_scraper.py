@@ -29,10 +29,10 @@ page_number = 0
 
 car_data_list = []
 
-while True:
+while True and number < 10:
     try:
-        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "h2.e1n1d04s0.ooa-1kyyooz.er34gjf0")))
-        cars_paragraphs = driver.find_elements(By.CSS_SELECTOR, "h2.e1n1d04s0.ooa-1kyyooz.er34gjf0")
+        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "article.ooa-16cop2i.e1oaf45v0")))
+        cars_paragraphs = driver.find_elements(By.CSS_SELECTOR, "article.ooa-16cop2i.e1oaf45v0")
 
         for car in cars_paragraphs:
             link = car.find_element(By.TAG_NAME, "a").get_attribute("href")
@@ -41,7 +41,7 @@ while True:
             data_links.append(link)
 
         try:
-            next_page_button = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, '//li[@title="Next Page"]')))
+            next_page_button = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, '//li[@title="Go to next Page"]')))
             if "disabled" in next_page_button.get_attribute("class"):
                 break
 
@@ -69,18 +69,18 @@ for link in data_links:
         except Exception as e:
             print("Image not found!")
 
-        technical_specs_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "button.accordion-item__toggle-button.ooa-9vqtkg")))
+        technical_specs_button = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "header.ooa-1g1u77j")))
         technical_specs_button.click()
 
-        pret = driver.find_element(By.CSS_SELECTOR, "h3.offer-price__number.evnmei44.ooa-1kdys7g.er34gjf0")
-        moneda = driver.find_element(By.CSS_SELECTOR, "p.offer-price__currency.evnmei45.ooa-m6bn4u.er34gjf0")
+        pret = driver.find_element(By.CSS_SELECTOR, "h3.offer-price__number.ex6ng1i5.ooa-1kdys7g")
+        moneda = driver.find_element(By.CSS_SELECTOR, "p.offer-price__currency.ex6ng1i6.ooa-m6bn4u")
         car_info["Pret"] = pret.text.strip() + moneda.text.strip()
 
         try:
             tags = WebDriverWait(driver, 5).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "p.eim4snj7.ooa-y26jp.er34gjf0")))
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "p.en2sar58.ooa-y26jp")))
             details = WebDriverWait(driver, 5).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "p.eim4snj8.ooa-17xeqrd.er34gjf0")))
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "p.en2sar59.ooa-17xeqrd")))
 
             pozitie = 0
 
@@ -95,8 +95,8 @@ for link in data_links:
                     pozitie += 1
 
             print(f"Car number {number}")
-            # for info in car_info:
-            #     print(info + ": " + car_info[info])
+            for info in car_info:
+                print(info + ": " + car_info[info])
             number += 1
 
             car_data_list.append(car_info)
@@ -110,4 +110,4 @@ car_data_df = pd.DataFrame(car_data_list)
 car_data_df = car_data_df.rename(columns={'Anul producției': 'Anul productiei'})
 print(car_data_df)
 columns = list(car_data_df.columns)
-car_data_df.to_csv("raw/cars_full_dataset.csv", index=False, columns=columns)
+car_data_df.to_csv("raw/test.csv", index=False, columns=columns)

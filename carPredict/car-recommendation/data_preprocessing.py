@@ -9,7 +9,7 @@ os.environ["LOKY_MAX_CPU_COUNT"] = "4" # for smote
 cars = pd.read_csv("raw/cars_cleaned_dataset.csv")
 cars = cars.drop_duplicates()
 
-X = cars.drop(["Masina"], axis=1)
+X = cars.drop(["Masina", "Culoare", "Anul productiei", "Numar locuri"], axis=1)
 y = cars["Masina"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -80,3 +80,8 @@ y_test_df.to_csv("processed_data/y_test.csv", index=False)
 # le = LabelEncoder()
 # y_train = pd.DataFrame(le.fit_transform(y_train), columns=["Masina"]).reset_index(drop=True)
 # y_test = pd.DataFrame(le.transform(y_test), columns=["Masina"]).reset_index(drop=True)
+#
+# X_train_df.to_csv("processed_data/X_train.csv")
+# X_test_df.to_csv("processed_data/X_test.csv")
+# y_train.to_csv("processed_data/y_train.csv", index=False)
+# y_test.to_csv("processed_data/y_test.csv", index=False)

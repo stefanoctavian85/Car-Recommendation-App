@@ -1,8 +1,6 @@
 import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import LabelEncoder
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)

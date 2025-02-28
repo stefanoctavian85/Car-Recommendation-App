@@ -1,21 +1,11 @@
-# Ignoră fișierul .env
 .env
 
-# Ignoră fișierele de configurare specifice IDE-urilor
 .idea/
 .vscode/
 
-# Ignoră fișierele de sistem
-*.log
-*.DS_Store
-
-# Ignoră directoarele de build
-node_modules/
-dist/
-
-# Ignoră fișierele de mediu virtual Python
 env/
 venv/
 
 LICENSE
 README.md
+raw/test.csv

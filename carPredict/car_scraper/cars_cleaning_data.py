@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 def na_values(df: pd.DataFrame, col_name):
@@ -71,9 +72,8 @@ cars = cars.rename(columns={"Marca": "Masina"})
 
 #Modify the subgroups into one group for colors, fuel type, body type and transmission
 colors_df = cars["Culoare"].value_counts().reset_index()
-another_culors = colors_df[colors_df["count"] < 100]["Culoare"].tolist()
+another_culors = colors_df[colors_df["count"] < 500]["Culoare"].tolist()
 cars["Culoare"] = cars["Culoare"].apply(lambda x: "Alte culori" if x in another_culors else x)
-
 cars["Combustibil"] = cars["Combustibil"].apply(lambda x: "Benzina" if "Benzina" in x else
                                                             "Hibrid" if "Hibrid" in x else
                                                             "Diesel")

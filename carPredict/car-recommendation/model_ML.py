@@ -5,7 +5,6 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 model = joblib.load("joblib_files/model_ML.joblib")
-label_encoder_culoare = joblib.load("joblib_files/labelencoder_Culoare.joblib")
 label_encoder_combustibil = joblib.load("joblib_files/labelencoder_Combustibil.joblib")
 label_encoder_cutie_viteze = joblib.load("joblib_files/labelencoder_Cutie de viteze.joblib")
 label_encoder_caroserie = joblib.load("joblib_files/labelencoder_Tip Caroserie.joblib")
@@ -21,14 +20,12 @@ def predict():
     transformed_responses = []
     for i, col in enumerate(responses):
         if i == 0:
-            transformed_responses.append(label_encoder_culoare.transform([col])[0])
-        elif i == 3:
             transformed_responses.append(label_encoder_combustibil.transform([col])[0])
-        elif i == 4:
+        elif i == 1:
             transformed_responses.append(label_encoder_cutie_viteze.transform([col])[0])
-        elif i == 5:
+        elif i == 2:
             transformed_responses.append(label_encoder_caroserie.transform([col])[0])
-        elif i == 8:
+        elif i == 5:
             transformed_responses.append(label_encoder_transmisie.transform([col])[0])
         else:
             transformed_responses.append(col)
