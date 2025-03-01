@@ -3,6 +3,12 @@ import controllers from './controllers/index.js';
 import middleware from '../middleware/index.js';
 
 const apiRouter = express.Router();
+
+apiRouter.get('/cars/brands', controllers.car.searchBrands);
+apiRouter.get('/cars/brands/:brand', controllers.car.searchModels);
+apiRouter.get('/cars/bodytypes', controllers.car.searchBodyTypes);
+apiRouter.post('/cars', controllers.car.searchSpecificCars);
+
 apiRouter.use(middleware.auth);
 
 apiRouter.get('/users/:uid/profile', controllers.profile.userInformations);
