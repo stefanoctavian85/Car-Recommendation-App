@@ -3,14 +3,17 @@ import React, { useContext } from 'react';
 import AppContext from '../../state/AppContext';
 import { useNavigate } from 'react-router-dom';
 
+import '../Search/Search.jsx';
+import Search from '../Search/Search.jsx';
 
 function Home () {
-    const { isAuthenticated } = useContext(AppContext);
+    const { auth } = useContext(AppContext);
     const navigate = useNavigate();
 
     return (
-        <div>
-            <p>home</p>
+        <div className='home-page'>
+            <p>Home</p>
+            <Search />
         </div>
     );
 }
