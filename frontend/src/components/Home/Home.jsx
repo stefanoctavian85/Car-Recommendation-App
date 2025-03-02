@@ -6,14 +6,19 @@ import { useNavigate } from 'react-router-dom';
 import '../Search/Search.jsx';
 import Search from '../Search/Search.jsx';
 
-function Home () {
+function Home() {
     const { auth } = useContext(AppContext);
     const navigate = useNavigate();
 
     return (
         <div className='home-page'>
             <p>Home</p>
-            <Search />
+            {
+                auth.token ? (
+                    <Search />
+                ) : null
+            }
+
         </div>
     );
 }

@@ -19,7 +19,6 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(authStore.getAuthStatus());
   const [token, setToken] = useState(authStore.getToken());
   const [carsStore] = useState(new CarsStore());
-  const [cars, setCars] = useState(carsStore.getCars());
 
   useEffect(() => {
     authStore.checkAuthStatus();
@@ -28,7 +27,7 @@ function App() {
   }, [authStore]);
 
   useEffect(() => {
-    setCars(carsStore.getCars());
+    carsStore.setCars(carsStore.getCars());
   }, [carsStore]);
 
   return (
@@ -43,7 +42,6 @@ function App() {
         },
         cars: {
           carsStore,
-          setCars,
         }
       }}>
         <BrowserRouter>

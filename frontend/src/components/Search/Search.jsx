@@ -1,11 +1,13 @@
 import './Search.css';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
-import { Select, MenuItem, InputLabel, FormControl, Button, Menu } from '@mui/material';
+import { Select, MenuItem, InputLabel, FormControl, Button } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import AppContext from '../../state/AppContext.jsx';
 
 function Search() {
+    const { auth, cars } = useContext(AppContext);
     const [brands, setBrands] = useState([]);
     const [selectedBrand, setSelectedBrand] = useState('');
     const [models, setModels] = useState([]);
@@ -28,6 +30,9 @@ function Search() {
     useEffect(() => {
         fetch(`${SERVER}/api/cars/brands`, {
             method: "GET",
+            headers: {
+                'Authorization': `Bearer ${auth.token}`,
+            }
         })
             .then((res) => {
                 if (res.ok) {
@@ -44,6 +49,9 @@ function Search() {
 
         fetch(`${SERVER}/api/cars/bodytypes`, {
             method: "GET",
+            headers: {
+                'Authorization': `Bearer ${auth.token}`,
+            }
         })
             .then((res) => {
                 if (res.ok) {
@@ -63,7 +71,10 @@ function Search() {
         if (selectedBrand && selectedBrand !== 'Any') {
             setIsModelDisabled(false);
             fetch(`${SERVER}/api/cars/brands/${selectedBrand}`, {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                }
             })
                 .then((res) => {
                     if (res.ok) {
@@ -94,13 +105,20 @@ function Search() {
             price: selectedPrice
         };
 
-        fetch(`${SERVER}/api/cars`, {
+        const response = await fetch(`${SERVER}/api/cars`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth.token}`,
             },
             body: JSON.stringify(data)
-        })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            cars.carsStore.setCars(data.cars);
+            navigate('/car-details');
+        }
     }
 
     return (

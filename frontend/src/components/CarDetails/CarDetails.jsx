@@ -12,17 +12,19 @@ function CarDetails() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        console.log(cars.carsStore.cars);
         if (cars.carsStore.cars.length === 0) {
-            navigate('/form');
-        } else {
-            setSelectedCar(cars.carsStore.cars);
-            const userId = jwtDecode(auth.token).id;
-    
-            fetch(`${SERVER}/api/users/${userId}/cars/${cars.carsStore.cars}`, {
-                method: 'GET',
+            navigate('/');
+        }
+
+        if (cars.carsStore.cars.length === 1) {
+            fetch(`${SERVER}/api/cars`, {
+                method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${auth.token}`,
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify(cars.carsStore.cars)
             })
                 .then((res) => {
                     if (res.ok) {
@@ -31,13 +33,15 @@ function CarDetails() {
                 })
                 .then((data) => {
                     setCarOffers(data.cars);
-                });
+                })
+        } else {
+            setCarOffers(cars.carsStore.cars);
         }
     }, [cars]);
 
     return (
         <div className='car-details-page'>
-            <p>Your selected car is: {selectedCar}</p>
+            
             {
                 carOffers ? (
                     <div>

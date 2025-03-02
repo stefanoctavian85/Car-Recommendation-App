@@ -71,13 +71,12 @@ function Form() {
         if (response.ok) {
             const data = await response.json();
             setPredictions(data.cars);
-            cars.carsStore.setCars(data.cars);
             setIndex(index + 1);
         }
     }
 
     function selectCar(indexCar) {
-        cars.carsStore.setCars(predictions[indexCar]);
+        cars.carsStore.setCars([predictions[indexCar]]);
         navigate('/car-details');
     }
 
