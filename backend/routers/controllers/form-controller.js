@@ -37,30 +37,6 @@ const predict = async (req, res, next) => {
     }
 }
 
-const offer = async (req, res, next) => {
-    try {
-        const { uid, car } = req.params;
-        
-        const cars = await models.Car.find({
-            Masina: car,
-            Status: "Available"
-        });
-
-        if (!cars) {
-            return res.status(404).json({
-                message: "Cars not found!"
-            });
-        }
-
-        return res.status(200).json({
-            cars
-        });
-    } catch (err) {
-        next(err);
-    }
-}
-
 export default {
-    predict,
-    offer
+    predict,    
 }

@@ -23,7 +23,7 @@ const searchBrands = async (req, res, next) => {
 const searchModels = async (req, res, next) => {
     try {
         const { brand } = req.params;
-        
+
         if (!brand) {
             return res.status(400).json({
                 message: "This brand does not exists",
@@ -83,24 +83,29 @@ const searchSpecificCars = async (req, res, next) => {
         const data = req.body;
         console.log(data);
         let query = {};
+        if (req.body.length === 1) {
+            query.Masina = data;
+        } else {
+            if (data.brand) {
+                query.Masina = { $regex: `^${data.brand}` };
+            }
 
-        if (data.brand) {
-            query.Masina = { $regex: `^${data.brand}`};
+            if (data.model) {
+                query.Masina = query.Masina || {};
+                query.Masina.$regex = query.Masina.$regex || '';
+                query.Masina.$regex += ` ${data.model}`;
+            }
+
+            if (data.bodytype) {
+                query["Tip Caroserie"] = data.bodytype;
+            }
+
+            if (data.price) {
+                query.Pret = { $lte: data.price };
+            }
         }
 
-        if (data.model) {
-            query.Masina = query.Masina || {};
-            query.Masina.$regex = query.Masina.$regex || '';
-            query.Masina.$regex += ` ${data.model}`;
-        }
-
-        if (data.bodytype) {
-            query["Tip Caroserie"] = data.bodytype;
-        }
-
-        if (data.price) {
-            query.Pret = { $lte: data.price };
-        }
+        query.Status = "Available";
 
         let cars = await models.Car.find(query);
 
@@ -113,7 +118,8 @@ const searchSpecificCars = async (req, res, next) => {
         return res.status(200).json({
             cars,
         });
-    } catch(err) {
+
+    } catch (err) {
         next(err);
     }
 }
