@@ -3,16 +3,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
-import { jwtDecode } from 'jwt-decode';
 
 function CarDetails() {
     const { auth, cars } = useContext(AppContext);
-    const [selectedCar, setSelectedCar] = useState('');
     const [carOffers, setCarOffers] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log(cars.carsStore.cars);
         if (cars.carsStore.cars.length === 0) {
             navigate('/');
         }

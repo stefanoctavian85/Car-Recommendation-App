@@ -24,7 +24,7 @@ function App() {
     authStore.checkAuthStatus();
     setIsAuthenticated(authStore.getAuthStatus());
     setToken(authStore.getToken());
-  }, [authStore]);
+  }, [authStore.isAuthenticated]);
 
   useEffect(() => {
     carsStore.setCars(carsStore.getCars());
