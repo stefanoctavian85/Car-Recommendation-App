@@ -9,7 +9,7 @@ os.environ["LOKY_MAX_CPU_COUNT"] = "4" # for smote
 cars = pd.read_csv("raw/cars_cleaned_dataset.csv")
 cars = cars.drop_duplicates()
 
-X = cars.drop(["Masina", "Culoare", "Anul productiei", "Numar locuri"], axis=1)
+X = cars.drop(["Masina", "Culoare", "Anul productiei", "Numar locuri", "Imagine"], axis=1)
 y = cars["Masina"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)

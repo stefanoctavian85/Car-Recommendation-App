@@ -63,9 +63,6 @@ consumption_na_values(cars, coloana2)
 
 cars = cars.dropna()
 
-# Removing image column
-cars = cars.drop(["Imagine"], axis=1)
-
 cars["Marca"] = cars["Marca"] + " " + cars["Model"]
 cars = cars.drop(["Model"], axis=1)
 cars = cars.rename(columns={"Marca": "Masina"})
