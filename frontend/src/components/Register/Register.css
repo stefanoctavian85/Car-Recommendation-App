@@ -1,0 +1,38 @@
+.register-title {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4rem;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.register-icon {
+    margin: 10px;
+    background-color: #26babd !important;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+    width: 100%;
+}
+
+.register-input {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 1rem;
+}
+
+.register-button {
+    display: flex;
+    justify-content: center;
+    margin: 30px;
+}
+
+.register-error {
+    display: flex;
+    justify-content: center;
+    font-size: 30px;
+}
