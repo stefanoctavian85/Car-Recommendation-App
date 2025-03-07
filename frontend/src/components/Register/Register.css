@@ -21,7 +21,7 @@
 
 .register-input {
     width: 100%;
-    max-width: 400px;
+    max-width: 300px;
     margin-bottom: 1rem;
 }
 
@@ -36,3 +36,14 @@
     justify-content: center;
     font-size: 30px;
 }
+
+.redirect-title {
+    margin-bottom: 4rem;
+}
+
+.redirect-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+

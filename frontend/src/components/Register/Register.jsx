@@ -7,7 +7,6 @@ import { Box, Container, Typography, Button, Avatar, FormControl, Input, InputAd
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import SendIcon from '@mui/icons-material/Send';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 
@@ -186,6 +185,10 @@ function Register() {
         }
     }
 
+    function login() {
+        navigate('/login');
+    }
+
     return (
         <Container maxWidth="sx">
             <Box className="register-title">
@@ -301,7 +304,7 @@ function Register() {
                                 }
                                 <IconButton
                                     aria-label={
-                                        showPassword ? 'hide the password' : 'display the password'
+                                        showPassword ? 'display the password' : 'hide the password'
                                     }
                                     onClick={handleShowPassword}
                                     edge="end"
@@ -318,7 +321,6 @@ function Register() {
             <Box className='register-button'>
                 <Button
                     variant='contained'
-                    endIcon={<SendIcon />}
                     onClick={register}
                 >
                     Sign Up
@@ -326,6 +328,19 @@ function Register() {
             </Box>
             <Box className='register-error'>
                 {error ? (<Typography>{error}</Typography>) : null}
+            </Box>
+            <Box className='redirect-login'>
+                <Typography
+                    component='h2'
+                    className='redirect-title'
+                >You don't have an account?</Typography>
+                <Button
+                    className='redirect-button'
+                    variant='contained'
+                    onClick={login}
+                >
+                    Log in
+                </Button>
             </Box>
         </Container>
     );
