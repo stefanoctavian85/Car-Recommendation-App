@@ -3,12 +3,25 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
 import AppContext from '../../state/AppContext.jsx';
+import { Box, Container, Avatar, Typography, FormControl, InputLabel, Input, InputAdornment, IconButton, Button, FormHelperText } from '@mui/material';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import ErrorIcon from '@mui/icons-material/Error';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 
 function Login() {
     const { auth } = useContext(AppContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+
+    const [emailTouched, setEmailTouched] = useState(false);
+    const [passwordTouched, setPasswordTouched] = useState(false);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,21 +30,69 @@ function Login() {
         }
     }, [auth.isAuthenticated]);
 
-    function validateCredentials() {
+    function handleShowPassword() {
+        setShowPassword(!showPassword);
+    }
+    
+    function handleEmailChange(e) {
+        const email = e.target.value;
+        setEmail(email);
+        if (emailTouched) {
+            validateEmail(email);
+        }
+    }
+
+    function handlePasswordChange(e) {
+        const password = e.target.value;
+        setPassword(password);
+        if (passwordTouched) {
+            validatePassword(password);
+        }
+    }
+
+    function handleEmailLive(e) {
+        setEmailTouched(true);
+        validateEmail(e.target.value);
+    }
+
+    function handlePasswordLive(e) {
+        setPasswordTouched(true);
+        validatePassword(e.target.value);
+    }
+
+    function validateEmail(email) {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        if (!emailRegex.test(email)) {
-            setError("Invalid email address!");
+        if (!email) {
+            setEmailError("Email is required!");
             return false;
-        }
-
-        if (password.length < 5 || password.length > 64) {
-            setError("Password length must be between 5 and 64!");
+        } else if (!emailRegex.test(email)) {
+            setEmailError("Invalid email address!");
             return false;
+        } else {
+            setEmailError("");
+            return true;
         }
+    }
 
-        setError('');
-        return true;
+    function validatePassword(password) {
+        if (!password) {
+            setPasswordError("Password is required!");
+            return false;
+        } else if (password.length < 5 || password.length > 64) {
+            setPasswordError("Password length must be between 5 and 64!");
+            return false;
+        } else {
+            setPasswordError("");
+            return true;
+        }
+    }
+
+    function validateCredentials() {
+        const isEmailValid = validateEmail(email);
+        const isPasswordValid = validatePassword(password);
+
+        return isEmailValid && isPasswordValid;
     }
 
     async function login() {
@@ -69,40 +130,107 @@ function Login() {
     }
 
     return (
-        <div className='login-page'>
-            <h2>Welcome back!</h2>
-            <p>Login to access your account!</p>
-            <form className='login-form'>
-                <div className='login-input'>
-                    <label htmlFor='email-input'>Email</label>
-                    <input
+        <Container maxWidth="sx">
+            <Box className='login-title'>
+                <Avatar className='login-icon'>
+                    <HowToRegIcon></HowToRegIcon>
+                </Avatar>
+                <Typography component="h1">Log in</Typography>
+            </Box>
+            <Box className='login-form' component='form'>
+                <FormControl className='login-input' error={!!emailError}>
+                    <InputLabel htmlFor='email-input'>Email</InputLabel>
+                    <Input
                         id='email-input'
+                        label='Email'
                         type='text'
-                        placeholder='Enter your email...'
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={handleEmailChange}
+                        onBlur={handleEmailLive}
                         required
-                    />
-                </div>
-                <div className='login-form'>
-                    <label htmlFor='password-input'>Password</label>
-                    <input
+                        endAdornment={
+                            emailTouched && (
+                                <InputAdornment>
+                                    {
+                                        emailError ? (
+                                            <ErrorIcon color='error'/>
+                                        ) : (
+                                            <CheckCircleIcon color='success'/>
+                                        )
+                                    }
+                                </InputAdornment>
+                            )
+                        }
+                    >
+                    </Input>
+                    {emailError ? (<FormHelperText error>{emailError}</FormHelperText>) : null}
+                </FormControl>
+            </Box>
+            <Box className='login-form' component='form'>
+                <FormControl className='login-input' error={!!passwordError}>
+                    <InputLabel htmlFor='password-input'>Password</InputLabel>
+                    <Input
                         id='password-input'
-                        type='password'
-                        placeholder='Enter your password...'
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        label='Password'
+                        type={showPassword ? 'text' : 'password'}
+                        onChange={handlePasswordChange}
+                        onBlur={handlePasswordLive}
                         required
-                    />
-                </div>
-                <button className='login-button' type='button' onClick={login}>Log in</button>
-            </form>
-            <div className='login-register'>
-                <p>You don't have an account?</p>
-                <button onClick={register}>Register</button>
-            </div>
-            <p className='login-error'>{error}</p>
-        </div>
+                        endAdornment={
+                            <InputAdornment position='end'>
+                                {
+                                    passwordTouched && (
+                                        <>
+                                            {
+                                                passwordError ? (
+                                                    <ErrorIcon color='error'/>
+                                                ) : password ? (
+                                                    <CheckCircleIcon color='success'/>
+                                                ) : null
+                                            }
+                                        </>
+                                    )
+                                }
+                                <IconButton
+                                    aria-label={
+                                        showPassword ? 'display the password' : 'hide the password'
+                                    }
+                                    onClick={handleShowPassword}
+                                    edge='end'
+                                >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        }
+                    >
+                    </Input>
+                    {passwordError ? (<FormHelperText error>{passwordError}</FormHelperText>) : null}
+                </FormControl>
+            </Box>
+            <Box className='login-button'>
+                <Button
+                    variant='contained'
+                    onClick={login}
+                >
+                    Log in
+                </Button>
+            </Box>
+            <Box className='login-error'>
+                {error ? <Typography component='h2'>{error}</Typography> : null}
+            </Box>
+            <Box className='redirect-register'>
+                <Typography
+                    component='h2'
+                    className='redirect-title'
+                >You don't have an account?</Typography>
+                <Button
+                    className='redirect-button'
+                    variant='contained'
+                    onClick={register}
+                >
+                    Register
+                </Button>
+            </Box>
+        </Container>
     );
 }
 

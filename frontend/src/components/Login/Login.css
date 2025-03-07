@@ -1,0 +1,49 @@
+.login-title {
+    display: flex;
+    flex-direction: column;
+    margin-top: 4rem;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.login-icon {
+    margin: 10px;
+    background-color: #26babd !important;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px;
+    width: 100%;
+}
+
+.login-input {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 1rem;
+}
+
+.login-button {
+    display: flex;
+    justify-content: center;
+    margin: 30px;
+}
+
+.login-error {
+    display: flex;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.redirect-title {
+    margin-bottom: 4rem;
+}
+
+.redirect-register {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
