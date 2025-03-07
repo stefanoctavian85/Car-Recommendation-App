@@ -117,7 +117,7 @@ function Search() {
         if (response.ok) {
             const data = await response.json();
             cars.carsStore.setCars(data.cars);
-            navigate('/car-details');
+            navigate('/cars');
         }
     }
 

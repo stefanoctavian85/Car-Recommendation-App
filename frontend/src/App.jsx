@@ -8,6 +8,7 @@ import Login from './components/Login/Login.jsx';
 import Register from './components/Register/Register.jsx';
 import Profile from './components/Profile/Profile.jsx';
 import Form from './components/Form/Form.jsx';
+import Cars from './components/Cars/Cars.jsx';
 import CarDetails from './components/CarDetails/CarDetails.jsx';
 
 import AppContext from './state/AppContext.jsx';
@@ -57,6 +58,10 @@ function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route path='/form' element={<Form />}></Route>
+            </Route>
+
+            <Route element={<ProtectedRoute />}>
+              <Route path='/cars' element={<Cars />}></Route>
             </Route>
 
             <Route element={<ProtectedRoute />}>

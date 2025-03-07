@@ -77,7 +77,7 @@ function Form() {
 
     function selectCar(indexCar) {
         cars.carsStore.setCars([predictions[indexCar]]);
-        navigate('/car-details');
+        navigate('/cars');
     }
 
     return (

@@ -1,6 +1,7 @@
 class CarsStore {
     constructor() {
         this.cars = [];
+        this.car = '';
     }
 
     setCars(cars) {
@@ -9,6 +10,14 @@ class CarsStore {
 
     getCars() {
         return this.cars;
+    }
+
+    setCar(car) {
+        this.car = car;
+    }
+
+    getCar() {
+        return this.car;
     }
 }
 
