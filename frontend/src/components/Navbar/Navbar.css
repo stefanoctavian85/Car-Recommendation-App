@@ -1,0 +1,53 @@
+.navbar {
+    background-color: #292525 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: "Lato", sans-serif !important;
+}
+
+.nav-toolbar {
+    width: 100%;
+    padding: 0;
+}
+
+.navbar-logo {
+    height: 40px;
+    filter: brightness(0) invert(1);
+}
+
+.MuiToolbar-root {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.navbar-left-section {
+    display: flex;
+    align-items: left;
+}
+
+.navbar-pages {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex: 1;
+}
+
+.navbar-pages Button {
+    font-weight: 500;
+}
+
+.navbar-settings .MuiSvgIcon-root {
+    cursor: pointer;
+    font-size: 28px;
+    color: #c1c1c1;
+}
+
+.navbar-user-settings .MuiPaper-root {
+    margin-top: 10px;
+}

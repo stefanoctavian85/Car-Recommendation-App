@@ -1,10 +1,17 @@
-import './Navbar.css'
-import React, { useContext, useEffect } from 'react';
+import './Navbar.css';
+import React, { useContext, useEffect, useState } from 'react';
 import AppContext from '../../state/AppContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { AppBar, Container, Toolbar, Box, Button, Menu, MenuItem, Typography, Tooltip } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import logo from '../../assets/Logo.svg';
+
+const pages = ['Form'];
+const settings = ['Profile', 'Log out'];
 
 function Navbar() {
     const { auth } = useContext(AppContext);
+    const [anchorElUser, setAnchorElUser] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -12,6 +19,19 @@ function Navbar() {
             navigate('/');
         }
     }, [auth.isAuthenticated]);
+
+    const handleOpenUserMenu = (event) => {
+        setAnchorElUser(event.currentTarget);
+    }
+
+    const handleCloseUserMenu = (event) => {
+        setAnchorElUser(null);
+        if (event.target.textContent === "Profile") {
+            navigate('/profile');
+        } else if (event.target.textContent === "Log out") {
+            logout();
+        }
+    }
 
     function handleLoginStatus() {
         if (auth.isAuthenticated) {
@@ -28,44 +48,84 @@ function Navbar() {
         navigate("/");
     }
 
-    function completeForm() {
+    function handlePages(event) {
         if (auth.isAuthenticated) {
-            navigate('/form');
-        } else {
-            navigate('/login');
+            if (event.target.textContent === "Form") {
+                navigate('/form');
+            }
         }
     }
 
     return (
-        <header className='main-header'>
-            <nav className='navbar'>
-                <div className='navbar-logo'>
-                    <Link to="/">CarMinds</Link>
-                </div>
-                <ul className='navbar-links'>
-                    <li>
-                        <button
-                            className='navbar-button-login'
+        <AppBar className='navbar'>
+            <Container disableGutters maxWidth={false} className='nav-container'>
+                <Toolbar className='nav-toolbar'>
+                    <Box className='navbar-left-section'>
+                        <Box
+                            component={Link}
+                            to='/'
+                        >
+                            <Box
+                                className='navbar-logo'
+                                component="img"
+                                src={logo}
+                                alt='CarMinds'
+                            />
+                        </Box>
+                    </Box>
+
+                    {auth.isAuthenticated && (
+                        <Box className='navbar-pages'>
+                            {
+                                pages.map(page => (
+                                    <Button
+                                        key={page}
+                                        color='default'
+                                        onClick={(e) => handlePages(e)}
+                                    >
+                                        {page}
+                                    </Button>
+                                ))
+                            }
+                        </Box>
+                    )}
+
+                    {auth.isAuthenticated ? (
+                        <Box className='navbar-settings'>
+                            <Tooltip title='Settings'>
+                                <PersonIcon onClick={handleOpenUserMenu}/>
+                            </Tooltip>
+                            <Menu
+                                className='navbag-user-settings'
+                                anchorEl={anchorElUser}
+                                open={Boolean(anchorElUser)}
+                                onClose={handleCloseUserMenu}
+                                disableAutoFocus
+                            >
+                                {
+                                    settings.map(setting => (
+                                        <MenuItem
+                                            key={setting}
+                                            onClick={(e) => handleCloseUserMenu(e)}
+                                        >
+                                            <Typography>{setting}</Typography>
+                                        </MenuItem>
+                                    ))
+                                }
+                            </Menu>
+                        </Box>
+                    ) : (
+                        <Button
+                            color='primary'
+                            variant='contained'
                             onClick={handleLoginStatus}
                         >
-                            {auth.isAuthenticated ? "Your account" : "Log in"}
-                        </button>
-                        <button
-                            className='navbar-button-logout'
-                            onClick={logout}
-                        >
-                            Log out
-                        </button>
-                        <button
-                            className='navbar-form'
-                            onClick={completeForm}
-                        >
-                            Form
-                        </button>
-                    </li>
-                </ul>
-            </nav>
-        </header>
+                            Log in
+                        </Button>
+                    )}
+                </Toolbar>
+            </Container>
+        </AppBar>
     );
 }
 
