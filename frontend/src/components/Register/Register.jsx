@@ -190,16 +190,16 @@ function Register() {
     }
 
     return (
-        <Container maxWidth="sx">
+        <Container maxWidth="sx" className='register-container'>
             <Box className="register-title">
                 <Avatar className='register-icon'>
                     <HowToRegIcon></HowToRegIcon>
                 </Avatar>
-                <Typography component="h1">Create a new account</Typography>
+                <Typography component="h1" className='register-text'>Create a new account</Typography>
             </Box>
             <Box className='register-form' component='form'>
                 <FormControl className='register-input' error={!!emailError}>
-                    <InputLabel htmlFor='email-input'>Email</InputLabel>
+                    <InputLabel htmlFor='email-input' className='register-label'>Email</InputLabel>
                     <Input
                         id='email-input'
                         onChange={handleEmailChange}
@@ -226,7 +226,7 @@ function Register() {
             </Box>
             <Box className='register-form' component='form'>
                 <FormControl className='register-input' error={!!firstnameError}>
-                    <InputLabel htmlFor='firstname-input'>First name</InputLabel>
+                    <InputLabel htmlFor='firstname-input' className='register-label'>First name</InputLabel>
                     <Input
                         id='firstname-input'
                         onChange={handleFirstnameChange}
@@ -253,7 +253,7 @@ function Register() {
             </Box>
             <Box className='register-form' component='form'>
                 <FormControl className='register-input' error={!!lastnameError}>
-                    <InputLabel htmlFor='lastname-input'>Last name</InputLabel>
+                    <InputLabel htmlFor='lastname-input' className='register-label'>Last name</InputLabel>
                     <Input
                         id='lastname-input'
                         onChange={handleLastnameChange}
@@ -280,7 +280,7 @@ function Register() {
             </Box>
             <Box className='register-form' component='form'>
                 <FormControl className='register-input' error={!!passwordError}>
-                    <InputLabel htmlFor='password-input'>Password</InputLabel>
+                    <InputLabel htmlFor='password-input' className='register-label'>Password</InputLabel>
                     <Input
                         id='password-input'
                         onChange={handlePasswordChange}
@@ -306,6 +306,7 @@ function Register() {
                                     aria-label={
                                         showPassword ? 'display the password' : 'hide the password'
                                     }
+                                    className='show-password-icon'
                                     onClick={handleShowPassword}
                                     edge="end"
                                 >
@@ -329,7 +330,7 @@ function Register() {
             <Box className='register-error'>
                 {error ? (<Typography>{error}</Typography>) : null}
             </Box>
-            <Box className='redirect-login'>
+            <Box className='redirect-register'>
                 <Typography
                     component='h2'
                     className='redirect-title'

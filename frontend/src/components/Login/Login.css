@@ -62,7 +62,7 @@
 .login-button Button {
     background-color: #3498db !important;
     padding: 10px 20px;
-    transition: all 0.3 ease;
+    transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     position: relative;
     top: 12px;
@@ -87,11 +87,11 @@
     margin-bottom: 10px !important;
 }
 
-.redirect-button {
+.redirect-login Button {
     background-color: #3498db !important;
     padding: 12px 30px;
-    transition: all 0.3 ease;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
     position: relative;
     top: 12px;
     margin-bottom: 10px;
