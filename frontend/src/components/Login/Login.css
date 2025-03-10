@@ -1,13 +1,25 @@
+.login-container {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    max-width: fit-content;
+    margin-top: 125px;
+    padding: 50px 75px !important;
+    background-image: linear-gradient(to right, #1e2936, #121a24);
+}
+
 .login-title {
     display: flex;
     flex-direction: column;
-    margin-top: 4rem;
     align-items: center;
     margin-bottom: 2rem;
 }
 
+.login-text {
+    font-size: 2rem !important;
+    font-weight: 600 !important;
+    color: #dededf;
+}
+
 .login-icon {
-    margin: 10px;
     background-color: #26babd !important;
 }
 
@@ -19,6 +31,22 @@
     width: 100%;
 }
 
+.login-label {
+    color: rgb(223, 216, 216) !important;
+}
+
+.login-input .MuiInputBase-input {
+    color: rgb(223, 216, 216) !important;
+}
+
+.MuiInputBase-root.Mui-focused {
+    background-image: linear-gradient(to right, #1e2936, #121a24);
+}
+
+.show-password-icon {
+    color: rgb(223, 216, 216) !important;
+}
+
 .login-input {
     width: 100%;
     max-width: 300px;
@@ -28,17 +56,24 @@
 .login-button {
     display: flex;
     justify-content: center;
-    margin: 30px;
+    margin: 30px; 
+}
+
+.login-button Button {
+    background-color: #3498db !important;
+    padding: 10px 20px;
+    transition: all 0.3 ease;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    position: relative;
+    top: 12px;
 }
 
 .login-error {
     display: flex;
     justify-content: center;
     font-size: 30px;
-}
-
-.redirect-title {
-    margin-bottom: 4rem;
+    color: #7b160b;
+    margin-bottom: 20px;
 }
 
 .redirect-register {
@@ -47,3 +82,17 @@
     align-items: center;
 }
 
+.redirect-title {
+    color: #dededf;
+    margin-bottom: 10px !important;
+}
+
+.redirect-button {
+    background-color: #3498db !important;
+    padding: 12px 30px;
+    transition: all 0.3 ease;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    position: relative;
+    top: 12px;
+    margin-bottom: 10px;
+}

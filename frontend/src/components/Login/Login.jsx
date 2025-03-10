@@ -130,16 +130,16 @@ function Login() {
     }
 
     return (
-        <Container maxWidth="sx">
+        <Container maxWidth="sx" className='login-container'>
             <Box className='login-title'>
                 <Avatar className='login-icon'>
                     <HowToRegIcon></HowToRegIcon>
                 </Avatar>
-                <Typography component="h1">Log in</Typography>
+                <Typography component="h1" className='login-text'>Log in</Typography>
             </Box>
             <Box className='login-form' component='form'>
                 <FormControl className='login-input' error={!!emailError}>
-                    <InputLabel htmlFor='email-input'>Email</InputLabel>
+                    <InputLabel htmlFor='email-input' className='login-label'>Email</InputLabel>
                     <Input
                         id='email-input'
                         label='Email'
@@ -167,7 +167,7 @@ function Login() {
             </Box>
             <Box className='login-form' component='form'>
                 <FormControl className='login-input' error={!!passwordError}>
-                    <InputLabel htmlFor='password-input'>Password</InputLabel>
+                    <InputLabel htmlFor='password-input' className='login-label'>Password</InputLabel>
                     <Input
                         id='password-input'
                         label='Password'
@@ -194,6 +194,7 @@ function Login() {
                                     aria-label={
                                         showPassword ? 'display the password' : 'hide the password'
                                     }
+                                    className='show-password-icon'
                                     onClick={handleShowPassword}
                                     edge='end'
                                 >
