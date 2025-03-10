@@ -1,7 +1,7 @@
 .register-container {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
     max-width: fit-content;
-    margin-top: 125px;
+    margin-top: 100px;
     padding: 50px 75px !important;
     background-image: linear-gradient(to right, #1e2936, #121a24);
 }
@@ -10,7 +10,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .register-text {
