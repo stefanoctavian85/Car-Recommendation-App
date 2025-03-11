@@ -1,6 +1,10 @@
 import './Form.css';
 import data from '../../assets/data.jsx';
 import React, { useState, useContext, useEffect } from 'react';
+import { Container, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio, Button, Grid2, Slider, Input } from '@mui/material';
+import { NumberField } from '@base-ui-components/react/number-field';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
@@ -10,6 +14,7 @@ function Form() {
     const { auth, cars } = useContext(AppContext);
     const [index, setIndex] = useState(0);
     const [rangeValue, setRangeValue] = useState(0);
+    const [currentValue, setCurrentValue] = useState(0);
     const [responses, setResponses] = useState([]);
     const [validResponse, setValidResponse] = useState(false);
     const [finalResponse, setFinalResponse] = useState('');
@@ -31,6 +36,24 @@ function Form() {
             setFinalResponse(e.target.value);
             setValidResponse(true);
         }
+    }
+
+    function checkInput(e, min, max) {
+        if (e.target.value < min) {
+            setFinalResponse(min);
+            setValidResponse(true);
+        } else {
+            setFinalResponse(max);
+            setValidResponse(true);
+        }
+    }
+
+    function handleDecrement(min) {
+        setCurrentValue((prev) => Math.max(prev - 1, min));
+    }
+
+    function handleIncrement(max) {
+        setCurrentValue((prev) => Math.min(prev + 1, max));
     }
 
     function handleResponses() {
@@ -58,6 +81,7 @@ function Form() {
         const userId = jwtDecode(auth.token).id;
 
         const updatedResponses = [...responses, finalResponse];
+        console.log(updatedResponses);
 
         const response = await fetch(`${SERVER}/api/users/${userId}/forms`, {
             method: 'POST',
@@ -81,68 +105,115 @@ function Form() {
     }
 
     return (
-        <div className='form-page'>
-            <h1>Recommendation Form</h1>
-            <div className='form-container'>
+        <Container className='form-page'>
+            <Box className='form-title'>
+                <Typography component='h2' className='form-text'>Recommendation Form</Typography>
+            </Box>
+            <Box className='form-container'>
                 {
                     index < maxQuestions ? (
-                        <div>
-                            <div className='form-question'>
-                                <p>{index + 1}. {data[index].question}</p>
-                            </div>
+                        <Box>
+                            <Box className='form-question'>
+                                <Typography component='h3' className='question'>
+                                    {index + 1}. {data[index].question}
+                                </Typography>
+                            </Box>
                             {
-                                data[index].type === 'choice' ? (
-                                    <div className='form-option choice'>
-                                        {
-                                            data[index].options.map((item, index) => (
-                                                <label key={index}>
-                                                    <input
-                                                        type='radio'
-                                                        name='question'
-                                                        value={item}
-                                                        checked={finalResponse === item}
-                                                        onChange={handleFinalResponse}
-                                                        required
-                                                    ></input>
-                                                    {item}
-                                                </label>
-                                            ))
-                                        }
-                                    </div>
-                                ) : data[index].type === 'range' ? (
-                                    <div className='form-option range'>
-                                        <input
-                                            type='range'
-                                            min={data[index].min}
-                                            max={data[index].max}
-                                            step={data[index].step}
-                                            value={rangeValue}
-                                            onChange={(e) => {
-                                                setRangeValue(e.target.value);
-                                                handleFinalResponse(e);
-                                            }}
-                                            required
-                                        >
-                                        </input>
-                                        <h1>
-                                            {rangeValue}
-                                        </h1>
-                                    </div>
-                                ) : (
-                                    <div className='form-option number'>
-                                        <input
-                                            type='number'
-                                            min={data[index].min}
-                                            max={data[index].max}
-                                            onChange={handleFinalResponse}
-                                            value={finalResponse}
-                                            required
-                                        ></input>
-                                    </div>
+                                data[index].type === 'choice' && (
+                                    <Box className='form-option choice'>
+                                        <FormControl>
+                                            <RadioGroup
+                                                onClick={handleFinalResponse}
+                                            >
+                                                {
+                                                    data[index].options.map((item, index) => (
+                                                        <FormControlLabel
+                                                            key={index}
+                                                            value={item}
+                                                            label={item}
+                                                            control={<Radio />}
+                                                        />
+                                                    ))
+                                                }
+                                            </RadioGroup>
+                                        </FormControl>
+                                    </Box>
                                 )
                             }
-                            <div className='form-button'>
-                                <button className='form-btn' onClick={() => {
+
+                            {
+                                data[index].type === 'range' && (
+                                    <Box className='form-option range'>
+                                        <Grid2>
+                                            <Grid2 className='grid-slider'>
+                                                <Slider
+                                                    onChange={(e) => {
+                                                        setRangeValue(e.target.value);
+                                                        handleFinalResponse(e);
+                                                    }}
+                                                    value={parseFloat(rangeValue)}
+                                                    defaultValue={data[index].min}
+                                                    min={data[index].min}
+                                                    max={data[index].max}
+                                                    aria-labelledby='input-slider'
+                                                />
+                                            </Grid2>
+
+                                            <Grid2 className='grid-slider-input'>
+                                                <Input
+                                                    value={parseFloat(rangeValue)}
+                                                    onChange={(e) => {
+                                                        setRangeValue(e.target.value);
+                                                        handleFinalResponse(e);
+                                                    }}
+                                                    onBlur={(e) => checkInput(e, data[index].min, data[index].max)}
+                                                    inputProps={{
+                                                        step: 10,
+                                                        min: data[index].min,
+                                                        max: data[index].max,
+                                                        type: 'number',
+                                                        'aria-labelledby': 'input-slider'
+                                                    }}
+                                                />
+                                            </Grid2>
+                                        </Grid2>
+                                    </Box>
+                                )
+                            }
+
+                            {
+                                data[index].type === 'number' && (
+                                    <Box className='form-option number'>
+                                        <NumberField.Root defaultValue={data[index].min}>
+                                            <NumberField.Group>
+                                                <NumberField.Decrement
+                                                    onClick={() => handleDecrement(data[index].min)}
+                                                    disabled={currentValue <= data[index].min}
+                                                >
+                                                    <RemoveIcon />
+                                                </NumberField.Decrement>
+                                                <NumberField.Input
+                                                    value={currentValue}
+                                                    onChange={handleFinalResponse}
+                                                    onBlur={(e) => checkInput(e, data[index].min, data[index].max)}
+                                                    inputprops={{
+                                                        min: data[index].min,
+                                                        max: data[index].max,
+                                                    }}
+                                                />
+                                                <NumberField.Increment
+                                                    onClick={() => handleIncrement(data[index].max)}
+                                                    disabled={currentValue >= data[index].max}
+                                                >
+                                                    <AddIcon />
+                                                </NumberField.Increment>
+                                            </NumberField.Group>
+                                        </NumberField.Root>
+                                    </Box>
+                                )
+                            }
+                            <Box className='form-button'>
+                                <Button onClick={() => {
                                     if (index < maxQuestions - 1) {
                                         handleResponses();
                                     } else {
@@ -152,26 +223,15 @@ function Form() {
                                     {
                                         index < maxQuestions - 1 ? 'Next' : 'Save form'
                                     }
-                                </button>
-                            </div>
-                        </div>
+                                </Button>
+                            </Box>
+                        </Box>
                     ) : (
-                        <div>
-                            <ul>
-                                {
-                                    predictions.map((element, indexCar) => (
-                                        <div key={indexCar}>
-                                            <li>{element}</li>
-                                            <button onClick={() => selectCar(indexCar)}>Select</button>
-                                        </div>
-                                    ))
-                                }
-                            </ul>
-                        </div>
+                        <Box></Box>
                     )
                 }
-            </div>
-        </div>
+            </Box>
+        </Container>
     );
 }
 
