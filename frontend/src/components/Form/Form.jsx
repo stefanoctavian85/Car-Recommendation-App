@@ -1,7 +1,7 @@
 import './Form.css';
 import data from '../../assets/data.jsx';
 import React, { useState, useContext, useEffect } from 'react';
-import { Container, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio, Button, Grid2, Slider, Input } from '@mui/material';
+import { Container, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio, Button, Grid2, Slider, Input, List } from '@mui/material';
 import { NumberField } from '@base-ui-components/react/number-field';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -227,7 +227,22 @@ function Form() {
                             </Box>
                         </Box>
                     ) : (
-                        <Box></Box>
+                        <Box className='form-predictions'>
+                            <List>
+                                {
+                                    predictions.map((item, indexCar) => (
+                                        <Box key={indexCar}>
+                                            {item}
+                                            <Button
+                                                onClick={() => selectCar(indexCar)}
+                                            >
+                                                Select
+                                            </Button>
+                                        </Box>
+                                    ))
+                                }
+                            </List>
+                        </Box>
                     )
                 }
             </Box>

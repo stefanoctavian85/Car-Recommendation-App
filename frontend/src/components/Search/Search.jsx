@@ -2,7 +2,8 @@ import './Search.css';
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
-import { Select, MenuItem, InputLabel, FormControl, Button } from '@mui/material';
+import { Container, Select, MenuItem, InputLabel, FormControl, Button, Box, Typography } from '@mui/material';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import SendIcon from '@mui/icons-material/Send';
 import AppContext from '../../state/AppContext.jsx';
 
@@ -122,118 +123,125 @@ function Search() {
     }
 
     return (
-        <div className='search-page'>
-            <p>Looking for a car to rent?</p>
-            <form className='search-form'>
-                <div className='search-input'>
-                    <FormControl sx={{ m: 1, minWidth: 200}}>
-                        <InputLabel id='brand-label'>Brand</InputLabel>
-                        <Select
-                            labelId='brand-label'
-                            id='brand-input'
-                            value={selectedBrand}
-                            onChange={(e) => {
-                                setSelectedBrand(e.target.value);
-                                setSelectedModel('');
-                                setIsModelDisabled(false);
-                            }}
-                            label="Brand"
-                            required
-                        >
-                            <MenuItem value={''}>Any</MenuItem>
-                        {
-                            brands.map(brand => (
-                                <MenuItem key={brand.value} value={brand.value}>
-                                    {brand.label}
-                                </MenuItem>
-                            ))
-                        }
-                        </Select>
-                    </FormControl>
-                </div>
-                <div className='search-input'>
-                    <FormControl sx={{ m: 1, minWidth: 200}}>
-                        <InputLabel id='model-label'>Model</InputLabel>
-                        <Select
-                            labelId='model-label'
-                            id='model-input'
-                            value={selectedModel}
-                            onChange={(e) => {
-                                setSelectedModel(e.target.value)
-                            }}
-                            label="Model"
-                            disabled={isModelDisabled}
-                            required
-                        >
-                            <MenuItem value={''}>Any</MenuItem>
-                        {
-                            models.map(model => (
-                                <MenuItem key={model.value} value={model.value}>
-                                    {model.label}
-                                </MenuItem>
-                            ))
-                        }
-                        </Select>
-                    </FormControl>
-                </div>
-                <div className='search-input'>
-                    <FormControl sx={{ m: 1, minWidth: 200}}>
-                        <InputLabel id='price-label'>Price up to</InputLabel>
-                        <Select
-                            labelId='price-label'
-                            id='price-input'
-                            value={selectedPrice}
-                            onChange={(e) => {
-                                setSelectedPrice(e.target.value)
-                            }}
-                            label="Price up to"
-                            required
-                        >
-                            <MenuItem value={''}>Any</MenuItem>
-                        {
-                            priceLimits.map(price => (
-                                <MenuItem key={price.value} value={price.value}>
-                                    {price.label}
-                                </MenuItem>
-                            ))
-                        }
-                        </Select>
-                    </FormControl>
-                </div>
-                <div className='search-input'>
-                    <FormControl sx={{ m: 1, minWidth: 200}}>
-                        <InputLabel id='body-type-label'>Body type</InputLabel>
-                        <Select
-                            labelId='body-type-label'
-                            id='body-type-input'
-                            value={selectedBodyType}
-                            onChange={(e) => {
-                                setSelectedBodyType(e.target.value)
-                            }}
-                            label="Body type"
-                            required
-                        >
-                            <MenuItem value={''}>Any</MenuItem>
-                        {
-                            bodyTypes.map(bodytype => (
-                                <MenuItem key={bodytype.value} value={bodytype.value}>
-                                    {bodytype.label}
-                                </MenuItem>
-                            ))
-                        }
-                        </Select>
-                    </FormControl>
-                </div>
-                <div className='search-button'>
-                    <Button
-                        variant='contained'
-                        size='medium'
-                        endIcon={<SendIcon />}
-                        onClick={(e) => searchCars(e)}
-                    >Search</Button>
-                </div>
-            </form>
-        </div>
+        <Container>
+            <Box className='search-page'>
+                <Box className='search-header'>
+                    <DirectionsCarIcon className='search-car' sx={{ fontSize: 40, color: '#3498db', mr: 2 }} />
+                    <Typography className='search-title'>
+                        Looking for a car to rent?
+                    </Typography>
+                </Box>
+                <form className='search-form' onSubmit={searchCars}>
+                    <Box className='search-input'>
+                        <FormControl sx={{ m: 1, minWidth: 200 }}>
+                            <InputLabel id='brand-label'>Brand</InputLabel>
+                            <Select
+                                labelId='brand-label'
+                                id='brand-input'
+                                value={selectedBrand}
+                                onChange={(e) => {
+                                    setSelectedBrand(e.target.value);
+                                    setSelectedModel('');
+                                    setIsModelDisabled(false);
+                                }}
+                                label="Brand"
+                                required
+                            >
+                                <MenuItem value={''}>Any</MenuItem>
+                                {
+                                    brands.map(brand => (
+                                        <MenuItem key={brand.value} value={brand.value}>
+                                            {brand.label}
+                                        </MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    <Box className='search-input'>
+                        <FormControl sx={{ m: 1, minWidth: 200 }}>
+                            <InputLabel id='model-label'>Model</InputLabel>
+                            <Select
+                                labelId='model-label'
+                                id='model-input'
+                                value={selectedModel}
+                                onChange={(e) => {
+                                    setSelectedModel(e.target.value)
+                                }}
+                                label="Model"
+                                disabled={isModelDisabled}
+                                required
+                            >
+                                <MenuItem value={''}>Any</MenuItem>
+                                {
+                                    models.map(model => (
+                                        <MenuItem key={model.value} value={model.value}>
+                                            {model.label}
+                                        </MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    <Box className='search-input'>
+                        <FormControl sx={{ m: 1, minWidth: 200 }}>
+                            <InputLabel id='price-label'>Price up to</InputLabel>
+                            <Select
+                                labelId='price-label'
+                                id='price-input'
+                                value={selectedPrice}
+                                onChange={(e) => {
+                                    setSelectedPrice(e.target.value)
+                                }}
+                                label="Price up to"
+                                required
+                            >
+                                <MenuItem value={''}>Any</MenuItem>
+                                {
+                                    priceLimits.map(price => (
+                                        <MenuItem key={price.value} value={price.value}>
+                                            {price.label}
+                                        </MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    <Box className='search-input'>
+                        <FormControl sx={{ m: 1, minWidth: 200 }}>
+                            <InputLabel id='body-type-label'>Body type</InputLabel>
+                            <Select
+                                labelId='body-type-label'
+                                id='body-type-input'
+                                value={selectedBodyType}
+                                onChange={(e) => {
+                                    setSelectedBodyType(e.target.value)
+                                }}
+                                label="Body type"
+                                required
+                            >
+                                <MenuItem value={''}>Any</MenuItem>
+                                {
+                                    bodyTypes.map(bodytype => (
+                                        <MenuItem key={bodytype.value} value={bodytype.value}>
+                                            {bodytype.label}
+                                        </MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    <Box className='search-button'>
+                        <Button
+                            variant='contained'
+                            size='medium'
+                            endIcon={<SendIcon />}
+                            onClick={(e) => searchCars(e)}
+                        >Search</Button>
+                    </Box>
+                </form>
+            </Box>
+        </Container>
     );
 }
 

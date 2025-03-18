@@ -53,6 +53,8 @@ function Navbar() {
             if (event.target.textContent === "Form") {
                 navigate('/form');
             }
+        } else {
+            navigate('/login');
         }
     }
 
@@ -74,26 +76,24 @@ function Navbar() {
                         </Box>
                     </Box>
 
-                    {auth.isAuthenticated && (
-                        <Box className='navbar-pages'>
-                            {
-                                pages.map(page => (
-                                    <Button
-                                        key={page}
-                                        color='default'
-                                        onClick={(e) => handlePages(e)}
-                                    >
-                                        {page}
-                                    </Button>
-                                ))
-                            }
-                        </Box>
-                    )}
+                    <Box className='navbar-pages'>
+                        {
+                            pages.map(page => (
+                                <Button
+                                    key={page}
+                                    color='default'
+                                    onClick={(e) => handlePages(e)}
+                                >
+                                    {page}
+                                </Button>
+                            ))
+                        }
+                    </Box>
 
                     {auth.isAuthenticated ? (
                         <Box className='navbar-settings'>
                             <Tooltip title='Settings'>
-                                <PersonIcon onClick={handleOpenUserMenu}/>
+                                <PersonIcon onClick={handleOpenUserMenu} />
                             </Tooltip>
                             <Menu
                                 className='navbag-user-settings'

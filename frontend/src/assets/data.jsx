@@ -1,5 +1,11 @@
 const data = [
     {
+        question: "Anul productiei",
+        type: 'range',
+        min: 1900,
+        max: 2025,
+    },
+    {
         question: "Selectati tipul de combustibil preferat",
         type: 'choice',
         options: ["Benzina", "Diesel", "Hibrid"],
