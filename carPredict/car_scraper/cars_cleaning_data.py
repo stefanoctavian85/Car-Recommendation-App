@@ -106,5 +106,6 @@ cars['Capacitate cilindrica'] = cars['Capacitate cilindrica'].apply(lambda x: 0 
                                                                     else x)
 
 cars = cars.dropna(subset=['Putere', 'Transmisie', 'KM', 'Numar locuri', 'Consum Urban', 'Consum Extraurban', 'Consum Mixt'])
+cars["Status"] = "Available"
 
 cars.to_csv("raw/cars_cleaned_dataset.csv", index=False)
