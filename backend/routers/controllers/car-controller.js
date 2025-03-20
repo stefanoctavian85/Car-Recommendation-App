@@ -80,34 +80,34 @@ const searchBodyTypes = async (req, res, next) => {
 
 const searchSpecificCars = async (req, res, next) => {
     try {
-        const data = req.body;
-        console.log(data);
+        const { brand, model, bodytype, price, page } = req.query;
+
         let query = {};
-        if (req.body.length === 1) {
-            query.Masina = data;
-        } else {
-            if (data.brand) {
-                query.Masina = { $regex: `^${data.brand}` };
-            }
 
-            if (data.model) {
-                query.Masina = query.Masina || {};
-                query.Masina.$regex = query.Masina.$regex || '';
-                query.Masina.$regex += ` ${data.model}`;
-            }
+        if (brand && brand !== undefined) {
+            query.Masina = { $regex: `^${brand}`, $options: 'i' };
+        }
 
-            if (data.bodytype) {
-                query["Tip Caroserie"] = data.bodytype;
-            }
+        if (model && model !== undefined ) {
+            query.Masina = query.Masina || {};
+            query.Masina.$regex = query.Masina.$regex || '';
+            query.Masina.$regex += ` ${model}`;
+        }
 
-            if (data.price) {
-                query.Pret = { $lte: data.price };
-            }
+        if (bodytype && bodytype !== undefined) {
+            query["Tip Caroserie"] = bodytype;
+        }
+
+        if (price && price !== undefined && !isNaN(price)) {
+            query.Pret = { $lte: parseInt(price) };
         }
 
         query.Status = "Available";
 
-        let cars = await models.Car.find(query);
+        const limit = 20;
+        const skip = (page - 1) * limit;
+
+        let cars = await models.Car.find(query).skip(skip).limit(limit);
 
         if (!cars) {
             return res.status(404).json({
@@ -115,8 +115,13 @@ const searchSpecificCars = async (req, res, next) => {
             });
         }
 
+        const totalCars = await models.Car.countDocuments(query);
+        const totalPages = Math.ceil(totalCars / limit);
+
         return res.status(200).json({
             cars,
+            totalCars,
+            totalPages,
         });
 
     } catch (err) {
