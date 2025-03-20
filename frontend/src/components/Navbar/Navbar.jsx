@@ -34,12 +34,7 @@ function Navbar() {
     }
 
     function handleLoginStatus() {
-        if (auth.isAuthenticated) {
-            navigate('/profile');
-        }
-        else {
-            navigate('/login');
-        }
+        navigate('/login');
     }
 
     function logout() {

@@ -1,6 +1,7 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Box, Typography } from '@mui/material';
 import Home from './components/Home/Home.jsx';
 import Navbar from './components/Navbar/Navbar.jsx';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute.jsx';
@@ -21,15 +22,27 @@ function App() {
   const [token, setToken] = useState(authStore.getToken());
   const [carsStore] = useState(new CarsStore());
 
-  useEffect(() => {
-    authStore.checkAuthStatus();
-    setIsAuthenticated(authStore.getAuthStatus());
-    setToken(authStore.getToken());
-  }, [authStore.isAuthenticated]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    carsStore.setCars(carsStore.getCars());
-  }, [carsStore]);
+    const storedToken = JSON.parse(localStorage.getItem("token"));
+    if (storedToken) {
+      authStore.checkAuthStatus();
+      setIsAuthenticated(authStore.getAuthStatus());
+      setToken(storedToken);
+    } else {
+      setIsAuthenticated(false);
+    }
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <Box>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <div className='App'>

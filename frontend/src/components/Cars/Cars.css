@@ -1,0 +1,40 @@
+.cars-page {
+    max-width: 1200px;
+    margin: 100px auto;
+}
+
+.cars-results-title {
+    margin-bottom: 30px;
+    text-align: center;
+    color: white;
+}
+
+.results-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.results-number {
+    font-size: 16px;
+}
+
+.result-car {
+    display: flex !important;
+    padding: 16px 0 !important;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #eee;
+    text-decoration: none !important;
+    color: inherit;
+}
+
+.result-car > .MuiCard-root:first-of-type {
+    width: 300px;
+    margin-right: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-car > .MuiCard-root:last-of-type {
+    flex: 1;
+    box-shadow: none;
+}

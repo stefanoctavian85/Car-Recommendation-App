@@ -81,7 +81,6 @@ function Form() {
         const userId = jwtDecode(auth.token).id;
 
         const updatedResponses = [...responses, finalResponse];
-        console.log(updatedResponses);
 
         const response = await fetch(`${SERVER}/api/users/${userId}/forms`, {
             method: 'POST',
@@ -100,7 +99,12 @@ function Form() {
     }
 
     function selectCar(indexCar) {
-        cars.carsStore.setCars([predictions[indexCar]]);
+        const selectedCar = predictions[indexCar];
+        const carParts = selectedCar.split(" ");
+        cars.carsStore.setSearchParams({
+            brand: carParts[0],
+            model: carParts[1]
+        });
         navigate('/cars');
     }
 
@@ -112,7 +116,7 @@ function Form() {
             <Box className='form-container'>
                 {
                     index < maxQuestions ? (
-                        <Box>
+                        <Box className='form-box'>
                             <Box className='form-question'>
                                 <Typography component='h3' className='question'>
                                     {index + 1}. {data[index].question}
@@ -161,6 +165,7 @@ function Form() {
 
                                             <Grid2 className='grid-slider-input'>
                                                 <Input
+                                                    className='slider-input'
                                                     value={parseFloat(rangeValue)}
                                                     onChange={(e) => {
                                                         setRangeValue(e.target.value);
@@ -184,7 +189,7 @@ function Form() {
                             {
                                 data[index].type === 'number' && (
                                     <Box className='form-option number'>
-                                        <NumberField.Root defaultValue={data[index].min}>
+                                        <NumberField.Root className='input-number' defaultValue={data[index].min}>
                                             <NumberField.Group>
                                                 <NumberField.Decrement
                                                     onClick={() => handleDecrement(data[index].min)}

@@ -11,16 +11,6 @@ const data = [
         options: ["Benzina", "Diesel", "Hibrid"],
     },
     {
-        question: "Selectati cutia de viteze dorita",
-        type: 'choice',
-        options: ["Manuala", "Automata"],
-    },
-    {
-        question: "Ce tip de caroserie preferati?",
-        type: 'choice',
-        options: ["Compact", "Monovolum", "Sedan", "Sport", "SUV"],
-    },
-    {
         question: "Capacitate cilindrica",
         type: 'range',
         min: 875,
@@ -33,9 +23,32 @@ const data = [
         max: 727,
     },
     {
+        question: "Ce tip de caroserie preferati?",
+        type: 'choice',
+        options: ["Compact", "Monovolum", "Sedan", "Sport", "SUV"],
+    },
+    {
+        question: "Selectati cutia de viteze dorita",
+        type: 'choice',
+        options: ["Manuala", "Automata"],
+    },
+    {
         question: "Ce tip de transmisie preferati?",
         type: 'choice',
         options: ["Fata", "Spate", "4x4"],
+    },
+    {
+        question: "Nr. de KM",
+        type: 'range',
+        min: 0,
+        max: 1000000,
+    },
+    {
+        question: "Bugetul mediu pentru masina",
+        type: 'range',
+        min: 1000,
+        max: 336000,
+        step: 1000
     },
     {
         question: "Consum urban mediu",
@@ -49,13 +62,6 @@ const data = [
         min: 3,
         max: 13,
     },
-    {
-        question: "Bugetul mediu pentru masina",
-        type: 'range',
-        min: 1000,
-        max: 336000,
-        step: 1000
-    }
 ];
 
 export default data;

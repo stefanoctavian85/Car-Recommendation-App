@@ -1,0 +1,40 @@
+.embla {
+    overflow: hidden;
+}
+
+.embla__container {
+    display: flex;
+    height: 100%;
+}
+
+.embla__slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    position: relative;
+}
+
+.embla__slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.embla__buttons {
+    position: absolute;
+    top: 50%;
+    width: 25%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.prev-button {
+    background-color: white;
+    border-radius: 50%;
+}
+
+.next-button {
+    background-color: white;
+    border-radius: 50%;
+}

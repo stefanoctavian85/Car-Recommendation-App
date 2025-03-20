@@ -25,10 +25,10 @@ function Login() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (auth.isAuthenticated) {
+        if (auth.isAuthenticated && window.location.pathname === '/login') {
             navigate('/profile');
         }
-    }, [auth.isAuthenticated]);
+    }, [auth.isAuthenticated, navigate]);
 
     function handleShowPassword() {
         setShowPassword(!showPassword);

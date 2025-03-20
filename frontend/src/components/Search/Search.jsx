@@ -1,6 +1,6 @@
 import './Search.css';
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
 import { Container, Select, MenuItem, InputLabel, FormControl, Button, Box, Typography } from '@mui/material';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
@@ -17,6 +17,8 @@ function Search() {
     const [bodyTypes, setBodyTypes] = useState([]);
     const [selectedBodyType, setSelectedBodyType] = useState('');
     const [selectedPrice, setSelectedPrice] = useState('');
+
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const priceLimits = [
         { value: 5000, label: '5 000 EUR' },
@@ -99,27 +101,21 @@ function Search() {
     async function searchCars(e) {
         e.preventDefault();
 
-        const data = {
+        const searchParamsObj = {
             brand: selectedBrand,
             model: selectedModel,
             bodytype: selectedBodyType,
-            price: selectedPrice
+            price: selectedPrice,
         };
 
-        const response = await fetch(`${SERVER}/api/cars`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.token}`,
-            },
-            body: JSON.stringify(data)
-        });
+        const filteredParams = Object.fromEntries(
+            Object.entries(searchParamsObj).filter(([_, value]) => value)
+        );
 
-        if (response.ok) {
-            const data = await response.json();
-            cars.carsStore.setCars(data.cars);
-            navigate('/cars');
-        }
+        setSearchParams(filteredParams);
+
+        cars.carsStore.setSearchParams(filteredParams);
+        navigate('/cars?' + new URLSearchParams(filteredParams).toString());
     }
 
     return (

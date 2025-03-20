@@ -1,15 +1,7 @@
 class CarsStore {
     constructor() {
-        this.cars = [];
         this.car = '';
-    }
-
-    setCars(cars) {
-        this.cars = cars;
-    }
-
-    getCars() {
-        return this.cars;
+        this.searchParams = {};
     }
 
     setCar(car) {
@@ -18,6 +10,14 @@ class CarsStore {
 
     getCar() {
         return this.car;
+    }
+
+    setSearchParams(searchParams) {
+        this.searchParams = searchParams;
+    }
+
+    getSearchParams() {
+        return this.searchParams;
     }
 }
 
