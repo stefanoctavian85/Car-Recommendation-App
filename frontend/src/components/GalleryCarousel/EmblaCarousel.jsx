@@ -19,7 +19,7 @@ function EmblaCarousel({ images }) {
         if (emblaApi) {
             emblaApi.scrollNext();
         }
-    }, []);
+    }, [emblaApi]);
 
     useEffect(() => {
         let imageLinks = images.split(', ');
@@ -49,11 +49,7 @@ function EmblaCarousel({ images }) {
                                     />
                                 </Box>
                             ))
-                        ) : (
-                            <Box className='embla__no-images'>
-                                <Typography component='h2'>No images found!</Typography>
-                            </Box>
-                        )
+                        ) : null
                     }
                 </Box>
 

@@ -3,8 +3,13 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
-import { Container, Typography, Box, List, ListItem, Card, CardContent, Grid2, Pagination } from '@mui/material';
+import { Container, Typography, Box, List, ListItem, Card, CardContent, Grid2, Pagination, Button, Grid } from '@mui/material';
 import EmblaCarousel from '../GalleryCarousel/EmblaCarousel.jsx';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AddRoadIcon from '@mui/icons-material/AddRoad';
+import EuroIcon from '@mui/icons-material/Euro';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 function Cars() {
     const { auth, cars } = useContext(AppContext);
@@ -98,42 +103,67 @@ function Cars() {
                                         <ListItem
                                             className='result-car'
                                             key={index}
-                                            // onClick={() => seeDetails(index)}
                                         >
-                                            <Card>
-                                                <Box>
-                                                    <EmblaCarousel images={element.Imagine} />
-                                                </Box>
-                                            </Card>
                                             <Card
                                             >
-                                                <CardContent>
-                                                    <Typography component='h2' className='results-car-name'>
-                                                        {element.Masina}
-                                                    </Typography>
-                                                    <Typography component='h3' className='results-car-version'>
-                                                        {element?.Versiune}
-                                                    </Typography>
-                                                    <Grid2 container spacing={2}>
-                                                        <Grid2 size={4}>
-                                                            <Typography component='h4'>
-                                                                {element.Combustibil}
-                                                            </Typography>
+                                                <CardContent className='results'>
+                                                    <Box className='results-car-images'>
+                                                        <EmblaCarousel images={element.Imagine} />
+                                                    </Box>
+                                                    <Box className='results-car-details'>
+                                                        <Typography component='h2' className='results-car-name'>
+                                                            {element.Masina}
+                                                        </Typography>
+                                                        <Typography component='h3' className='results-car-version'>
+                                                            {element?.Versiune}
+                                                        </Typography>
+                                                        <Grid2 container spacing={2} className='car-details-container'>
+                                                            <Grid2 size={4} className='results-car-fuel'>
+                                                                <Box className='icon-text'>
+                                                                    <LocalGasStationIcon />
+                                                                    <Typography component='h4' className='detail'>
+                                                                        {element.Combustibil}
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Grid2>
+                                                            <Grid2 size={4} className='results-car-km'>
+                                                                <Box className='icon-text'>
+                                                                    <AddRoadIcon />
+                                                                    <Typography component='h4' className='detail'>
+                                                                        {element.KM} km
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Grid2>
+                                                            <Grid2 size={4} className='results-car-year'>
+                                                                <Box className='icon-text'>
+                                                                    <CalendarMonthIcon />
+                                                                    <Typography component='h4' className='detail'>
+                                                                        {element['Anul productiei']}
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Grid2>
                                                         </Grid2>
-                                                        <Grid2 size={4}>
-                                                            <Typography component='h4'>
-                                                                {element.KM}
-                                                            </Typography>
+                                                        <Grid2 container spacing={2} className='price-select'>
+                                                            <Grid2 size={6}>
+                                                                <Box className='results-price'>
+                                                                    <Typography className='result-price'>
+                                                                        {element.Pret}
+                                                                        <EuroIcon className='price-icon' />
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Grid2>
+                                                            <Grid2 size={6}>
+                                                                <Box className='results-button'>
+                                                                    <Button onClick={() => seeDetails(index)}>
+                                                                        <Typography component='h3' className='results-select-button'>Select</Typography>
+                                                                        <ShoppingCartIcon className='shop-icon'/>
+                                                                    </Button>
+                                                                </Box>
+                                                            </Grid2>
                                                         </Grid2>
-                                                        <Grid2 size={4}>
-                                                            <Typography component='h4'>
-                                                                {element['Anul productiei']}
-                                                            </Typography>
-                                                        </Grid2>
-                                                    </Grid2>
-                                                    <Typography>
-                                                        {element.Pret} EUR
-                                                    </Typography>
+
+                                                    </Box>
+
                                                 </CardContent>
                                             </Card>
                                         </ListItem>
@@ -145,7 +175,6 @@ function Cars() {
                                     count={totalPages}
                                     page={currentPage}
                                     onChange={handlePageChange}
-                                    color='primary'
                                 />
                             </Box>
                         </Box>

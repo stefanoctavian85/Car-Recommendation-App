@@ -1,40 +1,182 @@
 .cars-page {
     max-width: 1200px;
     margin: 100px auto;
+    padding: 0 16px;
 }
 
 .cars-results-title {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     text-align: center;
     color: white;
 }
 
 .results-title {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 8px;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
 }
 
 .results-number {
     font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.results {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.results:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .result-car {
     display: flex !important;
-    padding: 16px 0 !important;
-    margin-bottom: 16px;
-    border-bottom: 1px solid #eee;
+    padding: 8px 0 !important;
+    margin-bottom: 24px;
     text-decoration: none !important;
     color: inherit;
+    border: none !important;
 }
 
-.result-car > .MuiCard-root:first-of-type {
-    width: 300px;
+.result-car .MuiCard-root {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.result-car .MuiCardContent-root {
+    display: flex;
+    padding: 16px;
+    height: 300px;
+}
+
+.results-car-images {
+    flex: 0 0 50%;
     margin-right: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
+    position: relative;
 }
 
-.result-car > .MuiCard-root:last-of-type {
+.results-car-details {
     flex: 1;
-    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+}
+
+.results-car-name {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #2c3e50;
+    text-align: center;
+    margin: 6px !important;
+}
+
+.results-car-version {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: #6c7576;
+    text-align: center;
+    position: relative;
+    bottom: 10%;
+}
+
+.car-details-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 32px !important;
+    margin-left: 60px !important;
+}
+
+.icon-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #34495e;
+}
+
+.icon-text svg {
+    color: #3498db;
+}
+
+.detail {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.price-select {
+    margin-left: 100px !important;
+}
+
+.results-price {
+    display: flex;
+    align-items: center;
+}
+
+.result-price {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #2c3e50;
+    display: flex;
+}
+
+.price-icon {
+    font-size: 20px !important;
+    position: relative;
+    top: 8px;
+    margin-left: 2px;
+    color: #3498db;
+}
+
+.results-button {
+    display: flex;
+}
+
+.results-button .MuiButton-root {
+    background-color: #3498db;
+    color: white;
+    text-transform: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    transition: background-color 0.3s;
+    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+}
+
+.results-button .MuiButton-root:hover {
+    background-color: #2980b9;
+}
+
+.results-select-button {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    padding: 0;
+}
+
+.shop-icon {
+    font-size: 18px !important;
+    margin-left: 8px;
+}
+
+.results-pagination {
+    display: flex;
+    justify-content: center;
+    
+}
+
+.results-pagination .MuiPagination-ul .MuiPaginationItem-root {
+    color: white;
+}
+
+.results-pagination .MuiPagination-ul .Mui-selected {
+    background-color: #3498db;
 }

@@ -105,7 +105,7 @@ function Form() {
             brand: carParts[0],
             model: carParts[1]
         });
-        navigate('/cars');
+        navigate('/cars?' + new URLSearchParams(cars.carsStore.getSearchParams()).toString());
     }
 
     return (
