@@ -88,7 +88,7 @@ const searchSpecificCars = async (req, res, next) => {
             query.Masina = { $regex: `^${brand}`, $options: 'i' };
         }
 
-        if (model && model !== undefined ) {
+        if (model && model !== undefined) {
             query.Masina = query.Masina || {};
             query.Masina.$regex = query.Masina.$regex || '';
             query.Masina.$regex += ` ${model}`;
@@ -129,9 +129,30 @@ const searchSpecificCars = async (req, res, next) => {
     }
 }
 
+const searchCarById = async (req, res, next) => {
+    try {
+        const { id } = req.query;
+        
+        const car = await models.Car.findById(id);
+
+        if (!car) {
+            return res.status(404).json({
+                message: 'Car not found!',
+            });
+        }
+
+        return res.status(200).json({
+            car
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
 export default {
     searchBrands,
     searchModels,
     searchBodyTypes,
-    searchSpecificCars
+    searchSpecificCars,
+    searchCarById
 }

@@ -84,7 +84,8 @@ function Cars() {
 
     function seeDetails(index) {
         cars.carsStore.setCar(carOffers[index]);
-        navigate('/car-details');
+        console.log(carOffers[index]._id);
+        navigate('/car-details?' + new URLSearchParams({ id: carOffers[index]._id}).toString());
     }
 
     return (

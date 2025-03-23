@@ -1,3 +1,103 @@
 .home-page {
-    padding-top: 100px;
+    width: 100%;
+    margin-top: 50px;
+}
+
+.home-search {
+    width: 100%;
+}
+
+.home-landing-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.home-hero {
+    padding: 25px 30px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.home-motto h1 {
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+    line-height: 1.2;
+    margin: 0 30px;
+}
+
+.home-description {
+    width: 50%;
+}
+
+.home-description h1 {
+    font-size: 16px;
+    color: white;
+    line-height: 1.5;
+    font-weight: normal;
+    margin: 0 30px;
+    text-align: justify;
+}
+
+.home-register-button {
+    position: relative;
+    top: 10px;
+    left: 30px;
+    background-color: rgb(25, 25, 25) !important;
+    color: white !important;
+    border-radius: 30px !important;
+    padding: 5px 20px !important;
+}
+
+.home-register-button:hover {
+    background-color: rgb(25, 25, 45) !important;
+}
+
+.home-main {
+    position: relative;
+    width: 100%;
+    height: 484px;
+    overflow: hidden;
+}
+
+.home-main-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 50%;
+}
+
+.home-main-text {
+    position: absolute;
+    top: 250px;
+    right: 50px;
+    color: white;
+    max-width: 500px;
+}
+
+.home-header {
+    margin-bottom: 15px;
+}
+
+.home-header-text {
+    font-size: 28px !important;
+    font-weight: bold !important;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 1) !important;
+}
+
+.home-subtitle-text {
+    font-size: 18px !important;
+    color: white;
+    line-height: 1.6;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    margin-bottom: 0;
+    text-align: justify;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 1) !important;
 }

@@ -22,7 +22,7 @@ function EmblaCarousel({ images }) {
     }, [emblaApi]);
 
     useEffect(() => {
-        let imageLinks = images.split(', ');
+        let imageLinks = images ? images.split(', ') : [];
         let links = [];
         const pattern = /^(https:\/\/[^,]+\/image)/;
         imageLinks.forEach(link => {

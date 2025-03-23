@@ -1,5 +1,12 @@
+html {
+    padding: 0;
+    margin: 0;
+}
+
 body {
-    font-family: "Inter", sans-serif;
-    height: 100vh;
+    height: 100%;
     background-image: linear-gradient(135deg, #052f63, #0d2644, #2d5270);
+    overflow: auto;
+    margin: 0;
+    padding: 0;
 }
