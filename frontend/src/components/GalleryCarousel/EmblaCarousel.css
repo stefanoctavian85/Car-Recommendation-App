@@ -3,7 +3,6 @@
     height: 300px;
     width: 100%;
     position: relative;
-    max-width: 600px;
 }
 
 .embla__container {
@@ -33,7 +32,7 @@
 }
 
 .prev-button, .next-button {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(59, 53, 53, 0.7);
     border-radius: 50%;
     cursor: pointer;
     padding: 5px;
