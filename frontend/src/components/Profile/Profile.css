@@ -1,0 +1,102 @@
+.profile-page {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 200px;
+    margin-left: 100px;
+    margin-right: 100px;
+}
+
+.profile-tabs {
+    display: flex;
+    flex: 1;
+}
+
+.MuiTabPanel-hidden {
+    display: none !important;
+}
+
+.profile-tabs .MuiTabs-root {
+    background-color: #2c2c2c;
+    border-radius: 8px;
+    margin-right: 20px;
+    width: 150px;
+}
+
+.profile-tabs .MuiTab-root {
+    color: #a0a0a0;
+    text-transform: none;
+    margin: 8px 0;
+}
+
+.profile-tabs .MuiTab-root.Mui-selected {
+    color: #ffffff;
+    background-color: #3a3a3a;
+}
+
+.profile-tabs .MuiTabs-root.MuiTabs-vertical {
+    min-height: 200px;
+}
+
+.profile-info-tab {
+    display: flex;
+    flex: 2;
+}
+
+.profile-tabs .MuiTabPanel-root {
+    flex-grow: 1;
+    width: calc(100% - 220px);
+    background-color: #2c2c2c;
+    border-radius: 10px;
+}
+
+.user-information-details {
+    background-color: #2c2c2c;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.profile-icon {
+    margin-right: 10px;
+    color: #4a9ff9;
+}
+
+.user-invalid-phonenumber {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.information-input {
+    flex-grow: 1;
+}
+
+.information-input .MuiInputLabel-root {
+    color: #a0a0a0;
+}
+
+.information-input .MuiInput-root {
+    color: #ffffff;
+    border-bottom-color: #4a9ff9;
+}
+
+.save-phone-number-button .MuiButton-root {
+    background-color: #4a9ff9;
+    color: #ffffff;
+}
+
+.save-phone-number-message {
+    margin-left: 10px;
+    color: #41cc6b;
+}
+
+.MuiInputAdornment-root .MuiSvgIcon-root {
+    margin-left: 10px;
+}

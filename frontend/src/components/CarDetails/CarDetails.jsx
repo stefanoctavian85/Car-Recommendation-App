@@ -48,6 +48,7 @@ function CarDetails() {
     useEffect(() => {
         if (cars.carsStore.getCar()) {
             setCar(cars.carsStore.getCar());
+            console.log("store", cars.carsStore.getCar());
         } else {
             const id = searchParams.get("id") || '';
             fetch(`${SERVER}/api/car?id=${id}`, {
@@ -64,14 +65,15 @@ function CarDetails() {
                 .then((data) => {
                     setCar(data.car);
                     cars.carsStore.setCar(data.car);
-                    setAudioOptions(parseOptions(data.car['Audio si tehnologie']));
-                    setElectronicsOptions(parseOptions(data.car['Electronice si sisteme de asistenta']));
-                    setOptionalsOptions(parseOptions(data.car['Confort si echipamente optionale']));
-                    setSafetyOptions(parseOptions(data.car['Siguranta']));
-                    setPerformanceOptions(parseOptions(data.car['Performanta']));
+                    console.log(data.car);
                 });
         }
-    }, [car, audioOptions, electronicsOptions, optionalsOptions, safetyOptions, performanceOptions]);
+        setAudioOptions(parseOptions(car['Audio si tehnologie']));
+        setElectronicsOptions(parseOptions(car['Electronice si sisteme de asistenta']));
+        setOptionalsOptions(parseOptions(car['Confort si echipamente optionale']));
+        setSafetyOptions(parseOptions(car['Siguranta']));
+        setPerformanceOptions(parseOptions(car['Performanta']));
+    }, [car]);
 
     function parseOptions(optionsArray) {
         let optionsComponents = [];
@@ -197,90 +199,87 @@ function CarDetails() {
                     <Typography>Extraurban {car['Consum Extraurban']} l/100km</Typography>
                 </Box>
             </Box>
-            <Box className='car-equipments'>
-                <TabContext value={valueTab}>
-                    <TabList onChange={handleChangeTab} centered>
-                        <Tab label='Audio and technology' value="0"></Tab>
-                        <Tab label='Electronics and assistance systems' value="1"></Tab>
-                        <Tab label='Performance' value="2"></Tab>
-                        <Tab label='Safety' value="3"></Tab>
-                        <Tab label='Optionals' value="4"></Tab>
-                    </TabList>
+            {
+                (car['Audio si tehnologie'] && car['Electronice si sisteme de asistenta'] && car['Performanta'] && car['Siguranta'] && car['Confort si echipamente optionale']) ? (
+                    <Box className='car-equipments'>
+                        <TabContext value={valueTab}>
+                            <TabList onChange={handleChangeTab} centered>
+                                <Tab label='Audio and technology' value="0" disabled={!car['Audio si tehnologie']}></Tab>
+                                <Tab label='Electronics and assistance systems' value="1" disabled={!car['Electronice si sisteme de asistenta']}></Tab>
+                                <Tab label='Performance' value="2" disabled={!car['Performanta']}></Tab>
+                                <Tab label='Safety' value="3" disabled={!car['Siguranta']}></Tab>
+                                <Tab label='Optionals' value="4" disabled={!car['Confort si echipamente optionale']}></Tab>
+                            </TabList>
 
-                    <TabPanel value="0">
-                        {
-                            car['Audio si tehnologie'] ? (
-
-                                <Box className='car-audio-options'>
-                                    {
-                                        audioOptions.length > 0 ? (
-                                            <List className='audio-list'>
-                                                {
-                                                    audioOptions.map((element, index) => (
-                                                        <ListItem key={index}>{element}</ListItem>
-                                                    ))
-                                                }
-                                            </List>
-                                        ) : null
-                                    }
-                                </Box>
-                            ) : null
-                        }
-                    </TabPanel>
-                    <TabPanel value="1">
-                        {
-                            electronicsOptions.length > 0 ? (
-                                <List className='electronics-list'>
-                                    {
-                                        electronicsOptions.map((element, index) => (
-                                            <ListItem key={index}>{element}</ListItem>
-                                        ))
-                                    }
-                                </List>
-                            ) : null
-                        }
-                    </TabPanel>
-                    <TabPanel value="2">
-                        {
-                            performanceOptions.length > 0 ? (
-                                <List className='performance-list'>
-                                    {
-                                        performanceOptions.map((element, index) => (
-                                            <ListItem key={index}>{element}</ListItem>
-                                        ))
-                                    }
-                                </List>
-                            ) : null
-                        }
-                    </TabPanel>
-                    <TabPanel value="3">
-                        {
-                            safetyOptions.length > 0 ? (
-                                <List className='safety-list'>
-                                    {
-                                        safetyOptions.map((element, index) => (
-                                            <ListItem key={index}>{element}</ListItem>
-                                        ))
-                                    }
-                                </List>
-                            ) : null
-                        }
-                    </TabPanel>
-                    <TabPanel value="4">
-                        {
-                            optionalsOptions.length > 0 ? (
-                                <List className='optional-list'>
-                                    {
-                                        optionalsOptions.map((element, index) => (
-                                            <ListItem key={index}>{element}</ListItem>
-                                        ))
-                                    }
-                                </List>
-                            ) : null
-                        }
-                    </TabPanel>
-                </TabContext>
-            </Box>
+                            <TabPanel value="0">
+                                {
+                                    audioOptions.length > 0 ? (
+                                        <List className='audio-list'>
+                                            {
+                                                audioOptions.map((element, index) => (
+                                                    <ListItem key={index}>{element}</ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    ) : null
+                                }
+                            </TabPanel>
+                            <TabPanel value="1">
+                                {
+                                    electronicsOptions.length > 0 ? (
+                                        <List className='electronics-list'>
+                                            {
+                                                electronicsOptions.map((element, index) => (
+                                                    <ListItem key={index}>{element}</ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    ) : null
+                                }
+                            </TabPanel>
+                            <TabPanel value="2">
+                                {
+                                    performanceOptions.length > 0 ? (
+                                        <List className='performance-list'>
+                                            {
+                                                performanceOptions.map((element, index) => (
+                                                    <ListItem key={index}>{element}</ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    ) : null
+                                }
+                            </TabPanel>
+                            <TabPanel value="3">
+                                {
+                                    safetyOptions.length > 0 ? (
+                                        <List className='safety-list'>
+                                            {
+                                                safetyOptions.map((element, index) => (
+                                                    <ListItem key={index}>{element}</ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    ) : null
+                                }
+                            </TabPanel>
+                            <TabPanel value="4">
+                                {
+                                    optionalsOptions.length > 0 ? (
+                                        <List className='optional-list'>
+                                            {
+                                                optionalsOptions.map((element, index) => (
+                                                    <ListItem key={index}>{element}</ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    ) : null
+                                }
+                            </TabPanel>
+                        </TabContext>
+                    </Box>
+                ) : null
+            }
         </Box>
     );
 }

@@ -21,7 +21,7 @@ async function createAdminUser() {
     if (!admin) {
         const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
         admin = await User.create({ email: process.env.ADMIN_EMAIL, password: hashedPassword, firstname: process.env.ADMIN_FIRSTNAME,
-            lastname: process.env.ADMIN_LASTNAME, status: "admin" });
+            lastname: process.env.ADMIN_LASTNAME, status: "admin", phoneNumber: process.env.ADMIN_PHONENUMBER });
         await admin.save();
         console.log("Admin user has been created!");
     } else {

@@ -22,6 +22,24 @@ const userSchema = new mongoose.Schema({
         required: true,
         enum: ["regular", "admin"],
         default: "regular",
+    },
+    phoneNumber: {
+        type: String,
+    },
+    dateOfBirth: {
+        type: Date,
+    },
+    idCardExpirationDate: {
+        type: Date,
+    },
+    driverLicenseExpirationDate: {
+        type: Date,
+    },
+    statusAccountVerified: {
+        type: String,
+        enum: ['uninitialized', 'rejected', 'pending', 'approved'],
+        default: 'uninitialized',
+        required: true,
     }
 }, { collection: 'Users'});
 

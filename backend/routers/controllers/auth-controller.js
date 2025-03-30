@@ -43,13 +43,15 @@ const register = async (req, res, next) => {
         const userExists = await models.User.findOne({ email: email });
         if (!userExists) {
             const hashedPassword = await bcrypt.hash(password, 10);
-            const user = await models.User.create({email: email, firstname: firstname, lastname: lastname, password: hashedPassword, status: "regular"});
+            const user = await models.User.create({email: email, firstname: firstname, lastname: lastname, password: hashedPassword, status: "regular", statusAccountVerified: 'uninitialized'});
             await user.save();
+
             const token = jwt.sign({
                 id: user._id, email: user.email,
             }, process.env.JWT_SECRET, {
                 expiresIn: '1h'
             });
+
             res.status(200).json({
                 token,
             });
