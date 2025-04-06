@@ -20,6 +20,7 @@ const login = async (req, res, next) => {
                 });
                 res.status(200).json({
                     token,
+                    user
                 });
             } else {
                 res.status(404).json({
@@ -54,6 +55,7 @@ const register = async (req, res, next) => {
 
             res.status(200).json({
                 token,
+                user
             });
         } else {
             res.status(400).json({

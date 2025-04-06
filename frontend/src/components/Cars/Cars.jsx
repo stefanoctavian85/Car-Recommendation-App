@@ -23,24 +23,29 @@ function Cars() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const webParams = {
-            brand: searchParams.get("brand") || '',
-            model: searchParams.get("model") || '',
-            bodytype: searchParams.get("bodytype") || '',
-            price: searchParams.get("price") || '',
-        }
+        let webParams = {};
+        if (Object.keys(cars.carsStore.searchParams).length !== 0) {
+            webParams = {
+                brand: cars.carsStore.searchParams.brand || '',
+                model: cars.carsStore.searchParams.model || '',
+                bodytype: cars.carsStore.searchParams.bodytype || '',
+                price: cars.carsStore.searchParams.price || '',
+            }
+        } else {
+            webParams = {
+                brand: searchParams.get("brand") || '',
+                model: searchParams.get("model") || '',
+                bodytype: searchParams.get("bodytype") || '',
+                price: searchParams.get("price") || '',
+            }
 
-        if (!searchParams.toString() && Object.keys(cars.carsStore.searchParams).length === 0) {
-            return;
-        }
-
-        if (Object.keys(cars.carsStore.searchParams).length === 0) {
-            cars.carsStore.setSearchParams(webParams);
+            if (Object.keys(webParams).some((key) => webParams[key] !== '')) {
+                cars.carsStore.setSearchParams(webParams);
+            }
         }
 
         getCars(webParams, currentPage);
-
-    }, [searchParams]);
+    }, [searchParams, currentPage]);
 
     function getCars(webParams, currentPage) {
         fetch(`${SERVER}/api/cars?brand=${webParams.brand}&model=${webParams.model}&bodytype=${webParams.bodytype}&price=${webParams.price}&page=${currentPage}`, {

@@ -1,5 +1,5 @@
 import './Home.css';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import AppContext from '../../state/AppContext';
 import { useNavigate } from 'react-router-dom';
 import '../Search/Search.jsx';
@@ -9,7 +9,13 @@ import photo from '../../assets/home_main_photo.jpg';
 
 function Home() {
     const { auth } = useContext(AppContext);
+    const [token, setToken] = useState('');
+
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setToken(auth.token);
+    }, [auth.token]);
 
     function redirectToRegister() {
         navigate('/register');
@@ -18,7 +24,7 @@ function Home() {
     return (
         <Box className='home-page'>
             {
-                auth.token ? (
+                token ? (
                     <Search />
                 ) : (
                     <Box className='home-landing-page'>
@@ -56,7 +62,6 @@ function Home() {
                     </Box>
                 )
             }
-
         </Box>
     );
 }

@@ -11,10 +11,12 @@ const settings = ['Profile', 'Log out'];
 
 function Navbar() {
     const { auth } = useContext(AppContext);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsAuthenticated(auth.isAuthenticated);
         if (!auth.isAuthenticated) {
             navigate('/');
         }
@@ -30,6 +32,7 @@ function Navbar() {
             navigate('/profile');
         } else if (event.target.textContent === "Log out") {
             logout();
+            window.location.reload();
         }
     }
 
@@ -44,7 +47,7 @@ function Navbar() {
     }
 
     function handlePages(event) {
-        if (auth.isAuthenticated) {
+        if (isAuthenticated) {
             if (event.target.textContent === "Form") {
                 navigate('/form');
             }
@@ -85,7 +88,7 @@ function Navbar() {
                         }
                     </Box>
 
-                    {auth.isAuthenticated ? (
+                    {isAuthenticated ? (
                         <Box className='navbar-settings'>
                             <Tooltip title='Settings'>
                                 <PersonIcon onClick={handleOpenUserMenu} />

@@ -11,6 +11,7 @@ import Profile from './components/Profile/Profile.jsx';
 import Form from './components/Form/Form.jsx';
 import Cars from './components/Cars/Cars.jsx';
 import CarDetails from './components/CarDetails/CarDetails.jsx';
+import RentCar from './components/RentCar/RentCar.jsx';
 
 import AppContext from './state/AppContext.jsx';
 import AuthStore from './state/stores/AuthStore.jsx';
@@ -79,6 +80,10 @@ function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route path='/car-details' element={<CarDetails />}></Route>
+            </Route>
+
+            <Route element={<ProtectedRoute />}>
+              <Route path='/rent-car' element={<RentCar />}></Route>
             </Route>
 
           </Routes>

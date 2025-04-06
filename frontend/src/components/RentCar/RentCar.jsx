@@ -1,0 +1,569 @@
+import './RentCar.css';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Box, Button, Checkbox, FormControlLabel, FormGroup, Step, StepLabel, Stepper, Typography, FormControl, InputLabel, Input, InputAdornment } from '@mui/material';
+import AppContext from '../../state/AppContext';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { SERVER } from '../../config/global.jsx';
+import { jwtDecode } from 'jwt-decode';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import PersonIcon from '@mui/icons-material/Person';
+import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
+import ErrorIcon from '@mui/icons-material/Error';
+import PaletteIcon from '@mui/icons-material/Palette';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
+import AddRoadIcon from '@mui/icons-material/AddRoad';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+import dayjs from 'dayjs';
+
+const steps = ['Select rental details', 'Complete the final documents', 'Rent the car'];
+
+const currentDate = dayjs()
+
+function RentCar() {
+    const { auth, cars } = useContext(AppContext);
+    const [car, setCar] = useState('');
+    const [user, setUser] = useState('');
+
+    const [startDate, setStartDate] = useState('')
+    const [endDate, setEndDate] = useState('');
+    const [insuranceOptions, setInsuranceOptions] = useState({
+        thirdPartyLiability: false,
+        collisionDamageWaiver: false,
+        theftProtection: false,
+    });
+
+    const [reservationsDates, setReservationsDates] = useState([]);
+    const [disabledDates, setDisabledDates] = useState([]);
+    const [reservationErrorMessage, setReservationErrorMessage] = useState('');
+
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [phoneNumberError, setPhoneNumberError] = useState('');
+    const [phoneNumberTouched, setPhoneNumberTouched] = useState('');
+    const [phoneNumberMessage, setPhoneNumberMessage] = useState('');
+
+    const [isFullInsuranceChecked, setIsFullInsuranceChecked] = useState(false);
+    const [isIndeterminate, setIsIndeterminate] = useState(false);
+
+    const [activeStep, setActiveStep] = useState(0);
+
+    const [rentalPrice, setRentalPrice] = useState(0);
+    const [rentalPriceErrorMessage, setRentalPriceErrorMessage] = useState('');
+
+    const [finalErrorMessage, setFinalErrorMessage] = useState('');
+
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (cars.carsStore.getCar()) {
+            setCar(cars.carsStore.getCar());
+        } else {
+            const id = searchParams.get("id") || '';
+            fetch(`${SERVER}/api/car?id=${id}`, {
+                method: "GET",
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                }
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    setCar(data.car);
+                    cars.carsStore.setCar(data.car);
+                });
+        }
+
+        if (auth.authStore.getUser()) {
+            setUser(auth.authStore.getUser());
+        } else {
+            const userId = jwtDecode(auth.authStore.token).id;
+            fetch(`${SERVER}/api/users/${userId}/profile`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                }
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    setUser(data.user);
+                })
+        }
+
+        setIsFullInsuranceChecked(insuranceOptions.thirdPartyLiability && insuranceOptions.collisionDamageWaiver && insuranceOptions.theftProtection);
+        setIsIndeterminate(!isFullInsuranceChecked && (insuranceOptions.thirdPartyLiability || insuranceOptions.collisionDamageWaiver || insuranceOptions.theftProtection));
+    }, [auth.token, searchParams]);
+
+    useEffect(() => {
+        if (car) {
+            fetch(`${SERVER}/api/reservations/${car._id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                }
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    setReservationsDates(data.reservationDates);
+
+                    const disabledDates = []
+                    data.reservationDates.forEach((date) => {
+                        const start = dayjs(date.startDate);
+                        const end = dayjs(date.endDate).add(1, 'day');
+                        let current = start;
+
+                        while (current.isBefore(end) || current.isSame(start)) {
+                            disabledDates.push(current.format('YYYY-MM-DD'));
+                            current = current.add(1, 'day');
+                        }
+                    });
+
+                    setDisabledDates(disabledDates);
+                });
+        }
+    }, [car, auth.token]);
+
+    function handleBackStep() {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    }
+
+    async function handleNextStep() {
+        if (activeStep === 0) {
+            if (dayjs(startDate).isAfter(endDate) || dayjs(endDate).isBefore(startDate)) {
+                setReservationErrorMessage('You cannot select the end date before the start date or the start date after the end date!');
+                return;
+            } else {
+                setReservationErrorMessage('');
+                const response = await fetch(`${SERVER}/api/reservations/check-availability`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cid: car._id,
+                        startDate,
+                        endDate
+                    })
+                })
+
+                const data = await response.json();
+                if (data.available) {
+                    setReservationErrorMessage('');
+                    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                } else {
+                    setReservationErrorMessage(data.message);
+                }
+
+                const res = await fetch(`${SERVER}/api/reservations/calculate-rental-price`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        cid: car._id,
+                        startDate,
+                        endDate,
+                        insuranceOptions
+                    })
+                });
+
+                const dataPrice = await res.json();
+                if (res.ok) {
+                    setRentalPrice(dataPrice.rentalPrice);
+                    setRentalPriceErrorMessage('');
+                } else {
+                    setRentalPriceErrorMessage(dataPrice.message);
+                }
+            }
+        }
+
+        if (activeStep === 1) {
+            fetch(`${SERVER}/api/reservations/rent-car`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cid: car._id,
+                    startDate,
+                    endDate,
+                    insuranceOptions,
+                    rentalPrice
+                })
+            })
+                .then(res => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then(data => {
+                    if (data.completed === true) {
+                        setFinalErrorMessage('');
+                        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                    } else {
+                        setFinalErrorMessage(data.message);
+                    }
+                })
+        }
+
+        if (activeStep === 2) {
+            navigate('/profile', {
+                state: {
+                    valueTab: '2'
+                }
+            });
+        }
+    }
+
+    function validatePhoneNumber(phoneNumber) {
+        const phoneNumberRegex = /^\d{10}$/;
+
+        if (!phoneNumberRegex.test(phoneNumber)) {
+            setPhoneNumberError('Phone number must be exactly 10 digits!');
+            return false;
+        }
+
+        setPhoneNumberError('');
+        return true;
+    }
+
+    function handlePhoneNumberChange(e) {
+        const phoneNumber = e.target.value;
+        setPhoneNumber(phoneNumber);
+        if (phoneNumberTouched) {
+            validatePhoneNumber(phoneNumber);
+        }
+    }
+
+    function handlePhoneNumberLive(e) {
+        setPhoneNumberTouched(true);
+        validatePhoneNumber(e.target.value);
+    }
+
+    async function savePhoneNumber() {
+        if (!validatePhoneNumber(phoneNumber)) {
+            return;
+        }
+
+        const response = await fetch(`${SERVER}/api/users/save-phone-number`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${auth.token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: user._id, phoneNumber })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            setPhoneNumberMessage(data.message);
+        }
+    }
+
+    function handleInsuranceOptionsChange(event) {
+        const { name, checked } = event.target;
+
+        if (name === "fullInsurance") {
+            setInsuranceOptions({
+                thirdPartyLiability: checked,
+                collisionDamageWaiver: checked,
+                theftProtection: checked,
+            });
+
+            setIsIndeterminate(false);
+            setIsFullInsuranceChecked(checked);
+        } else {
+            setInsuranceOptions((prevOptions) => {
+                const newOptions = { ...prevOptions, [name]: checked };
+                const allChecked = newOptions.thirdPartyLiability && newOptions.collisionDamageWaiver && insuranceOptions.theftProtection;
+                setIsFullInsuranceChecked(allChecked);
+                setIsIndeterminate(!allChecked && (newOptions.thirdPartyLiability || newOptions.collisionDamageWaiver || newOptions.theftProtection));
+
+                return newOptions;
+            })
+        }
+    }
+
+    return (
+        <Box className='rent-car-page'>
+            <Stepper activeStep={activeStep}>
+                {
+                    steps.map((step, index) => (
+                        <Step key={index}>
+                            <StepLabel>{step}</StepLabel>
+                        </Step>
+                    ))
+                }
+            </Stepper>
+            <Fragment>
+                <Box className='steppers-container'>
+                    {
+                        activeStep === 0 ? (
+                            <Box className='rental-period'>
+                                <Box className='rented-car'>
+                                    <Typography component='h1' className='car-name-rental'>{car.Masina}</Typography>
+                                    <Typography component='h2' className='car-version-rental'>{car?.Versiune}</Typography>
+                                </Box>
+
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DemoContainer components={['DateRangePicker']}>
+                                        <DemoItem component="DateRangePicker">
+                                            <Box className='date-pickers'>
+                                                <DatePicker
+                                                    className='date-picker'
+                                                    label='Start date'
+                                                    minDate={currentDate}
+                                                    value={startDate !== '' ? dayjs(startDate) : null}
+                                                    onChange={(date) => setStartDate(date)}
+                                                    shouldDisableDate={(date) => disabledDates.includes(date.format('YYYY-MM-DD'))}
+                                                    slotProps={{
+                                                        field: {
+                                                            clearable: true,
+                                                            onClear: () => setStartDate('')
+                                                        }
+                                                    }}
+                                                />
+                                                <Typography className='date-picker-separator'>-</Typography>
+                                                <DatePicker
+                                                    className='date-picker'
+                                                    label='End date'
+                                                    minDate={currentDate}
+                                                    value={endDate !== '' ? dayjs(endDate) : null}
+                                                    onChange={(date) => setEndDate(dayjs(date).toDate())}
+                                                    shouldDisableDate={(date) => disabledDates.includes(date.format('YYYY-MM-DD'))}
+                                                    slotProps={{
+                                                        field: {
+                                                            clearable: true,
+                                                            onClear: () => setEndDate('')
+                                                        }
+                                                    }}
+                                                />
+                                            </Box>
+                                        </DemoItem>
+                                    </DemoContainer>
+                                </LocalizationProvider>
+
+                                <Box className='rental-additional-options'>
+                                    <Box className='rental-insurances'>
+                                        <Typography component='h2' className='car-insurance'>Car Insurances</Typography>
+                                        <FormGroup>
+                                            <FormControlLabel
+                                                label='Full insurance'
+                                                name='fullInsurance'
+                                                control={
+                                                    <Checkbox
+                                                        checked={isFullInsuranceChecked}
+                                                        indeterminate={isIndeterminate}
+                                                        onChange={handleInsuranceOptionsChange}
+                                                    />
+                                                }
+                                            />
+                                            <FormControlLabel
+                                                control={<Checkbox
+                                                    checked={insuranceOptions.thirdPartyLiability}
+                                                    onChange={handleInsuranceOptionsChange}
+                                                    name='thirdPartyLiability'
+                                                />}
+                                                label='Third Party Liability'
+                                            />
+                                            <FormControlLabel
+                                                control={<Checkbox
+                                                    checked={insuranceOptions.collisionDamageWaiver}
+                                                    onChange={handleInsuranceOptionsChange}
+                                                    name='collisionDamageWaiver'
+                                                />}
+                                                label='Collision Damage Waiver'
+                                            />
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={insuranceOptions.theftProtection}
+                                                        onChange={handleInsuranceOptionsChange}
+                                                        name='theftProtection'
+                                                    />}
+                                                label='Theft Protection'
+                                            />
+                                        </FormGroup>
+                                    </Box>
+                                </Box>
+
+                                <Box className='rental-period-error'>
+                                    <Typography>{reservationErrorMessage}</Typography>
+                                </Box>
+                            </Box>
+                        ) : null
+                    }
+
+                    {
+                        activeStep === 1 ? (
+                            <Box className='rental-details'>
+                                <Box className='rental-details-title'>
+                                    <AssignmentIcon />
+                                    <Typography component='h1'>Here are the details of the rental agreement!</Typography>
+                                </Box>
+
+                                <Box className='rental-details-account-car'>
+                                    <Box className='rental-details-account'>
+                                        <Typography component='h2' className='rental-details-account-title'>Account details</Typography>
+
+                                        <Box className='user-info'>
+                                            <PersonIcon className='profile-icon' />
+                                            <Typography>{user.firstname} {user.lastname}</Typography>
+                                        </Box>
+
+                                        <Box className='user-info'>
+                                            <AlternateEmailIcon className='profile-icon' />
+                                            <Typography>{user.email}</Typography>
+                                        </Box>
+
+                                        <Box className='user-info'>
+                                            <LocalPhoneIcon className='profile-icon phone-icon' />
+                                            {
+                                                user.phoneNumber ? (
+                                                    <Box className='user-valid-phonenumber'>
+                                                        <Typography>{user.phoneNumber}</Typography>
+                                                    </Box>
+                                                ) : (
+                                                    <Box className='user-invalid-phonenumber'>
+                                                        <FormControl className='information-input'>
+                                                            <InputLabel htmlFor='phone-number-input' className='information-label'>Phone number</InputLabel>
+                                                            <Input
+                                                                id='phone-number-input'
+                                                                label='Phone number'
+                                                                type='text'
+                                                                onChange={handlePhoneNumberChange}
+                                                                onBlur={handlePhoneNumberLive}
+                                                                required
+                                                                endAdornment={
+                                                                    <InputAdornment position='end'>
+                                                                        {
+                                                                            phoneNumberTouched && (
+                                                                                <>
+                                                                                    {
+                                                                                        phoneNumberError ? (
+                                                                                            <ErrorIcon color='error' />
+                                                                                        ) : phoneNumber ? (
+                                                                                            <CheckCircleIcon color='success' />
+                                                                                        ) : null
+                                                                                    }
+                                                                                </>
+                                                                            )
+                                                                        }
+                                                                    </InputAdornment>
+                                                                }
+                                                            ></Input>
+                                                        </FormControl>
+                                                        <Box className='save-phone-number-button'>
+                                                            <Button
+                                                                variant='contained'
+                                                                onClick={savePhoneNumber}
+                                                            >
+                                                                Save
+                                                            </Button>
+                                                        </Box>
+                                                        <Box className='save-phone-number-message'>
+                                                            <Typography>{phoneNumberMessage}</Typography>
+                                                        </Box>
+                                                    </Box>
+                                                )
+                                            }
+                                        </Box>
+                                    </Box>
+
+                                    <Box className='rental-details-car'>
+                                        <Typography component='h2' className='rental-details-car-title'>Car details</Typography>
+
+                                        <Box className='rented-car'>
+                                            <Typography component='h1' className='car-name'>{car.Masina}</Typography>
+                                            <Typography component='h2' className='car-version'>{car?.Versiune}</Typography>
+                                        </Box>
+
+                                        <Box className='rented-car-feature'>
+                                            <AddRoadIcon />
+                                            <Typography>{car.KM}</Typography>
+                                        </Box>
+                                        {
+                                            car.Culoare ? (
+                                                <Box className='rented-car-feature'>
+                                                    <PaletteIcon />
+                                                    <Typography className='car-feature-color'>{car.Culoare} {car['Optiuni culoare']}</Typography>
+                                                </Box>
+                                            ) : null
+                                        }
+                                        <Box className='rented-car-feature'>
+                                            <CalendarMonthIcon />
+                                            <Typography>{car['Anul productiei']}</Typography>
+                                        </Box>
+                                        <Box className='rented-car-feature'>
+                                            <LocalGasStationIcon />
+                                            <Typography>{car.Combustibil}</Typography>
+                                        </Box>
+                                    </Box>
+                                </Box>
+
+                                <Box className='rental-price'>
+                                        <Typography component='h2' className='rental-price-text'>Rental price: {rentalPrice} EUR</Typography>
+                                        <Typography>{rentalPriceErrorMessage}</Typography>
+                                    </Box>
+                            </Box>
+                        ) : null
+                    }
+
+                    {
+                        activeStep === 2 ? (
+                            <Box className='rental-final'>
+                                <Box className='rental-final-success'>
+                                    <Typography component='h1' className='rental-final-title'>Congratulations!</Typography>
+                                    <EmojiEmotionsIcon className='success-icon'/>
+                                </Box>
+                                <Box className='rental-final-content'>
+                                    <Typography component='h2' className='rental-final-subtitle'>The payment was successful!</Typography>
+                                    <Typography component='h3' className='rental-final-text'>
+                                        Thank you for trusting us and our services!
+                                        From now on, you can see your new car on your profile!
+                                    </Typography>
+                                    <Typography className='team-message'>The CarMinds team wishes you safe travels and enjoy your car!</Typography>
+                                </Box>
+                            </Box>
+                        ) : null
+                    }
+                </Box>
+                <Box className='rent-buttons'>
+                    {
+                        activeStep !== 2 ? (
+                            <Button onClick={handleBackStep} className='back-button'>Back</Button>
+                        ) : null
+                    }
+                    <Button onClick={handleNextStep} className='next-stepper-button'>
+                        {
+                            activeStep === 0 ? 'Next' :
+                                activeStep === 1 ? 'Pay' : 'See your rented cars now!'
+                        }
+                    </Button>
+                </Box>
+            </Fragment>
+        </Box>
+    );
+}
+
+export default RentCar;

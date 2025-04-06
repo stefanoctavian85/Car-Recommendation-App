@@ -10,6 +10,10 @@ apiRouter.post('/users/:uid/forms', controllers.form.predict);
 apiRouter.patch('/users/save-phone-number', controllers.profile.savePhoneNumber);
 apiRouter.post('/users/send-documents', middleware.uploadFiles, controllers.profile.sendDocuments, controllers.profile.checkDocuments);
 
+apiRouter.get('/reservations/:cid', controllers.reservation.getReservations);
+apiRouter.post('/reservations/check-availability', controllers.reservation.checkDateAvailability);
+apiRouter.post('/reservations/calculate-rental-price', controllers.reservation.calculateRentalPrice);
+apiRouter.post('/reservations/rent-car', controllers.reservation.rentCar);
 
 apiRouter.get('/cars/brands', controllers.car.searchBrands);
 apiRouter.get('/cars/brands/:brand', controllers.car.searchModels);

@@ -1,6 +1,6 @@
 import './Profile.css';
 import React, { useEffect, useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
 import { jwtDecode } from 'jwt-decode';
@@ -16,6 +16,9 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import UseAnimations from 'react-useanimations';
 import loading from 'react-useanimations/lib/loading';
 import alertCircle from 'react-useanimations/lib/alertCircle';
+import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+
+const profileTabs = ['My Information', 'Documents', 'Rented Cars'];
 
 function Profile() {
     const { auth } = useContext(AppContext);
@@ -32,8 +35,7 @@ function Profile() {
     const [valueTab, setValueTab] = useState('0');
 
     const navigate = useNavigate();
-
-    const profileTabs = ['My Information', 'Documents', 'Rented Cars', 'Cars Bought'];
+    const location = useLocation();
 
     useEffect(() => {
         const userId = jwtDecode(auth.token).id;
@@ -51,9 +53,14 @@ function Profile() {
             })
             .then((data) => {
                 setAccountInformation(data.user);
-                console.log(data.user);
             });
     }, [auth.token]);
+
+    useEffect(() => {
+        if (location.state?.valueTab) {
+            setValueTab(location.state.valueTab);
+        }
+    }, [location.state]);
 
     function handleChangeTab(event, newValue) {
         setValueTab(newValue);
@@ -220,6 +227,10 @@ function Profile() {
                                     )
                                 }
                             </Box>
+                            <Box className='user-info'>
+                                <PriorityHighIcon className='profile-icon' />
+                                <Typography>{accountInformation.statusAccountVerified ? accountInformation.statusAccountVerified.charAt(0).toUpperCase() + accountInformation.statusAccountVerified.slice(1) : ""}</Typography>
+                            </Box>
                         </Box>
                     </TabPanel>
 
@@ -286,7 +297,7 @@ function Profile() {
                                 ) : accountInformation.statusAccountVerified === "rejected" ? (
                                     <Box className='user-rejected-documents'>
                                         <Box className='user-documents-header'>
-                                            <Typography className='user-documents-title'>The documents you submitted were rejected!</Typography>
+                                            <Typography className='user-documents-title'>The documents you submitted were rejected! Please contact us!</Typography>
                                         </Box>
                                         <UseAnimations animation={alertCircle} speed={0} />
                                     </Box>

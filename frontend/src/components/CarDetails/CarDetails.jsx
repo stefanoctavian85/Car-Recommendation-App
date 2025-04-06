@@ -1,9 +1,10 @@
 import './CarDetails.css';
 import React, { useContext, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext';
 import { SERVER } from '../../config/global.jsx';
-import { Box, Button, ListItem, Typography, List, Tooltip, IconButton, Tab } from '@mui/material';
+import { jwtDecode } from 'jwt-decode';
+import { Box, Button, ListItem, Typography, List, Tooltip, IconButton, Tab, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
@@ -17,30 +18,37 @@ import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import AddRoadIcon from '@mui/icons-material/AddRoad';
 import BoltIcon from '@mui/icons-material/Bolt';
 import SpeedIcon from '@mui/icons-material/Speed';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ComputerIcon from '@mui/icons-material/Computer';
-import CableIcon from '@mui/icons-material/Cable';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
-import LooksOneIcon from '@mui/icons-material/LooksOne';
 import InfoIcon from '@mui/icons-material/Info';
 import { TbManualGearbox } from "react-icons/tb";
 import { MdCo2 } from "react-icons/md";
 import { FaCarSide } from "react-icons/fa";
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import dayjs from 'dayjs';
 
+const todaysDate = dayjs().format('YYYY-MM-DD');
 
 function CarDetails() {
     const { auth, cars } = useContext(AppContext);
+
     const [car, setCar] = useState('');
+    const [user, setUser] = useState('');
+
     const [audioOptions, setAudioOptions] = useState([]);
     const [electronicsOptions, setElectronicsOptions] = useState([]);
     const [optionalsOptions, setOptionalsOptions] = useState([]);
     const [safetyOptions, setSafetyOptions] = useState([]);
     const [performanceOptions, setPerformanceOptions] = useState([]);
 
+    const [minRentalPrice, setMinRentalPrice] = useState(0);
+
     const [valueTab, setValueTab] = useState('0');
+    const [open, setOpen] = useState(false);
 
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const theme = useTheme();
+    const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     const rentInfoText = `This price is indicative and may vary based on vehicle availability, rental duration, and any additional options selected. The final cost may be adjusted for
                         extra mileage, additional insurance, or optional equipment.`;
@@ -48,7 +56,6 @@ function CarDetails() {
     useEffect(() => {
         if (cars.carsStore.getCar()) {
             setCar(cars.carsStore.getCar());
-            console.log("store", cars.carsStore.getCar());
         } else {
             const id = searchParams.get("id") || '';
             fetch(`${SERVER}/api/car?id=${id}`, {
@@ -65,7 +72,6 @@ function CarDetails() {
                 .then((data) => {
                     setCar(data.car);
                     cars.carsStore.setCar(data.car);
-                    console.log(data.car);
                 });
         }
         setAudioOptions(parseOptions(car['Audio si tehnologie']));
@@ -73,6 +79,56 @@ function CarDetails() {
         setOptionalsOptions(parseOptions(car['Confort si echipamente optionale']));
         setSafetyOptions(parseOptions(car['Siguranta']));
         setPerformanceOptions(parseOptions(car['Performanta']));
+
+        if (auth.authStore.getUser()) {
+            setUser(auth.authStore.getUser());
+        } else {
+            const userId = jwtDecode(auth.authStore.token).id;
+            fetch(`${SERVER}/api/users/${userId}/profile`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                }
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    setUser(data.user);
+                })
+        }
+    }, [auth.token, searchParams]);
+
+    useEffect(() => {
+        if (car) {
+            fetch(`${SERVER}/api/reservations/calculate-rental-price`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    cid: car._id,
+                    startDate: dayjs(todaysDate).toDate(),
+                    endDate: dayjs(todaysDate).add(1, 'day').toDate(),
+                    insuranceOptions: {
+                        thirdPartyLiability: false,
+                        collisionDamageWaiver: false,
+                        theftProtection: false,
+                    }
+                })
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    setMinRentalPrice(data.rentalPrice);
+                });
+        }
     }, [car]);
 
     function parseOptions(optionsArray) {
@@ -87,6 +143,28 @@ function CarDetails() {
         setValueTab(newValue);
     }
 
+    function handleCloseDialog() {
+        setOpen(false);
+
+        setTimeout(() => {
+            document.getElementById('rent-button')?.focus();
+        }, 100);
+
+        navigate('/profile', {
+            state: {
+                valueTab: '1',
+            }
+        });
+    }
+
+    function rentCar() {
+        if (user.statusAccountVerified === 'approved') {
+            navigate('/rent-car?' + new URLSearchParams({ id: car._id, car: car.Masina }).toString());
+        } else {
+            setOpen(true);
+        }
+    }
+
     return (
         <Box className='car-details-page'>
             <Box className='car-make-version'>
@@ -98,20 +176,17 @@ function CarDetails() {
                     <EmblaCarousel className='gallery' images={car.Imagine} />
                 </Box>
                 <Box className='car-price'>
-                    <Box className='buy-now'>
-                        <Typography className='buy-now-text'>
-                            Buy Now: <EuroIcon className='price-icon' /> {car.Pret}
+                    <Box className='full-price'>
+                        <Typography className='full-price-text'>
+                            Full Price: <EuroIcon className='price-icon' /> {car.Pret}
                         </Typography>
-                        <Box className='car-buy-now-button'>
-                            <Button>Buy Now</Button>
-                        </Box>
                     </Box>
                     <Box className='rent-price'>
                         <Box className='rent-container'>
                             <Typography className='rent-text'>
                                 Rental Price: From
                                 <EuroIcon className='price-icon' />
-                                X/day
+                                {minRentalPrice}/day
                             </Typography>
                             <Box className='rent-info'>
                                 <Tooltip title={rentInfoText}>
@@ -122,7 +197,10 @@ function CarDetails() {
                             </Box>
                         </Box>
                         <Box className='car-rent-button'>
-                            <Button>Rent</Button>
+                            <Button onClick={() => {
+                                setOpen(true);
+                                rentCar();
+                            }}>Rent</Button>
                         </Box>
                     </Box>
                 </Box>
@@ -200,7 +278,7 @@ function CarDetails() {
                 </Box>
             </Box>
             {
-                (car['Audio si tehnologie'] && car['Electronice si sisteme de asistenta'] && car['Performanta'] && car['Siguranta'] && car['Confort si echipamente optionale']) ? (
+                (car['Audio si tehnologie'] || car['Electronice si sisteme de asistenta'] || car['Performanta'] || car['Siguranta'] || car['Confort si echipamente optionale']) ? (
                     <Box className='car-equipments'>
                         <TabContext value={valueTab}>
                             <TabList onChange={handleChangeTab} centered>
@@ -280,6 +358,30 @@ function CarDetails() {
                     </Box>
                 ) : null
             }
+
+            <Box className='documents-rejected-dialog'>
+                <Dialog
+                    fullScreen={fullScreen}
+                    open={open}
+                    onClose={handleCloseDialog}
+                >
+                    <DialogTitle>
+                        {"There is a problem with your documents!"}
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            The documents you submitted were rejected or are under review!
+                            Please check and contact us from your profile page for a fix!
+                            Thank you for waiting!
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button autoFocus onClick={handleCloseDialog} variant='contained'>
+                            Profile
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Box>
         </Box>
     );
 }

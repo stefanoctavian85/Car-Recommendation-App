@@ -18,7 +18,7 @@
 .car-name {
     font-size: 28px !important;
     font-weight: 700 !important;
-    color: #fff;
+    color: #90caf9;
     margin-bottom: 5px !important;
 }
 
@@ -89,7 +89,7 @@
     width: 1200px !important;
 }
 
-.buy-now, .rent-price {
+.full-price, .rent-price {
     display: flex;
     flex-direction: column;
     padding: 15px;
@@ -101,13 +101,22 @@
     flex-direction: row;
 }
 
-.buy-now-text, .rent-text {
+.rent-text {
     font-size: 20px !important;
     font-weight: 500 !important;
     color: #fff;
     display: flex;
     align-items: center;
     margin-bottom: 10px !important;
+}
+
+.full-price-text {
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    text-align: center !important;
 }
 
 .price-icon {
@@ -125,7 +134,7 @@
     font-size: 20px !important;
 }
 
-.car-buy-now-button Button, .car-rent-button Button {
+.car-full-price-button Button, .car-rent-button Button {
     background-color: #4caf50 !important;
     color: white !important;
     width: 100%;
@@ -136,7 +145,7 @@
     margin-top: 5px;
 }
 
-.car-buy-now-button Button:hover, .car-rent-button Button:hover {
+.car-full-price-button Button:hover, .car-rent-button Button:hover {
     background-color: #3d8b40 !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -235,7 +244,6 @@
     padding: 0 !important;
 }
 
-/* List Styles */
 .car-equipments .MuiList-root {
     padding: 0 !important;
     background-color: transparent;
@@ -246,6 +254,7 @@
     padding: 12px 15px !important;
     border-bottom: 1px solid #333;
     transition: background-color 0.3s ease;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;;
 }
 
 .car-equipments .MuiListItem-root:last-child {

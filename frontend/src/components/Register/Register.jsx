@@ -176,8 +176,9 @@ function Register() {
         const data = await response.json();
         if (response.ok) {
             const token = data.token;
+            const user = data.user;
             localStorage.setItem("token", JSON.stringify(token));
-            auth.authStore.login(token);
+            auth.authStore.login(token, user);
             auth.setIsAuthenticated(auth.authStore.getAuthStatus());
             navigate("/");
         } else {
