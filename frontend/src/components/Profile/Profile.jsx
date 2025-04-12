@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
 import { jwtDecode } from 'jwt-decode';
-import { Box, Tab, Typography, Tabs, FormControl, InputLabel, Input, InputAdornment, Button } from '@mui/material';
+import { Box, Tab, Typography, Tabs, FormControl, InputLabel, Input, InputAdornment, Button, List, ListItem, Card, CardContent } from '@mui/material';
 import TabContext from '@mui/lab/TabContext';
 import TabPanel from '@mui/lab/TabPanel';
 import PersonIcon from '@mui/icons-material/Person';
@@ -14,14 +14,18 @@ import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import UseAnimations from 'react-useanimations';
-import loading from 'react-useanimations/lib/loading';
+import loading3 from 'react-useanimations/lib/loading3';
 import alertCircle from 'react-useanimations/lib/alertCircle';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import CancelIcon from '@mui/icons-material/Cancel';
+import EuroIcon from '@mui/icons-material/Euro';
+import EmblaCarousel from '../GalleryCarousel/EmblaCarousel.jsx';
+import dayjs from 'dayjs';
 
 const profileTabs = ['My Information', 'Documents', 'Rented Cars'];
 
 function Profile() {
-    const { auth } = useContext(AppContext);
+    const { auth, cars } = useContext(AppContext);
     const [accountInformation, setAccountInformation] = useState('');
 
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -31,6 +35,8 @@ function Profile() {
 
     const [files, setFiles] = useState({});
     const [fileMessage, setFileMessage] = useState('');
+
+    const [rentedCars, setRentedCars] = useState([]);
 
     const [valueTab, setValueTab] = useState('0');
 
@@ -58,12 +64,31 @@ function Profile() {
 
     useEffect(() => {
         if (location.state?.valueTab) {
-            setValueTab(location.state.valueTab);
+            setValueTab(location.state?.valueTab);
+            handleChangeTab(null, location.state?.valueTab)
         }
     }, [location.state]);
 
     function handleChangeTab(event, newValue) {
+        const userId = jwtDecode(auth.token).id;
         setValueTab(newValue);
+
+        if (newValue === '2') {
+            fetch(`${SERVER}/api/reservations/get-reservations-by-id/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                },
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    setRentedCars(data.rentedCars);
+                })
+        }
     }
 
     function validatePhoneNumber(phoneNumber) {
@@ -120,7 +145,7 @@ function Profile() {
 
     async function sendDocuments(e) {
         e.preventDefault();
-        
+
         if (Object.keys(files).length < 2) {
             setFileMessage("Please upload the ID card and driver's license!");
             return;
@@ -131,7 +156,7 @@ function Profile() {
         const formData = new FormData();
         formData.append("id-card", files["id-card"]);
         formData.append("driver-license", files["driver-license"]);
-        
+
         const response = await fetch(`${SERVER}/api/users/send-documents`, {
             method: 'POST',
             headers: {
@@ -146,6 +171,17 @@ function Profile() {
         } else {
             setFileMessage(data.message);
         }
+    }
+
+    async function extendRentalPeriod(selectedCar) {
+        console.log(selectedCar);
+        cars.carsStore.setCar(selectedCar.car);
+        cars.carsStore.setReservation(selectedCar);
+        navigate('/rent-car', {
+            state: {
+                from: '/profile',
+            }
+        });
     }
 
     return (
@@ -246,7 +282,7 @@ function Profile() {
                                         <Box className='form' component='form' onSubmit={sendDocuments}>
                                             <Box className='documents-form'>
                                                 <FormControl className='document-input'>
-                                                    <Typography>ID card</Typography>
+                                                    <Typography className='document-input-title'>ID card</Typography>
                                                     <Button
                                                         component='label'
                                                         className='id-card-upload'
@@ -265,7 +301,7 @@ function Profile() {
 
                                             <Box className='documents-form'>
                                                 <FormControl className='document-input'>
-                                                    <Typography>Driver's license</Typography>
+                                                    <Typography className='document-input-title'>Driver's license</Typography>
                                                     <Button
                                                         component='label'
                                                         className='driver-license-upload'
@@ -290,23 +326,23 @@ function Profile() {
                                             </Box>
 
                                             <Box className='files-message'>
-                                                <Typography>{fileMessage}</Typography>
+                                                <Typography className='file-message'>{fileMessage}</Typography>
                                             </Box>
                                         </Box>
                                     </Box>
                                 ) : accountInformation.statusAccountVerified === "rejected" ? (
                                     <Box className='user-rejected-documents'>
                                         <Box className='user-documents-header'>
-                                            <Typography className='user-documents-title'>The documents you submitted were rejected! Please contact us!</Typography>
+                                            <Typography className='user-documents-title'>The documents you submitted were rejected!</Typography>
                                         </Box>
-                                        <UseAnimations animation={alertCircle} speed={0} />
+                                        <UseAnimations animation={alertCircle} speed={0} className='dynamic-icon' />
                                     </Box>
                                 ) : accountInformation.statusAccountVerified === "pending" ? (
                                     <Box className='user-pending-documents'>
                                         <Box className='user-documents-header'>
                                             <Typography className='user-documents-title'>Thank you for your interest! Your documents are being checked!</Typography>
                                         </Box>
-                                        <UseAnimations animation={loading} speed={0} />
+                                        <UseAnimations animation={loading3} speed={0} className='dynamic-icon' />
                                     </Box>
                                 ) : (
                                     <Box className='user-approved-documents'>
@@ -315,6 +351,114 @@ function Profile() {
                                         </Box>
                                         <CheckCircleIcon color='success' />
                                     </Box>
+                                )
+                            }
+                        </Box>
+                    </TabPanel>
+
+                    <TabPanel className='profile-rented-cars-tab' value={valueTab} index='2' hidden={valueTab !== '2'}>
+                        <Box className='user-reservations-tab'>
+                            {
+                                rentedCars.length > 0 ? (
+                                    <Box className='user-reservations'>
+                                        <List className='user-reservations-list'>
+                                            {
+                                                rentedCars.map((rentedCar, index) => (
+                                                    <ListItem
+                                                        className='user-rented-car'
+                                                        key={index}
+                                                    >
+                                                        <Card>
+                                                            <CardContent className='rented-car-profile'>
+                                                                <Box className='rented-car-images'>
+                                                                    <EmblaCarousel images={rentedCar.car.Imagine} />
+                                                                </Box>
+
+                                                                <Box className='rented-car-details'>
+                                                                    <Box className='rented-car-header'>
+                                                                        <Typography component='h2' className='rented-car-name'>
+                                                                            {rentedCar.car.Masina}
+                                                                        </Typography>
+                                                                        <Typography component='h3' className='rented-car-version'>
+                                                                            {rentedCar.car.Versiune}
+                                                                        </Typography>
+                                                                    </Box>
+
+                                                                    <Box className='rented-car-reservation-details'>
+                                                                        <Typography component='h3' className='rented-car-start-time'>
+                                                                            {dayjs(rentedCar.startDate).format("DD.MM.YYYY")}
+                                                                        </Typography>
+                                                                        <Typography component='h3' className='rented-car-time-separator'>
+                                                                            -
+                                                                        </Typography>
+                                                                        <Typography component='h3' className='rented-car-end-time'>
+                                                                            {dayjs(rentedCar.endDate).format("DD.MM.YYYY")}
+                                                                        </Typography>
+
+
+                                                                        <Box className='rented-car-extend-button'>
+                                                                            <Button
+                                                                                className='extend-button'
+                                                                                onClick={() => extendRentalPeriod(rentedCar)}
+                                                                            >
+                                                                                Extend
+                                                                            </Button>
+                                                                        </Box>
+                                                                    </Box>
+
+                                                                    <Box className='rented-car-insurance-details'>
+                                                                        <Box className='rented-car-insurance'>
+                                                                            {
+                                                                                rentedCar.insurance['thirdPartyLiability'] === true ? (
+                                                                                    <CheckCircleIcon className='check-insurance-icon' />
+                                                                                ) : (
+                                                                                    <CancelIcon className='cancel-insurance-icon' />
+                                                                                )
+                                                                            }
+                                                                            <Typography className='insurance-type'>Third Party Liability</Typography>
+                                                                        </Box>
+
+                                                                        <Box className='rented-car-insurance'>
+                                                                            {
+                                                                                rentedCar.insurance['collisionDamageWaiver'] === true ? (
+                                                                                    <CheckCircleIcon className='check-insurance-icon' />
+                                                                                ) : (
+                                                                                    <CancelIcon className='cancel-insurance-icon' />
+                                                                                )
+                                                                            }
+                                                                            <Typography className='insurance-type'>Collision Damage Waiver</Typography>
+                                                                        </Box>
+
+                                                                        <Box className='rented-car-insurance'>
+                                                                            {
+                                                                                rentedCar.insurance['theftProtection'] === true ? (
+                                                                                    <CheckCircleIcon className='check-insurance-icon' />
+                                                                                ) : (
+                                                                                    <CancelIcon className='cancel-insurance-icon' />
+                                                                                )
+                                                                            }
+                                                                            <Typography className='insurance-type'>Theft Protection</Typography>
+                                                                        </Box>
+                                                                    </Box>
+
+                                                                    <Box className='rented-car-footer'>
+                                                                        <Box className='rented-car-price'>
+                                                                            <Typography component='h4'>
+                                                                                Rental price: {rentedCar.totalPrice}
+                                                                                <EuroIcon />
+                                                                            </Typography>
+                                                                        </Box>
+                                                                    </Box>
+                                                                </Box>
+                                                            </CardContent>
+                                                        </Card>
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    </Box>
+                                ) : (
+                                    <Typography className='user-reservations-message'>You have not made any reservations yet!</Typography>
                                 )
                             }
                         </Box>

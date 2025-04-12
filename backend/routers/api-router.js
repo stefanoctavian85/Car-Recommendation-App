@@ -11,9 +11,12 @@ apiRouter.patch('/users/save-phone-number', controllers.profile.savePhoneNumber)
 apiRouter.post('/users/send-documents', middleware.uploadFiles, controllers.profile.sendDocuments, controllers.profile.checkDocuments);
 
 apiRouter.get('/reservations/:cid', controllers.reservation.getReservations);
+apiRouter.get('/reservations/check-another-reservation/:uid/:cid', controllers.reservation.checkAnotherReservation);
 apiRouter.post('/reservations/check-availability', controllers.reservation.checkDateAvailability);
 apiRouter.post('/reservations/calculate-rental-price', controllers.reservation.calculateRentalPrice);
 apiRouter.post('/reservations/rent-car', controllers.reservation.rentCar);
+apiRouter.get('/reservations/get-reservations-by-id/:uid', controllers.reservation.getReservationById);
+apiRouter.patch('/reservations/change-rental-details', controllers.reservation.changeRentalDetails);
 
 apiRouter.get('/cars/brands', controllers.car.searchBrands);
 apiRouter.get('/cars/brands/:brand', controllers.car.searchModels);

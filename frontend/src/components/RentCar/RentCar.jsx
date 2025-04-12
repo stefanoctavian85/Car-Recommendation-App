@@ -2,7 +2,7 @@ import './RentCar.css';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { Box, Button, Checkbox, FormControlLabel, FormGroup, Step, StepLabel, Stepper, Typography, FormControl, InputLabel, Input, InputAdornment } from '@mui/material';
 import AppContext from '../../state/AppContext';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
 import { jwtDecode } from 'jwt-decode';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -24,7 +24,7 @@ import dayjs from 'dayjs';
 
 const steps = ['Select rental details', 'Complete the final documents', 'Rent the car'];
 
-const currentDate = dayjs()
+const currentDate = dayjs();
 
 function RentCar() {
     const { auth, cars } = useContext(AppContext);
@@ -42,6 +42,7 @@ function RentCar() {
     const [reservationsDates, setReservationsDates] = useState([]);
     const [disabledDates, setDisabledDates] = useState([]);
     const [reservationErrorMessage, setReservationErrorMessage] = useState('');
+    const [disableStartDate, setDisableStartDate] = useState(false);
 
     const [phoneNumber, setPhoneNumber] = useState('');
     const [phoneNumberError, setPhoneNumberError] = useState('');
@@ -60,27 +61,45 @@ function RentCar() {
 
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
-        if (cars.carsStore.getCar()) {
-            setCar(cars.carsStore.getCar());
-        } else {
-            const id = searchParams.get("id") || '';
-            fetch(`${SERVER}/api/car?id=${id}`, {
-                method: "GET",
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
-                }
-            })
-                .then((res) => {
-                    if (res.ok) {
-                        return res.json();
+        if (location.state?.from === '/profile') {
+            if (cars.carsStore.getCar()) {
+                setCar(cars.carsStore.getCar());
+                setStartDate(dayjs(cars.carsStore.getReservation().endDate).add(1, 'day'));
+                setDisableStartDate(true);
+                setInsuranceOptions(cars.carsStore.getReservation().insurance);
+            } else {
+                navigate('/profile', {
+                    state: {
+                        valueTab: '2',
+                    }
+                });
+            }
+        } else if (location.state?.from === '/car-details') {
+            if (cars.carsStore.getCar()) {
+                setCar(cars.carsStore.getCar());
+            } else {
+                const id = searchParams.get("id") || '';
+                fetch(`${SERVER}/api/car?id=${id}`, {
+                    method: "GET",
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
                     }
                 })
-                .then((data) => {
-                    setCar(data.car);
-                    cars.carsStore.setCar(data.car);
-                });
+                    .then((res) => {
+                        if (res.ok) {
+                            return res.json();
+                        }
+                    })
+                    .then((data) => {
+                        setCar(data.car);
+                        cars.carsStore.setCar(data.car);
+                    });
+            }
+        } else {
+            navigate('/');
         }
 
         if (auth.authStore.getUser()) {
@@ -145,8 +164,9 @@ function RentCar() {
     }
 
     async function handleNextStep() {
+        console.log(location.state.from);
         if (activeStep === 0) {
-            if (dayjs(startDate).isAfter(endDate) || dayjs(endDate).isBefore(startDate)) {
+            if (dayjs(startDate).isAfter(endDate) || dayjs(endDate).isBefore(startDate) || endDate === '') {
                 setReservationErrorMessage('You cannot select the end date before the start date or the start date after the end date!');
                 return;
             } else {
@@ -197,33 +217,63 @@ function RentCar() {
         }
 
         if (activeStep === 1) {
-            fetch(`${SERVER}/api/reservations/rent-car`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    cid: car._id,
-                    startDate,
-                    endDate,
-                    insuranceOptions,
-                    rentalPrice
+            if (location.state.from === '/car-details') {
+                fetch(`${SERVER}/api/reservations/rent-car`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cid: car._id,
+                        startDate,
+                        endDate,
+                        insuranceOptions,
+                        rentalPrice
+                    })
                 })
-            })
-                .then(res => {
-                    if (res.ok) {
-                        return res.json();
-                    }
+                    .then(res => {
+                        if (res.ok) {
+                            return res.json();
+                        }
+                    })
+                    .then(data => {
+                        if (data.completed === true) {
+                            setFinalErrorMessage('');
+                            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                        } else {
+                            setFinalErrorMessage(data.message);
+                        }
+                    })
+            } else if (location.state.from === '/profile') {
+                fetch(`${SERVER}/api/reservations/change-rental-details`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cid: car._id,
+                        startDate,
+                        endDate,
+                        insuranceOptions,
+                        rentalPrice
+                    })
                 })
-                .then(data => {
-                    if (data.completed === true) {
-                        setFinalErrorMessage('');
-                        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-                    } else {
-                        setFinalErrorMessage(data.message);
-                    }
-                })
+                    .then(res => {
+                        if (res.ok) {
+                            return res.json();
+                        }
+                    })
+                    .then(data => {
+                        if (data.completed === true) {
+                            setFinalErrorMessage('');
+                            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                        } else {
+                            setFinalErrorMessage(data.message);
+                        }
+                    })
+            }
         }
 
         if (activeStep === 2) {
@@ -332,6 +382,7 @@ function RentCar() {
                                                 <DatePicker
                                                     className='date-picker'
                                                     label='Start date'
+                                                    disabled={disableStartDate}
                                                     minDate={currentDate}
                                                     value={startDate !== '' ? dayjs(startDate) : null}
                                                     onChange={(date) => setStartDate(date)}
@@ -347,7 +398,7 @@ function RentCar() {
                                                 <DatePicker
                                                     className='date-picker'
                                                     label='End date'
-                                                    minDate={currentDate}
+                                                    minDate={disableStartDate === true ? startDate : currentDate}
                                                     value={endDate !== '' ? dayjs(endDate) : null}
                                                     onChange={(date) => setEndDate(dayjs(date).toDate())}
                                                     shouldDisableDate={(date) => disabledDates.includes(date.format('YYYY-MM-DD'))}
@@ -380,7 +431,7 @@ function RentCar() {
                                             />
                                             <FormControlLabel
                                                 control={<Checkbox
-                                                    checked={insuranceOptions.thirdPartyLiability}
+                                                    checked={insuranceOptions?.thirdPartyLiability}
                                                     onChange={handleInsuranceOptionsChange}
                                                     name='thirdPartyLiability'
                                                 />}
@@ -388,7 +439,7 @@ function RentCar() {
                                             />
                                             <FormControlLabel
                                                 control={<Checkbox
-                                                    checked={insuranceOptions.collisionDamageWaiver}
+                                                    checked={insuranceOptions?.collisionDamageWaiver}
                                                     onChange={handleInsuranceOptionsChange}
                                                     name='collisionDamageWaiver'
                                                 />}
@@ -397,7 +448,7 @@ function RentCar() {
                                             <FormControlLabel
                                                 control={
                                                     <Checkbox
-                                                        checked={insuranceOptions.theftProtection}
+                                                        checked={insuranceOptions?.theftProtection}
                                                         onChange={handleInsuranceOptionsChange}
                                                         name='theftProtection'
                                                     />}
@@ -522,9 +573,9 @@ function RentCar() {
                                 </Box>
 
                                 <Box className='rental-price'>
-                                        <Typography component='h2' className='rental-price-text'>Rental price: {rentalPrice} EUR</Typography>
-                                        <Typography>{rentalPriceErrorMessage}</Typography>
-                                    </Box>
+                                    <Typography component='h2' className='rental-price-text'>Rental price: {rentalPrice} EUR</Typography>
+                                    <Typography>{rentalPriceErrorMessage}</Typography>
+                                </Box>
                             </Box>
                         ) : null
                     }
@@ -534,7 +585,7 @@ function RentCar() {
                             <Box className='rental-final'>
                                 <Box className='rental-final-success'>
                                     <Typography component='h1' className='rental-final-title'>Congratulations!</Typography>
-                                    <EmojiEmotionsIcon className='success-icon'/>
+                                    <EmojiEmotionsIcon className='success-icon' />
                                 </Box>
                                 <Box className='rental-final-content'>
                                     <Typography component='h2' className='rental-final-subtitle'>The payment was successful!</Typography>

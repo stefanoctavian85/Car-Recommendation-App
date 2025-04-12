@@ -79,11 +79,20 @@
     max-width: 300px !important;
 }
 
-.date-picker>.MuiFormLabel-root {
-    color: white
+.date-picker > .MuiFormLabel-root {
+    color: white !important;
 }
 
-.date-picker>.MuiOutlinedInput-input {
+.date-picker > .MuiOutlinedInput-input {
+    color: white !important;
+}
+
+.date-picker .MuiInputBase-input {
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+}
+
+.date-picker svg {
     color: white !important;
 }
 

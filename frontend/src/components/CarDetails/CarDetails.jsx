@@ -28,6 +28,14 @@ import dayjs from 'dayjs';
 
 const todaysDate = dayjs().format('YYYY-MM-DD');
 
+const rentInfoText = `This price is indicative and may vary based on vehicle availability, rental duration, and any additional options selected.
+                    The final cost may be adjusted for extra mileage, additional insurance, or optional equipment.`;
+
+const dialogText = {
+    0: "The documents you submitted were rejected or are under review! Please check and contact us from your profile page for a fix! Thank you for waiting!",
+    1: "There is already a confirmed reservation for this car! Please check profile page if you want to change the rental period! Thank you!"
+};
+
 function CarDetails() {
     const { auth, cars } = useContext(AppContext);
 
@@ -43,6 +51,7 @@ function CarDetails() {
     const [minRentalPrice, setMinRentalPrice] = useState(0);
 
     const [valueTab, setValueTab] = useState('0');
+    const [navigateProfileValueTab, setNavigateProfileValueTab] = useState('0');
     const [open, setOpen] = useState(false);
 
     const [searchParams] = useSearchParams();
@@ -50,8 +59,7 @@ function CarDetails() {
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-    const rentInfoText = `This price is indicative and may vary based on vehicle availability, rental duration, and any additional options selected. The final cost may be adjusted for
-                        extra mileage, additional insurance, or optional equipment.`;
+    const [alertDialogText, setAlertDialogText] = useState('');
 
     useEffect(() => {
         if (cars.carsStore.getCar()) {
@@ -152,15 +160,43 @@ function CarDetails() {
 
         navigate('/profile', {
             state: {
-                valueTab: '1',
+                valueTab: `${navigateProfileValueTab}`,
             }
         });
     }
 
-    function rentCar() {
+    async function rentCar() {
         if (user.statusAccountVerified === 'approved') {
-            navigate('/rent-car?' + new URLSearchParams({ id: car._id, car: car.Masina }).toString());
+            setOpen(false);
+            await fetch(`${SERVER}/api/reservations/check-another-reservation/${user._id}/${car._id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                }
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    if (data.isAlreadyRented === false) {
+                        setAlertDialogText('');
+                        setNavigateProfileValueTab('0');
+                        navigate('/rent-car?' + new URLSearchParams({ id: car._id, car: car.Masina }).toString(), {
+                            state: {
+                                from: '/car-details',
+                            }
+                        });
+                    } else {
+                        setAlertDialogText(dialogText[1]);
+                        setNavigateProfileValueTab('2');
+                        setOpen(true);
+                    }
+                });
         } else {
+            setAlertDialogText(dialogText[0]);
+            setNavigateProfileValueTab('1');
             setOpen(true);
         }
     }
@@ -366,13 +402,11 @@ function CarDetails() {
                     onClose={handleCloseDialog}
                 >
                     <DialogTitle>
-                        {"There is a problem with your documents!"}
+                        {"Something went wrong!"}
                     </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            The documents you submitted were rejected or are under review!
-                            Please check and contact us from your profile page for a fix!
-                            Thank you for waiting!
+                            {alertDialogText}
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

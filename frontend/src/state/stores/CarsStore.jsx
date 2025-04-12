@@ -2,6 +2,7 @@ class CarsStore {
     constructor() {
         this.car = '';
         this.searchParams = {};
+        this.reservation = {};
     }
 
     setCar(car) {
@@ -18,6 +19,14 @@ class CarsStore {
 
     getSearchParams() {
         return this.searchParams;
+    }
+
+    setReservation(reservation) {
+        this.reservation = reservation;
+    }
+
+    getReservation() {
+        return this.reservation;
     }
 }
 
