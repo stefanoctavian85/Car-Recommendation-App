@@ -1,50 +1,211 @@
 .form-page {
-    margin-top: 100px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    margin: 100px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
     max-width: 500px !important;
     background-image: linear-gradient(to right, #1e2936, #121a24);
-    border-radius: 10px;
-    padding: 20px 30px;
+    border-radius: 12px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .form-container {
-    max-width: 500px;
+    width: 100%;
 }
 
 .form-title {
-    color: #dededf;
+    margin-bottom: 25px;
+}
+
+.form-text {
+    color: #ffffff;
+    font-size: 24px !important;
+    font-weight: 600 !important;
     text-align: center;
-    padding-bottom: 20px;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.form-box {
+    padding: 10px 0;
 }
 
 .form-question {
-    text-align: center;
-    color: rgb(255, 255, 255);
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.question {
+    color: #ffffff;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    margin: 0;
+}
+
+.form-option {
+    margin-bottom: 25px;
 }
 
 .choice {
-    color: rgb(236, 225, 225); 
+    color: #e0e0e0;
+}
+
+.choice .MuiFormControlLabel-root {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.choice .MuiFormControlLabel-root:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.choice .MuiRadio-root {
+    color: #9ba5b0;
+}
+
+.choice .Mui-checked {
+    color: #5dadff !important;
+}
+
+.range .MuiSlider-root {
+    color: #5dadff !important;
+    margin: 10px 0;
+}
+
+.range .MuiSlider-thumb {
+    width: 16px;
+    height: 16px;
+    background-color: #ffffff;
+}
+
+.range .MuiSlider-rail {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.grid-slider {
+    padding: 0 10px;
+    margin-bottom: 15px;
 }
 
 .grid-slider-input {
     display: flex;
-    align-items: center;
-    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.slider-input {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 5px 10px;
+    width: 80px !important;
+    text-align: center;
 }
 
 .slider-input input {
     color: white;
+    text-align: center;
 }
 
-.input-number {
+.slider-input:before,
+.slider-input:after {
+    display: none;
+}
+
+.number {
     display: flex;
-    align-items: center;
-    flex-direction: column;
+    justify-content: center;
+}
+
+.input-number-field {
+    height: 20px;
+    text-align: center;
+}
+
+.input-number-button {
+    flex: 0 15%;
+    height: 15px;
+    padding-bottom: 20px;
+    margin-top: 10px;
+    position: relative;
+    top: 10px;
+}
+
+.input-number-button:first-child {
+    margin-right: 10px;
+}
+
+.input-number-button:last-child {
+    margin-left: 10px;
 }
 
 .form-button {
-    margin-top: 10px;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.form-button button {
+    background-color: #5dadff;
+    color: #121a24;
+    font-weight: 600;
+    padding: 10px 10px !important;
+    border-radius: 6px;
+    text-transform: none;
+    transition: all 0.2s;
+    min-width: 150px;
+}
+
+.form-button button:hover {
+    background-color: #7ebdff;
+    box-shadow: 0 2px 10px rgba(93, 173, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+.form-predictions {
+    padding: 10px 0;
+}
+
+.form-predictions .MuiList-root {
+    padding: 0;
+}
+
+.form-predictions .MuiListItem-root {
+    padding: 8px 0;
+}
+
+.select-predicted-car {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.select-predicted-car:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.predicted-car {
+    color: #e0e0e0;
+    font-size: 16px;
+}
+
+.select-predicted-car button {
+    background-color: #5dadff;
+    color: #121a24;
+    font-weight: 500;
+    padding: 5px 15px;
+    border-radius: 4px;
+    text-transform: none;
+    transition: all 0.2s;
+    min-width: auto;
+}
+
+.select-predicted-car button:hover {
+    background-color: #7ebdff;
 }

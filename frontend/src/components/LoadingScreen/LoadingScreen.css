@@ -1,0 +1,87 @@
+.loading-screen-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 50px);
+    width: 100%;
+    animation: skyChange 5s infinite alternate;
+}
+
+.loading-container {
+    position: relative;
+    width: 500px;
+    height: 150px;
+}
+
+.loading-car {
+    position: absolute;
+    top: 0;
+    left: -10px;
+    top: -70px;
+    animation: driveCar 5s linear infinite;
+    z-index: 10;
+}
+
+.loading-road {
+    position: absolute;
+    bottom: 150px;
+    width: 100%;
+    height: 100px;
+}
+
+.first-line {
+    position: relative;
+    top: 30px;
+    stroke-width: 1px;
+}
+
+.middle-line {
+    position: relative;
+    top: 50px;
+    stroke-width: 1.5px;
+}
+
+.second-line {
+    position: relative;
+    top: 70px;
+    stroke-width: 2px;
+}
+
+.track-separator {
+    color: white;
+    font-size: 54px !important;
+}
+
+.track-separator:first-child {
+    position: absolute;
+    left: -7px;
+    top: -7px;
+}
+
+.track-separator:last-child {
+    position: absolute;
+    left: 495px;
+    top: -7px;
+}
+
+@keyframes driveCar {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(420px);
+    }
+}
+
+@keyframes skyChange {
+    0% {
+        background-color: #87CEEB;
+    }
+    50% {
+        background-color: #206714;
+    }
+    100% {
+        background-color: #2C3E50;
+    }
+}

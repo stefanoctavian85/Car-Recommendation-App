@@ -130,8 +130,8 @@
 
 .price-icon {
     font-size: 20px !important;
-    position: relative;
-    top: 8px;
+    position: relative !important;
+    top: 12px !important;
     margin-left: 2px;
     color: #3498db;
 }

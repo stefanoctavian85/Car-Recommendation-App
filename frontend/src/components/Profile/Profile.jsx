@@ -5,6 +5,7 @@ import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
 import { jwtDecode } from 'jwt-decode';
 import { Box, Tab, Typography, Tabs, FormControl, InputLabel, Input, InputAdornment, Button, List, ListItem, Card, CardContent } from '@mui/material';
+import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 import TabContext from '@mui/lab/TabContext';
 import TabPanel from '@mui/lab/TabPanel';
 import PersonIcon from '@mui/icons-material/Person';
@@ -40,10 +41,13 @@ function Profile() {
 
     const [valueTab, setValueTab] = useState('0');
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
+        setIsLoading(true);
         const userId = jwtDecode(auth.token).id;
 
         fetch(`${SERVER}/api/users/${userId}/profile`, {
@@ -60,13 +64,25 @@ function Profile() {
             .then((data) => {
                 setAccountInformation(data.user);
             });
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }, [auth.token]);
 
     useEffect(() => {
+        setIsLoading(true);
+
         if (location.state?.valueTab) {
             setValueTab(location.state?.valueTab);
             handleChangeTab(null, location.state?.valueTab)
         }
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }, [location.state]);
 
     function handleChangeTab(event, newValue) {
@@ -74,6 +90,7 @@ function Profile() {
         setValueTab(newValue);
 
         if (newValue === '2') {
+            setIsLoading(true);
             fetch(`${SERVER}/api/reservations/get-reservations-by-id/${userId}`, {
                 method: 'GET',
                 headers: {
@@ -87,7 +104,12 @@ function Profile() {
                 })
                 .then((data) => {
                     setRentedCars(data.rentedCars);
-                })
+                });
+
+            const timeout = setTimeout(() => {
+                setIsLoading(false);
+            }, 1500);
+            return () => clearTimeout(timeout);
         }
     }
 
@@ -174,7 +196,6 @@ function Profile() {
     }
 
     async function extendRentalPeriod(selectedCar) {
-        console.log(selectedCar);
         cars.carsStore.setCar(selectedCar.car);
         cars.carsStore.setReservation(selectedCar);
         navigate('/rent-car', {
@@ -182,6 +203,12 @@ function Profile() {
                 from: '/profile',
             }
         });
+    }
+
+    if (isLoading) {
+        return (
+            <LoadingScreen />
+        );
     }
 
     return (

@@ -1,7 +1,7 @@
 import './Form.css';
 import data from '../../assets/data.jsx';
 import React, { useState, useContext, useEffect } from 'react';
-import { Container, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio, Button, Grid2, Slider, Input, List } from '@mui/material';
+import { Container, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio, Button, Grid2, Slider, Input, List, ListItem } from '@mui/material';
 import { NumberField } from '@base-ui-components/react/number-field';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -9,26 +9,40 @@ import { useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
 import { jwtDecode } from 'jwt-decode';
+import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
 function Form() {
     const { auth, cars } = useContext(AppContext);
     const [index, setIndex] = useState(0);
     const [rangeValue, setRangeValue] = useState(0);
     const [currentValue, setCurrentValue] = useState(0);
+
+    const [questions, setQuestions] = useState([]);
     const [responses, setResponses] = useState([]);
     const [validResponse, setValidResponse] = useState(false);
     const [finalResponse, setFinalResponse] = useState('');
     const [predictions, setPredictions] = useState('');
+
+    const [error, setError] = useState('');
+
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     let maxQuestions = data.length;
 
     useEffect(() => {
+        setIsLoading(true);
+
         if (!auth.isAuthenticated) {
             navigate('/login');
         } else {
             navigate('/form');
         }
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+        return () => clearTimeout(timeout);
     }, [auth.isAuthenticated]);
 
     function handleFinalResponse(e) {
@@ -42,8 +56,11 @@ function Form() {
         if (e.target.value < min) {
             setFinalResponse(min);
             setValidResponse(true);
-        } else {
+        } else if (e.target.value > max) {
             setFinalResponse(max);
+            setValidResponse(true);
+        } else {
+            setFinalResponse(e.target.value);
             setValidResponse(true);
         }
     }
@@ -66,6 +83,7 @@ function Form() {
         }
 
         if (validResponse === true) {
+            setQuestions([...questions, data[index].question]);
             setResponses([...responses, finalResponse]);
             setFinalResponse('');
             setRangeValue(0);
@@ -81,21 +99,34 @@ function Form() {
         const userId = jwtDecode(auth.token).id;
 
         const updatedResponses = [...responses, finalResponse];
+        const updatedQuestions = [...questions, data[index].question];
 
+        setIsLoading(true);
         const response = await fetch(`${SERVER}/api/users/${userId}/forms`, {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${auth.token}`,
+                'Authorization': `Bearer ${auth.token}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ responses: updatedResponses }),
+            body: JSON.stringify({
+                questions: updatedQuestions,
+                responses: updatedResponses,
+            }),
         });
-
+        
         if (response.ok) {
             const data = await response.json();
             setPredictions(data.cars);
             setIndex(index + 1);
+            setError('');
+        } else {
+            setError('An error occured. Please try again later!');
         }
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+        return () => clearTimeout(timeout);
     }
 
     function selectCar(indexCar) {
@@ -106,6 +137,12 @@ function Form() {
             model: carParts[1]
         });
         navigate('/cars?' + new URLSearchParams(cars.carsStore.getSearchParams()).toString());
+    }
+
+    if (isLoading) {
+        return (
+            <LoadingScreen />
+        );
     }
 
     return (
@@ -192,12 +229,14 @@ function Form() {
                                         <NumberField.Root className='input-number' defaultValue={data[index].min}>
                                             <NumberField.Group>
                                                 <NumberField.Decrement
+                                                    className='input-number-button'
                                                     onClick={() => handleDecrement(data[index].min)}
                                                     disabled={currentValue <= data[index].min}
                                                 >
                                                     <RemoveIcon />
                                                 </NumberField.Decrement>
                                                 <NumberField.Input
+                                                    className='input-number-field'
                                                     value={currentValue}
                                                     onChange={handleFinalResponse}
                                                     onBlur={(e) => checkInput(e, data[index].min, data[index].max)}
@@ -207,6 +246,7 @@ function Form() {
                                                     }}
                                                 />
                                                 <NumberField.Increment
+                                                    className='input-number-button'
                                                     onClick={() => handleIncrement(data[index].max)}
                                                     disabled={currentValue >= data[index].max}
                                                 >
@@ -231,22 +271,28 @@ function Form() {
                                 </Button>
                             </Box>
                         </Box>
-                    ) : (
+                    ) : predictions.length > 0 ? (
                         <Box className='form-predictions'>
                             <List>
                                 {
                                     predictions.map((item, indexCar) => (
-                                        <Box key={indexCar}>
-                                            {item}
-                                            <Button
-                                                onClick={() => selectCar(indexCar)}
-                                            >
-                                                Select
-                                            </Button>
-                                        </Box>
+                                        <ListItem key={indexCar}>
+                                            <Box className='select-predicted-car'>
+                                                <Typography className='predicted-car'>{item}</Typography>
+                                                <Button
+                                                    onClick={() => selectCar(indexCar)}
+                                                >
+                                                    Select
+                                                </Button>
+                                            </Box>
+                                        </ListItem>
                                     ))
                                 }
                             </List>
+                        </Box>
+                    ) : (
+                        <Box className='form-error'>
+                            {error}
                         </Box>
                     )
                 }

@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import User from './User.js';
 import Car from './Car.js';
-import Reservation from "./Reservation.js";
+import Reservation from './Reservation.js';
+import Form from './Form.js';
 
 dotenv.config();
 
@@ -35,5 +36,6 @@ export default {
     createAdminUser,
     User,
     Car,
-    Reservation
+    Reservation,
+    Form
 };

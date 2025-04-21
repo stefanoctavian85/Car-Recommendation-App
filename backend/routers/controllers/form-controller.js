@@ -3,9 +3,9 @@ import fetch from 'node-fetch';
 
 const predict = async (req, res, next) => {
     try {
-        const { responses } = req.body;
+        const { questions, responses } = req.body;
         const user = req.user;
-        
+
         if (responses.length !== 11) {
             return res.status(400).json({
                 message: "Invalid number of inputs",
@@ -29,6 +29,19 @@ const predict = async (req, res, next) => {
         });
 
         const prediction = await flaskResponse.json();
+
+        const combinedResponses = questions.map((question, index) => ({
+            question,
+            answer: responses[index],
+        }));
+
+        const form = await models.Form.create({
+            userId: user._id,
+            responses: combinedResponses,
+            predictions: prediction
+        });
+        await form.save();
+
         return res.status(200).json({
             cars: prediction
         });

@@ -8,7 +8,8 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import ErrorIcon from '@mui/icons-material/Error';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
 function Register() {
     const { auth } = useContext(AppContext);
@@ -29,12 +30,20 @@ function Register() {
     const [lastnameTouched, setLastnameTouched] = useState(false);
     const [passwordTouched, setPasswordTouched] = useState(false);
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsLoading(true);
+
         if (auth.isAuthenticated) {
             navigate('/profile');
         }
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
     }, [auth.isAuthenticated]);
 
     function handleShowPassword() {
@@ -188,6 +197,12 @@ function Register() {
 
     function login() {
         navigate('/login');
+    }
+
+    if (isLoading) {
+        return (
+            <LoadingScreen />
+        );
     }
 
     return (

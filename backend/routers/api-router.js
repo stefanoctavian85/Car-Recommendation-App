@@ -24,5 +24,8 @@ apiRouter.get('/cars/bodytypes', controllers.car.searchBodyTypes);
 apiRouter.get('/cars', controllers.car.searchSpecificCars);
 apiRouter.get('/car', controllers.car.searchCarById);
 
+apiRouter.get('/dashboard/dashboard-reports', controllers.dashboard.dashboardReports);
+apiRouter.get('/dashboard/dashboard-charts', controllers.dashboard.getDataForCharts);
+apiRouter.get('/dashboard/logs', controllers.dashboard.getLogs);
 
 export default apiRouter;

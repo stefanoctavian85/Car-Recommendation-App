@@ -1,5 +1,4 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import './ProtectedRoute.css';
 import React, { useContext } from 'react';
 import AppContext from '../../state/AppContext';
 

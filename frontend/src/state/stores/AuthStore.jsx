@@ -68,7 +68,7 @@ class AuthStore {
         localStorage.removeItem("token");
         this.isAuthenticated = false;
         this.token = '';
-        this.user = ''
+        this.user = '';
     }
 }
 

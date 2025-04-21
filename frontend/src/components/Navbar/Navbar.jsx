@@ -2,11 +2,11 @@ import './Navbar.css';
 import React, { useContext, useEffect, useState } from 'react';
 import AppContext from '../../state/AppContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { AppBar, Container, Toolbar, Box, Button, Menu, MenuItem, Typography, Tooltip } from '@mui/material';
+import { AppBar, Container, Toolbar, Box, Button, Menu, MenuItem, Typography, Tooltip, List, ListItem } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
-import logo from '../../assets/Logo.svg';
+import Logo from '../../assets/Logo.svg';
 
-const pages = ['Form'];
+const pages = ['Search', 'Form'];
 const settings = ['Profile', 'Log out'];
 
 function Navbar() {
@@ -50,6 +50,8 @@ function Navbar() {
         if (isAuthenticated) {
             if (event.target.textContent === "Form") {
                 navigate('/form');
+            } else if (event.target.textContent === "Search") {
+                navigate('/search');
             }
         } else {
             navigate('/login');
@@ -68,24 +70,29 @@ function Navbar() {
                             <Box
                                 className='navbar-logo'
                                 component="img"
-                                src={logo}
+                                src={Logo}
                                 alt='CarMinds'
                             />
                         </Box>
                     </Box>
 
                     <Box className='navbar-pages'>
-                        {
-                            pages.map(page => (
-                                <Button
-                                    key={page}
-                                    color='default'
-                                    onClick={(e) => handlePages(e)}
-                                >
-                                    {page}
-                                </Button>
-                            ))
-                        }
+                        <List className='navbar-pages'>
+                            {
+                                pages.map((page, index) => (
+                                    <ListItem
+                                        key={index}
+                                        onClick={(e) => handlePages(e)}
+                                    >
+                                        <Button
+                                            variant='default'
+                                        >
+                                            {page}
+                                        </Button>
+                                    </ListItem>
+                                ))
+                            }
+                        </List>
                     </Box>
 
                     {isAuthenticated ? (
@@ -93,8 +100,9 @@ function Navbar() {
                             <Tooltip title='Settings'>
                                 <PersonIcon onClick={handleOpenUserMenu} />
                             </Tooltip>
+
                             <Menu
-                                className='navbag-user-settings'
+                                className='navbar-user-settings'
                                 anchorEl={anchorElUser}
                                 open={Boolean(anchorElUser)}
                                 onClose={handleCloseUserMenu}
@@ -113,13 +121,15 @@ function Navbar() {
                             </Menu>
                         </Box>
                     ) : (
-                        <Button
-                            color='primary'
-                            variant='contained'
-                            onClick={handleLoginStatus}
-                        >
-                            Log in
-                        </Button>
+                        <Box className='navbar-settings'>
+                            <Button
+                                color='primary'
+                                variant='contained'
+                                onClick={handleLoginStatus}
+                            >
+                                Log in
+                            </Button>
+                        </Box>
                     )}
                 </Toolbar>
             </Container>

@@ -1,6 +1,7 @@
 .home-page {
     width: 100%;
-    margin-top: 50px;
+    padding-top: 50px;
+    box-sizing: content-box;
 }
 
 .home-search {
@@ -100,4 +101,72 @@
     margin-bottom: 0;
     text-align: justify;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 1) !important;
+}
+
+.loading-screen-page {
+    padding-top: 50px !important;
+}
+
+.home-page-regular {
+    padding-top: 100px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    align-items: center;
+}
+
+.home-left-page {
+    border-right: 1px solid white;
+}
+
+.home-title {
+    text-align: center !important;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    color: white !important;
+}
+
+.home-connected-description {
+    font-size: 18px !important;
+    color: rgba(255, 255, 255, 0.687) !important;
+    font-weight: 500 !important;
+    width: 100%;
+    text-align: center !important;
+    justify-content: center !important;
+    margin-top: 5px !important;
+}
+
+.home-bullets {
+    color: rgba(255, 255, 255, 0.687) !important;
+    text-align: center !important;
+    margin-top: 10px;
+    justify-content: left !important;
+}
+
+.home-redirect-button {
+    display: flex;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-top: 10px !important;
+}
+
+.check-icon {
+    font-size: 18px !important;
+    margin-right: 5px;
+    position: relative !important;
+    top: 3px !important;
+}
+
+.home-dashboard {
+    display: flex !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    margin-top: 20px;
+}
+
+.home-dashboard-button {
+    margin-top: 10px;
+    display: flex;
+    align-items: center !important;
+    justify-content: center !important;
 }

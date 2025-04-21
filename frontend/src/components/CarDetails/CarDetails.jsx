@@ -25,6 +25,7 @@ import { FaCarSide } from "react-icons/fa";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
+import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
 const todaysDate = dayjs().format('YYYY-MM-DD');
 
@@ -50,6 +51,8 @@ function CarDetails() {
 
     const [minRentalPrice, setMinRentalPrice] = useState(0);
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const [valueTab, setValueTab] = useState('0');
     const [navigateProfileValueTab, setNavigateProfileValueTab] = useState('0');
     const [open, setOpen] = useState(false);
@@ -62,8 +65,10 @@ function CarDetails() {
     const [alertDialogText, setAlertDialogText] = useState('');
 
     useEffect(() => {
+        setIsLoading(true);
         if (cars.carsStore.getCar()) {
             setCar(cars.carsStore.getCar());
+            console.log(cars.carsStore.getCar());
         } else {
             const id = searchParams.get("id") || '';
             fetch(`${SERVER}/api/car?id=${id}`, {
@@ -82,11 +87,6 @@ function CarDetails() {
                     cars.carsStore.setCar(data.car);
                 });
         }
-        setAudioOptions(parseOptions(car['Audio si tehnologie']));
-        setElectronicsOptions(parseOptions(car['Electronice si sisteme de asistenta']));
-        setOptionalsOptions(parseOptions(car['Confort si echipamente optionale']));
-        setSafetyOptions(parseOptions(car['Siguranta']));
-        setPerformanceOptions(parseOptions(car['Performanta']));
 
         if (auth.authStore.getUser()) {
             setUser(auth.authStore.getUser());
@@ -107,10 +107,23 @@ function CarDetails() {
                     setUser(data.user);
                 })
         }
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+        return () => clearTimeout(timeout);
     }, [auth.token, searchParams]);
 
     useEffect(() => {
+        setIsLoading(true);
+
         if (car) {
+            setAudioOptions(parseOptions(car['Audio si tehnologie']));
+            setElectronicsOptions(parseOptions(car['Electronice si sisteme de asistenta']));
+            setOptionalsOptions(parseOptions(car['Confort si echipamente optionale']));
+            setSafetyOptions(parseOptions(car['Siguranta']));
+            setPerformanceOptions(parseOptions(car['Performanta']));
+
             fetch(`${SERVER}/api/reservations/calculate-rental-price`, {
                 method: 'POST',
                 headers: {
@@ -137,6 +150,11 @@ function CarDetails() {
                     setMinRentalPrice(data.rentalPrice);
                 });
         }
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+        return () => clearTimeout(timeout);
     }, [car]);
 
     function parseOptions(optionsArray) {
@@ -199,6 +217,12 @@ function CarDetails() {
             setNavigateProfileValueTab('1');
             setOpen(true);
         }
+    }
+
+    if (isLoading) {
+        return (
+            <LoadingScreen />
+        );
     }
 
     return (

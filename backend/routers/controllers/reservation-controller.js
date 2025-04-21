@@ -140,7 +140,7 @@ const calculateRentalPrice = async (req, res, next) => {
         }
 
         if (parseFloat(car["Anul productiei"]) >= 2020 || car.Pret > 50000) {
-            luxuryPrice += 0.005 * car.Pret;
+            luxuryPrice += 0.0005 * car.Pret;
         }
 
         rentalPrice = ((dailyRate + insuranceDailyFee + luxuryPrice) * rentalPeriod).toFixed(2);
@@ -251,10 +251,11 @@ const changeRentalDetails = async (req, res, next) => {
             })
         };
 
-        reservation.startDate = startDate;
+        const reservationFirstPrice = parseFloat(reservation.totalPrice);
+
         reservation.endDate = endDate;
         reservation.insurance = insuranceOptions;
-        reservation.totalPrice = rentalPrice;
+        reservation.totalPrice = reservationFirstPrice + parseFloat(rentalPrice);
 
         await reservation.save();
 

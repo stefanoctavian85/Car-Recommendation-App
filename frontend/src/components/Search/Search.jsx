@@ -6,6 +6,7 @@ import { Container, Select, MenuItem, InputLabel, FormControl, Button, Box, Typo
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import SendIcon from '@mui/icons-material/Send';
 import AppContext from '../../state/AppContext.jsx';
+import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
 function Search() {
     const { auth, cars } = useContext(AppContext);
@@ -20,6 +21,8 @@ function Search() {
 
     const [searchParams, setSearchParams] = useSearchParams();
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const priceLimits = [
         { value: 5000, label: '5 000 EUR' },
         { value: 10000, label: '10 000 EUR' },
@@ -31,6 +34,7 @@ function Search() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsLoading(true);
         fetch(`${SERVER}/api/cars/brands`, {
             method: "GET",
             headers: {
@@ -67,12 +71,16 @@ function Search() {
                     label: bodytype,
                 }));
                 setBodyTypes(options);
-            })
+            });
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }, []);
 
     useEffect(() => {
         if (selectedBrand && selectedBrand !== 'Any') {
-            setIsModelDisabled(false);
             fetch(`${SERVER}/api/cars/brands/${selectedBrand}`, {
                 method: 'GET',
                 headers: {
@@ -90,6 +98,10 @@ function Search() {
                         label: model,
                     }));
                     setModels(options);
+                    const timeout = setTimeout(() => {
+                        setIsModelDisabled(false);
+                    }, 500);
+                    return () => clearTimeout(timeout);
                 })
         } else {
             setIsModelDisabled(true);
@@ -118,8 +130,16 @@ function Search() {
         navigate('/cars?' + new URLSearchParams(filteredParams).toString());
     }
 
+    if (isLoading) {
+        return (
+            <Box className='loading-screen-search'>
+                <LoadingScreen />
+            </Box>
+        );
+    }
+
     return (
-        <Container>
+        <Container className='search-container'>
             <Box className='search-page'>
                 <Box className='search-header'>
                     <DirectionsCarIcon className='search-car' sx={{ fontSize: 40, color: '#3498db', mr: 2 }} />
@@ -138,7 +158,6 @@ function Search() {
                                 onChange={(e) => {
                                     setSelectedBrand(e.target.value);
                                     setSelectedModel('');
-                                    setIsModelDisabled(false);
                                 }}
                                 label="Brand"
                                 required

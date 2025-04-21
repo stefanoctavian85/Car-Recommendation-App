@@ -3,13 +3,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
-import { Container, Typography, Box, List, ListItem, Card, CardContent, Grid2, Pagination, Button, Grid } from '@mui/material';
+import { Container, Typography, Box, List, ListItem, Card, CardContent, Grid2, Pagination, Button } from '@mui/material';
 import EmblaCarousel from '../GalleryCarousel/EmblaCarousel.jsx';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AddRoadIcon from '@mui/icons-material/AddRoad';
 import EuroIcon from '@mui/icons-material/Euro';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
 function Cars() {
     const { auth, cars } = useContext(AppContext);
@@ -19,10 +20,14 @@ function Cars() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalCars, setTotalCars] = useState(0);
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsLoading(true);
+
         let webParams = {};
         if (Object.keys(cars.carsStore.searchParams).length !== 0) {
             webParams = {
@@ -45,6 +50,11 @@ function Cars() {
         }
 
         getCars(webParams, currentPage);
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }, [searchParams, currentPage]);
 
     function getCars(webParams, currentPage) {
@@ -68,6 +78,7 @@ function Cars() {
     }
 
     function handlePageChange(event, page) {
+        setIsLoading(true);
         const webParams = {
             brand: searchParams.get("brand") || '',
             model: searchParams.get("model") || '',
@@ -85,11 +96,21 @@ function Cars() {
 
         getCars(filteredParams, page);
         window.scrollTo(0, 0);
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }
 
     function seeDetails(index) {
         cars.carsStore.setCar(carOffers[index]);
         navigate('/car-details?' + new URLSearchParams({ id: carOffers[index]._id}).toString());
+    }
+
+    if (isLoading) {
+        return (
+            <LoadingScreen />
+        );
     }
 
     return (
@@ -153,8 +174,8 @@ function Cars() {
                                                                 <Box className='results-price'>
                                                                     <Typography className='result-price'>
                                                                         {element.Pret}
-                                                                        <EuroIcon className='price-icon' />
                                                                     </Typography>
+                                                                    <EuroIcon className='price-icon' />
                                                                 </Box>
                                                             </Grid2>
                                                             <Grid2 size={6}>

@@ -21,6 +21,7 @@ import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import AddRoadIcon from '@mui/icons-material/AddRoad';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import dayjs from 'dayjs';
+import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
 const steps = ['Select rental details', 'Complete the final documents', 'Rent the car'];
 
@@ -59,11 +60,15 @@ function RentCar() {
 
     const [finalErrorMessage, setFinalErrorMessage] = useState('');
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
+        setIsLoading(true);
+
         if (location.state?.from === '/profile') {
             if (cars.carsStore.getCar()) {
                 setCar(cars.carsStore.getCar());
@@ -124,9 +129,16 @@ function RentCar() {
 
         setIsFullInsuranceChecked(insuranceOptions.thirdPartyLiability && insuranceOptions.collisionDamageWaiver && insuranceOptions.theftProtection);
         setIsIndeterminate(!isFullInsuranceChecked && (insuranceOptions.thirdPartyLiability || insuranceOptions.collisionDamageWaiver || insuranceOptions.theftProtection));
+    
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }, [auth.token, searchParams]);
 
     useEffect(() => {
+        setIsLoading(true);
+
         if (car) {
             fetch(`${SERVER}/api/reservations/${car._id}`, {
                 method: 'GET',
@@ -157,19 +169,34 @@ function RentCar() {
                     setDisabledDates(disabledDates);
                 });
         }
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }, [car, auth.token]);
 
+    useEffect(() => {
+        const allChecked = insuranceOptions.thirdPartyLiability && insuranceOptions.collisionDamageWaiver
+                        && insuranceOptions.theftProtection;
+        setIsFullInsuranceChecked(allChecked);
+        setIsIndeterminate(!allChecked && (insuranceOptions.thirdPartyLiability || insuranceOptions.collisionDamageWaiver || insuranceOptions.theftProtection));
+        
+    }, [insuranceOptions]);
+
     function handleBackStep() {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        if (activeStep > 0) {
+            setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        }
     }
 
     async function handleNextStep() {
-        console.log(location.state.from);
         if (activeStep === 0) {
             if (dayjs(startDate).isAfter(endDate) || dayjs(endDate).isBefore(startDate) || endDate === '') {
                 setReservationErrorMessage('You cannot select the end date before the start date or the start date after the end date!');
                 return;
             } else {
+                setIsLoading(true);
                 setReservationErrorMessage('');
                 const response = await fetch(`${SERVER}/api/reservations/check-availability`, {
                     method: 'POST',
@@ -214,9 +241,14 @@ function RentCar() {
                     setRentalPriceErrorMessage(dataPrice.message);
                 }
             }
+            const timeout = setTimeout(() => {
+                setIsLoading(false);
+            }, 1500);
+            return () => clearTimeout(timeout);
         }
 
         if (activeStep === 1) {
+            setIsLoading(true);
             if (location.state.from === '/car-details') {
                 fetch(`${SERVER}/api/reservations/rent-car`, {
                     method: 'POST',
@@ -274,6 +306,11 @@ function RentCar() {
                         }
                     })
             }
+            console.log('test');
+            const timeout = setTimeout(() => {
+                setIsLoading(false);
+            }, 1500);
+            return () => clearTimeout(timeout);
         }
 
         if (activeStep === 2) {
@@ -339,19 +376,17 @@ function RentCar() {
                 collisionDamageWaiver: checked,
                 theftProtection: checked,
             });
-
-            setIsIndeterminate(false);
-            setIsFullInsuranceChecked(checked);
         } else {
             setInsuranceOptions((prevOptions) => {
                 const newOptions = { ...prevOptions, [name]: checked };
-                const allChecked = newOptions.thirdPartyLiability && newOptions.collisionDamageWaiver && insuranceOptions.theftProtection;
-                setIsFullInsuranceChecked(allChecked);
-                setIsIndeterminate(!allChecked && (newOptions.thirdPartyLiability || newOptions.collisionDamageWaiver || newOptions.theftProtection));
-
+                
                 return newOptions;
             })
         }
+    }
+
+    if (isLoading) {
+        return <LoadingScreen />
     }
 
     return (
@@ -400,7 +435,7 @@ function RentCar() {
                                                     label='End date'
                                                     minDate={disableStartDate === true ? startDate : currentDate}
                                                     value={endDate !== '' ? dayjs(endDate) : null}
-                                                    onChange={(date) => setEndDate(dayjs(date).toDate())}
+                                                    onChange={(date) => setEndDate(date)}
                                                     shouldDisableDate={(date) => disabledDates.includes(date.format('YYYY-MM-DD'))}
                                                     slotProps={{
                                                         field: {
@@ -475,7 +510,7 @@ function RentCar() {
 
                                 <Box className='rental-details-account-car'>
                                     <Box className='rental-details-account'>
-                                        <Typography component='h2' className='rental-details-account-title'>Account details</Typography>
+                                        <Typography component='h2' className='rental-details-account-title'>Reservation details</Typography>
 
                                         <Box className='user-info'>
                                             <PersonIcon className='profile-icon' />
@@ -538,6 +573,11 @@ function RentCar() {
                                                     </Box>
                                                 )
                                             }
+                                        </Box>
+
+                                        <Box className='user-info'>
+                                                <CalendarMonthIcon className='profile-icon' />
+                                                <Typography>{startDate.format('MM/DD')} - {endDate.format('MM/DD/YYYY')}</Typography>
                                         </Box>
                                     </Box>
 

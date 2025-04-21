@@ -13,6 +13,8 @@
 .nav-toolbar {
     width: 100%;
     padding: 0;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
 }
 
 .navbar-logo {
@@ -21,21 +23,19 @@
 }
 
 .MuiToolbar-root {
-    display: flex;
-    justify-content: space-between;
     width: 100%;
 }
 
 .navbar-left-section {
     display: flex;
     align-items: left;
+    justify-content: flex-start;
 }
 
 .navbar-pages {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex: 1;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
 }
 
 .navbar-pages Button {
@@ -50,4 +50,10 @@
 
 .navbar-user-settings .MuiPaper-root {
     margin-top: 10px;
+}
+
+.navbar-settings {
+    margin-right: 10px;
+    display: flex;
+    justify-content: end;
 }
