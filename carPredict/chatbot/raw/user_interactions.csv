@@ -1,0 +1,123 @@
+text,category
+"I can't log into my account, it says the password is incorrect.",account
+"I made a payment yesterday but the amount was not processed.",payment
+"I need to upload my driver's license and identity card for verification.",account
+"I was in an accident, the car is damaged and I need assistance.",accident
+"Your service is great! I am very satisfied with the car.",feedback
+"I have a general question about your rental policies.",others
+"My payment was declined, I think it might be a bank issue.",payment
+"I can't find my account information, can you help me?",account
+"Can I upload my account later? I am not ready right now.",account
+"The car I rented has some scratches on it, I didn't cause them.",accident
+"Could you send me a feedback survey about the rental process?",feedback
+"I have a question about how to return the car after the rental period.",others
+"My payment was successful, but I need to confirm the amount.",payment
+"I am locked out of my account, please assist.",account
+"Do I need to upload my insurance document as well?",account
+"The car broke down on my way, I need a replacement.",accident
+"I just wanted to thank you for the amazing service.",feedback
+"Can you clarify the terms for the car rental extension?",others
+"I was charged incorrectly for my rental, I want a refund.",payment
+"How can I reset my account password?",account
+"I need to upload a photo of my passport for verification.",account
+"I hit a curb and now my tire is flat, can you help?",accident
+"The car was perfect, no issues at all!",feedback
+"How can I cancel my reservation?",others
+"I made an overpayment, can I get a refund?",payment
+"I can't access my account, can you unlock it?",account
+"I uploaded my driver's license, but it was rejected.",account
+"There was an accident, and the car is heavily damaged.",accident
+"I'm happy with the vehicle, but I think it needs a better cleaning.",feedback
+"How do I change the drop-off location?",others
+"My payment went through but I received no confirmation email.",payment
+"Can you help me update my account information?",account
+"I need to send my identification account for approval.",account
+"I crashed the car, it’s not working now.",accident
+"The service was amazing, thank you!",feedback
+"I have some questions about the insurance options.",others
+"I tried to make a payment but it failed.",payment
+"I can't remember my account login details.",account
+"Is it okay to upload my account later?",account
+"There was a small accident, but I’m okay.",accident
+"The car was great, but the GPS system wasn’t working properly.",feedback
+"Can I extend my rental for another day?",others
+"I think I was charged too much for the rental.",payment
+"My account is suspended, how can I reactivate it?",account
+"I'm looking for a luxury car for my trip. What do you suggest?",form
+"Is there a way to filter cars by price range on your website?",search
+"I need to submit additional account for my rental.",account
+"I had an accident and need a tow truck to pick up the car.",accident
+"I loved the car, but the fuel was a bit low when I got it.",feedback
+"How do I check my past rental history?",others
+"I received a late payment fee, I don’t think I deserve it.",payment
+"I need to update my personal information in my account.",account
+"Can I upload my account in PDF format?",account
+"I had a minor fender bender, can you assist?",accident
+"Your customer support was very helpful, thank you.",feedback
+"Can I change the pickup location for my car?",others
+"I paid for the rental but didn’t get any confirmation.",payment
+"I’m trying to log into my account but it keeps failing.",account
+"What account do I need to upload for car rental?",account
+"Do you have any cars available with heated seats?",form
+"I want a car that's great for city driving. What do you recommend?",form
+"I was in a car accident and need a replacement vehicle.",accident
+"The car was clean and in good condition, very pleased.",feedback
+"How do I make a change to my reservation?",others
+"I can't make a payment, is there a problem with your system?",payment
+"I forgot my account password, how do I reset it?",account
+"Can I upload my account after I book the car?",account
+"I was rear-ended and now the car is damaged.",accident
+"I had a great experience with the car, no complaints.",feedback
+"How do I extend my car rental for another week?",others
+"I was charged for an extra day, but I returned the car on time.",payment
+"I can't update my account email address, can you help?",account
+"Do I need to upload my bank statement for payment verification?",account
+"The car was involved in an accident, and the airbags deployed.",accident
+"The car worked perfectly during my rental period.",feedback
+"How do I know if my reservation has been confirmed?",others
+"I was charged a cancellation fee, even though I canceled on time.",payment
+"I need to recover my account password.",account
+"Can I upload my account via the mobile app?",account
+"I need a car with enough space for 5 people. Can you recommend one?",form
+"How do I find cars with GPS included?",search
+"I crashed the car, and now it won’t start.",accident
+"Your customer service was amazing, very friendly.",feedback
+"How can I change my car reservation?",others
+"My payment is pending and I haven’t received any confirmation.",payment
+"I want to change my email address on my account.",account
+"How can I upload my rental agreement for verification?",account
+"I got into an accident and the car is damaged.",accident
+"The car was excellent, no issues at all.",feedback
+"Can I add an additional driver to my reservation?",others
+"My payment failed, can you assist me?",payment
+"I can’t access my account, please unlock it.",account
+"Can you suggest a car that has a high safety rating?",form
+"I'm searching for a convertible. Any options available?",search
+"What account do I need to upload to complete my rental?",account
+"I need assistance with a car accident I was in.",accident
+"Great experience with the car, I’ll definitely rent again.",feedback
+"Can I return the car earlier than planned?",others
+"I was charged for an extra day, even though I returned the car early.",payment
+"I need to reset my account password, can you help?",account
+"I uploaded my account, but they were rejected.",account
+"I was in a minor accident and need to report it.",accident
+"I had an amazing experience, the car was perfect.",feedback
+"How do I cancel my reservation?",others
+"My payment was successful, but the receipt didn’t arrive.",payment
+"Can I change my account details?",account
+"I need to upload a proof of address for my account.",account
+"The car was involved in an accident and is damaged.",accident
+"How can I filter by car type, like SUV or sedan?",search
+"I would like a hybrid car. Can you show me the available options?",form
+"I was really happy with the car, it was in great condition.",feedback
+"How do I extend my rental for another week?",others
+"I want to search for a car with automatic transmission and low mileage.",search
+"Can you recommend a car that is good on fuel economy?",form
+"I'm looking for an electric car, can you help me with that?",form
+"How do I search for cars with a sunroof?",search
+"I want a car that's good for long trips. Can you suggest one?",form
+"Can you recommend a car based on my previous rentals?",form
+"What documents do I need to upload to complete my rentals?",account
+"The cars I rented had a lot of issues",feedback
+"I was in an accident with multiple vehicles",accident
+"I need to upload my documents again",account

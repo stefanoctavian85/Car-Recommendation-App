@@ -44,8 +44,11 @@ cars['Consum Urban'] = pd.to_numeric(cars['Consum Urban'])
 cars['Consum Extraurban'] = cars['Consum Extraurban'].str.extract(r'(\d+\.?\d*)')
 cars['Consum Extraurban'] = pd.to_numeric(cars['Consum Extraurban'])
 
+cars["Moneda"] = cars["Pret"].str.extract(r'(EUR|RON)')
 cars["Pret"] = cars["Pret"].str.extract(r'(\d+\s?\d*)')
 cars["Pret"] = cars["Pret"].str.replace(" ", "")
+cars["Pret"] = cars.apply(lambda row: float(row["Pret"]) / 5.00 if row["Moneda"] == "RON" else row["Pret"], axis=1)
+cars = cars.drop(["Moneda"], axis=1)
 
 cars["Capacitate cilindrica"] = cars["Capacitate cilindrica"].str.extract(r'(\d+\s?\d*)')
 cars["Capacitate cilindrica"] = cars["Capacitate cilindrica"].str.replace(" ", "")
@@ -106,6 +109,5 @@ cars['Capacitate cilindrica'] = cars['Capacitate cilindrica'].apply(lambda x: 0 
                                                                     else x)
 
 cars = cars.dropna(subset=['Putere', 'Transmisie', 'KM', 'Numar locuri', 'Consum Urban', 'Consum Extraurban', 'Consum Mixt'])
-cars["Status"] = "Available"
 
 cars.to_csv("raw/cars_cleaned_dataset.csv", index=False)

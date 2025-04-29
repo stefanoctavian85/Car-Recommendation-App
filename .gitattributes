@@ -1,3 +1,4 @@
 carPredict/car_scraper/raw/cars_cleaned_dataset.csv filter=lfs diff=lfs merge=lfs -text
 carPredict/car_scraper/raw/cars_dataset.csv filter=lfs diff=lfs merge=lfs -text
 carPredict/car_scraper/raw/cars_links.csv filter=lfs diff=lfs merge=lfs -text
+carPredict/car-recommendation/raw/cars_cleaned_dataset.csv filter=lfs diff=lfs merge=lfs -text

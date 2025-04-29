@@ -5,38 +5,44 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 model = joblib.load("joblib_files/model_ML.joblib")
-label_encoder_combustibil = joblib.load("joblib_files/labelencoder_Combustibil.joblib")
-label_encoder_cutie_viteze = joblib.load("joblib_files/labelencoder_Cutie de viteze.joblib")
-label_encoder_caroserie = joblib.load("joblib_files/labelencoder_Tip Caroserie.joblib")
-label_encoder_transmisie = joblib.load("joblib_files/labelencoder_Transmisie.joblib")
-label_encoder_masina = joblib.load("joblib_files/labelencoder_y.joblib")
+label_encoder_bodytype = joblib.load("joblib_files/labelencoder_Tip Caroserie.joblib")
+label_encoder_fueltype = joblib.load("joblib_files/labelencoder_Combustibil.joblib")
+label_encoder_transmission = joblib.load("joblib_files/labelencoder_Transmisie.joblib")
+label_encoder_gearbox = joblib.load("joblib_files/labelencoder_Cutie de viteze.joblib")
+label_encoder_car = joblib.load("joblib_files/labelencoder_y.joblib")
+standard_scaler = joblib.load("joblib_files/standardscaler.joblib")
 
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
 
     responses = np.array(data['responses'])
-
+    print(responses)
+    numeric_responses = []
     transformed_responses = []
     for i, col in enumerate(responses):
-        if i == 0:
-            transformed_responses.append(label_encoder_combustibil.transform([col])[0])
-        elif i == 1:
-            transformed_responses.append(label_encoder_cutie_viteze.transform([col])[0])
-        elif i == 2:
-            transformed_responses.append(label_encoder_caroserie.transform([col])[0])
+        if i == 3:
+            transformed_responses.append(label_encoder_gearbox.transform([col])[0])
+        elif i == 4:
+            transformed_responses.append(label_encoder_bodytype.transform([col])[0])
         elif i == 5:
-            transformed_responses.append(label_encoder_transmisie.transform([col])[0])
+            transformed_responses.append(label_encoder_fueltype.transform([col])[0])
+        elif i == 6:
+            transformed_responses.append(label_encoder_transmission.transform([col])[0])
         else:
-            transformed_responses.append(col)
+            numeric_responses.append(col)
 
+    numeric_responses = np.array(numeric_responses).reshape(1, -1)
+    numeric_responses = standard_scaler.transform(numeric_responses)
+
+    transformed_responses = np.concatenate([transformed_responses, numeric_responses.flatten()])
     transformed_responses = np.array(transformed_responses).reshape(1, -1)
 
     predictions = model.predict_proba(transformed_responses)
     predictions = np.argsort(predictions, axis=1)[:, -3:]
     predictions = np.sort(predictions)
     predictions = predictions.ravel()
-    predictions = label_encoder_masina.inverse_transform(predictions).tolist()
+    predictions = label_encoder_car.inverse_transform(predictions).tolist()
     return jsonify(predictions)
 
 if __name__=='__main__':
