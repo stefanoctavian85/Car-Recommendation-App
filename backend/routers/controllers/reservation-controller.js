@@ -1,5 +1,8 @@
 import models from "../../models/index.js";
 import dayjs from 'dayjs';
+import messages from '../../utils/index.js';
+
+const RESERVATIONS_LIMIT_PER_USER = 3;
 
 const getReservations = async (req, res, next) => {
     try {
@@ -11,7 +14,7 @@ const getReservations = async (req, res, next) => {
 
         if (!reservations) {
             return res.status(404).json({
-                message: "Reservations not found",
+                message: messages.reservationMessages.RESERVATION_NOT_FOUND,
             })
         }
 
@@ -32,21 +35,44 @@ const checkAnotherReservation = async (req, res, next) => {
     try {
         const { uid, cid } = req.params;
 
-        const reservations = await models.Reservation.find({
+        let validationPassed = {
+            validatedDocuments: true,
+            nonexistingReservation: true,
+            underLimit: true,
+        };
+
+        let sendMessages = [];
+
+        if (req.user.statusAccountVerified !== 'approved') {
+            validationPassed.validatedDocuments = false;
+            sendMessages.push(messages.reservationMessages.FAILED_DOCUMENTS);
+        }
+
+        const reservationsForTheSameCar = await models.Reservation.find({
             userId: uid,
             carId: cid,
             status: 'confirmed',
         });
 
-        if (reservations.length > 0) {
-            return res.status(200).json({
-                isAlreadyRented: true,
-            });
-        } else {
-            return res.status(200).json({
-                isAlreadyRented: false,
-            });
+        if (reservationsForTheSameCar.length > 0) {
+            validationPassed.nonexistingReservation = false;
+            sendMessages.push(messages.reservationMessages.EXISTING_RESERVATION);
         }
+
+        const userReservations = await models.Reservation.find({
+            userId: uid,
+            status: 'confirmed',
+        });
+
+        if (userReservations.length >= RESERVATIONS_LIMIT_PER_USER) {
+            validationPassed.underLimit = false;
+            sendMessages.push(messages.reservationMessages.RESERVATIONS_LIMIT_REACHED);
+        }
+
+        return res.status(200).json({
+            validationPassed,
+            sendMessages
+        })
 
     } catch (err) {
         next(err);
@@ -79,7 +105,7 @@ const checkDateAvailability = async (req, res, next) => {
         if (!isAvailable) {
             return res.status(400).json({
                 available: isAvailable,
-                message: 'The chosen rental period is not available.',
+                message: messages.reservationMessages.UNAVAILABLE_RENTAL_PERIOD,
             });
         }
 
@@ -246,7 +272,7 @@ const changeRentalDetails = async (req, res, next) => {
 
         if (!reservation) {
             return res.status(404).json({
-                message: 'Reservation not found!',
+                message: messages.reservationMessages.RESERVATION_NOT_FOUND,
                 completed: false,
             })
         };

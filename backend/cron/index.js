@@ -3,7 +3,7 @@ import reservationsCronJob from './reservation-cronjob.js';
 
 function startCronJobs() {
     try {
-        cron.schedule('0 0 * * *', reservationsCronJob.completedReservations);
+        cron.schedule('* * * * *', reservationsCronJob.completedReservations);
     } catch (err) {
         console.log(err);
     }

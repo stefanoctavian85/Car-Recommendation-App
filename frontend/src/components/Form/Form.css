@@ -23,6 +23,8 @@
     text-align: center;
     margin: 0;
     letter-spacing: 0.5px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
 }
 
 .form-box {
@@ -208,4 +210,14 @@
 
 .select-predicted-car button:hover {
     background-color: #7ebdff;
+}
+
+.form-typing-error {
+    margin-top: 10px;
+}
+
+.form-typing-error-text {
+    text-align: center;
+    color: #9f0808;
+    font-size: 20px !important;
 }

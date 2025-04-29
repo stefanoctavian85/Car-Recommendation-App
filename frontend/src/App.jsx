@@ -1,10 +1,9 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import MainLayout from './components/MainLayout/MainLayout.jsx';
 import Home from './components/Home/Home.jsx';
-import Navbar from './components/Navbar/Navbar.jsx';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute.jsx';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute/ProtectedAdminRoute.jsx';
 import Login from './components/Login/Login.jsx';

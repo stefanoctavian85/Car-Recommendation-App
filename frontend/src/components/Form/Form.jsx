@@ -24,6 +24,7 @@ function Form() {
     const [predictions, setPredictions] = useState('');
 
     const [error, setError] = useState('');
+    const [typingError, setTypingError] = useState('');
 
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -47,21 +48,33 @@ function Form() {
 
     function handleFinalResponse(e) {
         if (e.target.value !== '') {
-            setFinalResponse(e.target.value);
-            setValidResponse(true);
-        }
-    }
-
-    function checkInput(e, min, max) {
-        if (e.target.value < min) {
-            setFinalResponse(min);
-            setValidResponse(true);
-        } else if (e.target.value > max) {
-            setFinalResponse(max);
-            setValidResponse(true);
+            if (data[index].type === 'range' && e.target.value >= data[index].min && e.target.value <= data[index].max) {
+                setFinalResponse(e.target.value);
+                setValidResponse(true);
+                setTypingError('');
+            } else if (data[index].type === 'choice') {
+                setFinalResponse(e.target.value);
+                setValidResponse(true);
+                setTypingError('');
+            } else if (data[index].type === 'number') {
+                const min = data[index].min;
+                const max = data[index].max;
+                if (e.target.value < min) {
+                    setFinalResponse(min);
+                    setValidResponse(true);
+                } else if (e.target.value > max) {
+                    setFinalResponse(max);
+                    setValidResponse(true);
+                } else {
+                    setFinalResponse(e.target.value);
+                    setValidResponse(true);
+                }
+                setTypingError('');
+            } else {
+                setTypingError(`Please insert a value between ${data[index].min} and ${data[index].max}!`)
+            }
         } else {
-            setFinalResponse(e.target.value);
-            setValidResponse(true);
+            setTypingError("Please answer the question!");
         }
     }
 
@@ -75,19 +88,19 @@ function Form() {
 
     function handleResponses() {
         if (finalResponse === '') {
-            alert('Please answer the question!');
-            return;
+            setTypingError("Please answer the question!");
         } else if (finalResponse < data[index].min || finalResponse > data[index].max) {
-            alert(`Please insert a value between ${data[index].min} and ${data[index].max}`);
-            return;
+            setTypingError(`Please insert a value between ${data[index].min} and ${data[index].max}!`);
         }
 
-        if (validResponse === true) {
+        if (validResponse === true && typingError === '') {
             setQuestions([...questions, data[index].question]);
             setResponses([...responses, finalResponse]);
             setFinalResponse('');
             setRangeValue(0);
             setValidResponse(false);
+            setCurrentValue(0);
+            setTypingError('');
 
             if (index < maxQuestions - 1) {
                 setIndex(index + 1);
@@ -98,35 +111,39 @@ function Form() {
     async function submitForm() {
         const userId = jwtDecode(auth.token).id;
 
-        const updatedResponses = [...responses, finalResponse];
-        const updatedQuestions = [...questions, data[index].question];
-
-        setIsLoading(true);
-        const response = await fetch(`${SERVER}/api/users/${userId}/forms`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${auth.token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                questions: updatedQuestions,
-                responses: updatedResponses,
-            }),
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            setPredictions(data.cars);
-            setIndex(index + 1);
-            setError('');
+        if (finalResponse === '') {
+            setTypingError("Please answer the question!");
         } else {
-            setError('An error occured. Please try again later!');
-        }
+            setTypingError('');
+            setIsLoading(true);
+            const updatedResponses = [...responses, finalResponse];
+            const updatedQuestions = [...questions, data[index].question];
+            const response = await fetch(`${SERVER}/api/users/${userId}/forms`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    questions: updatedQuestions,
+                    responses: updatedResponses,
+                }),
+            });
 
-        const timeout = setTimeout(() => {
-            setIsLoading(false);
-        }, 1000);
-        return () => clearTimeout(timeout);
+            if (response.ok) {
+                const data = await response.json();
+                setPredictions(data.cars);
+                setIndex(index + 1);
+                setError('');
+            } else {
+                setError('An error occured. Please try again later!');
+            }
+
+            const timeout = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timeout);
+        }
     }
 
     function selectCar(indexCar) {
@@ -208,7 +225,7 @@ function Form() {
                                                         setRangeValue(e.target.value);
                                                         handleFinalResponse(e);
                                                     }}
-                                                    onBlur={(e) => checkInput(e, data[index].min, data[index].max)}
+                                                    onBlur={(e) => handleFinalResponse(e)}
                                                     inputProps={{
                                                         step: 10,
                                                         min: data[index].min,
@@ -238,8 +255,8 @@ function Form() {
                                                 <NumberField.Input
                                                     className='input-number-field'
                                                     value={currentValue}
-                                                    onChange={handleFinalResponse}
-                                                    onBlur={(e) => checkInput(e, data[index].min, data[index].max)}
+                                                    onChange={(e) => handleFinalResponse(e)}
+                                                    onBlur={(e) => handleFinalResponse(e)}
                                                     inputprops={{
                                                         min: data[index].min,
                                                         max: data[index].max,
@@ -269,6 +286,10 @@ function Form() {
                                         index < maxQuestions - 1 ? 'Next' : 'Save form'
                                     }
                                 </Button>
+                            </Box>
+
+                            <Box className='form-typing-error'>
+                                <Typography className='form-typing-error-text'>{typingError}</Typography>
                             </Box>
                         </Box>
                     ) : predictions.length > 0 ? (

@@ -6,7 +6,7 @@ const predict = async (req, res, next) => {
         const { questions, responses } = req.body;
         const user = req.user;
 
-        if (responses.length !== 11) {
+        if (responses.length !== 10) {
             return res.status(400).json({
                 message: "Invalid number of inputs",
             });

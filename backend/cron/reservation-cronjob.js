@@ -17,7 +17,7 @@ const completedReservations = async () => {
             await reservation.save();
         }
 
-        console.log(`Today - ${currentDate.format("DD-MM-YYYY")} - expired ${completedReservations.length}`);
+        console.log(`Today - ${currentDate.format("DD-MM-YYYY HH:mm")} - expired ${completedReservations.length}`);
     } catch(err) {
         console.log("Cron-job completed reservations error: " + err);
     }

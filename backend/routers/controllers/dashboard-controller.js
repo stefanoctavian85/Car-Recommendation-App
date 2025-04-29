@@ -12,7 +12,7 @@ const dashboardReports = async (req, res, next) => {
                 message: 'Unauthorized',
             });
         }
-        console.log(todaysDate);
+
         const reservationsToday = await models.Reservation.find({
             createdAt: {
                 $gt: todaysDate,
@@ -28,7 +28,7 @@ const dashboardReports = async (req, res, next) => {
                 todaysRevenue += element.totalPrice;
             });
         }
-        console.log(reservationsToday);
+
 
         const lastWeekMondayDate = dayjs(todaysDate).subtract(todaysDayIndex + 7, 'day').toDate();
         const lastWeekSundayDate = dayjs(todaysDate).subtract(todaysDayIndex, 'day').toDate();
@@ -45,7 +45,7 @@ const dashboardReports = async (req, res, next) => {
                 lastWeekRevenue += element.totalPrice;
             });
         }
-        console.log(todaysRevenue);
+
         todaysRevenue = todaysRevenue.toFixed(2);
         lastWeekRevenue = lastWeekRevenue.toFixed(2);
         todaysBookings = reservationsToday.length;

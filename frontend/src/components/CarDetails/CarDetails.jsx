@@ -32,11 +32,6 @@ const todaysDate = dayjs().format('YYYY-MM-DD');
 const rentInfoText = `This price is indicative and may vary based on vehicle availability, rental duration, and any additional options selected.
                     The final cost may be adjusted for extra mileage, additional insurance, or optional equipment.`;
 
-const dialogText = {
-    0: "The documents you submitted were rejected or are under review! Please check and contact us from your profile page for a fix! Thank you for waiting!",
-    1: "There is already a confirmed reservation for this car! Please check profile page if you want to change the rental period! Thank you!"
-};
-
 function CarDetails() {
     const { auth, cars } = useContext(AppContext);
 
@@ -68,7 +63,6 @@ function CarDetails() {
         setIsLoading(true);
         if (cars.carsStore.getCar()) {
             setCar(cars.carsStore.getCar());
-            console.log(cars.carsStore.getCar());
         } else {
             const id = searchParams.get("id") || '';
             fetch(`${SERVER}/api/car?id=${id}`, {
@@ -184,39 +178,45 @@ function CarDetails() {
     }
 
     async function rentCar() {
-        if (user.statusAccountVerified === 'approved') {
-            setOpen(false);
-            await fetch(`${SERVER}/api/reservations/check-another-reservation/${user._id}/${car._id}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
+        setOpen(false);
+        await fetch(`${SERVER}/api/reservations/check-another-reservation/${user._id}/${car._id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${auth.token}`,
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    return res.json();
                 }
             })
-                .then((res) => {
-                    if (res.ok) {
-                        return res.json();
-                    }
-                })
-                .then((data) => {
-                    if (data.isAlreadyRented === false) {
-                        setAlertDialogText('');
-                        setNavigateProfileValueTab('0');
-                        navigate('/rent-car?' + new URLSearchParams({ id: car._id, car: car.Masina }).toString(), {
-                            state: {
-                                from: '/car-details',
-                            }
+            .then((data) => {
+                const validations = data.validationPassed;
+                const messages = data.sendMessages;
+                if (validations.validatedDocuments === true && validations.nonexistingReservation === true && validations.underLimit === true) {
+                    setAlertDialogText('');
+                    setNavigateProfileValueTab('0');
+                    navigate('/rent-car?' + new URLSearchParams({ id: car._id, car: car.Masina }).toString(), {
+                        state: {
+                            from: '/car-details',
+                        }
+                    });
+                } else {
+                    if (messages.length > 0) {
+                        setAlertDialogText((prevMessage) => {
+                            return [...prevMessage, messages.join('\n')];
                         });
-                    } else {
-                        setAlertDialogText(dialogText[1]);
+                    }
+                    if (validations.validatedDocuments === false) {
+                        setNavigateProfileValueTab('1');
+                        setOpen(true);
+                    } else if (validations.nonexistingReservation === false || validations.underLimit === false) {
                         setNavigateProfileValueTab('2');
                         setOpen(true);
                     }
-                });
-        } else {
-            setAlertDialogText(dialogText[0]);
-            setNavigateProfileValueTab('1');
-            setOpen(true);
-        }
+                }
+            });
+
     }
 
     if (isLoading) {

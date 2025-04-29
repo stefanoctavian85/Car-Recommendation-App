@@ -74,7 +74,6 @@ function Dashboard() {
                 }
             })
             .then((data) => {
-                console.log(data.labels);
                 setChartData(data.filteredData);
                 setLabelsOptions(data.labels);
             })
