@@ -1,14 +1,5 @@
-# Ignoră fișierul .env
 .env
-
-# Ignoră fișierele de configurare specifice IDE-urilor
 .idea/
-.vscode/
-
-# Ignoră fișierele de mediu virtual Python
-env/
-venv/
-
 LICENSE
 README.md
 joblib_files/

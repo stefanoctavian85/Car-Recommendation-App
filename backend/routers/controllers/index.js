@@ -4,6 +4,7 @@ import profile from './profile-controller.js';
 import car from './car-controller.js';
 import reservation from './reservation-controller.js';
 import dashboard from './dashboard-controller.js';
+import chat from './chat-controller.js';
 
 export default {
     auth,
@@ -11,5 +12,6 @@ export default {
     profile,
     car,
     reservation,
-    dashboard
+    dashboard,
+    chat,
 }

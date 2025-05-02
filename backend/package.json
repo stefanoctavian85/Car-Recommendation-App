@@ -17,6 +17,7 @@
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "firebase": "^11.6.1",
     "fs": "^0.0.1-security",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
@@ -30,6 +31,7 @@
     "path": "^0.12.7",
     "sequelize": "^6.37.5",
     "sequelize-cli": "^6.6.2",
-    "sharp": "^0.33.5"
+    "sharp": "^0.33.5",
+    "uuid": "^11.1.0"
   }
 }

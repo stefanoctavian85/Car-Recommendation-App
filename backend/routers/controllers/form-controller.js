@@ -1,5 +1,6 @@
 import models from "../../models/index.js";
 import fetch from 'node-fetch';
+import { SERVER } from '../../utils/global.js';
 
 const predict = async (req, res, next) => {
     try {
@@ -18,7 +19,7 @@ const predict = async (req, res, next) => {
             });
         }
 
-        const flaskResponse = await fetch('http://localhost:5000/predict', {
+        const flaskResponse = await fetch(`${SERVER}/predict`, {
             method: 'POST',
             headers: {
                 'Content-Type': "application/json",

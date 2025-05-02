@@ -12,6 +12,7 @@ dotenv.config();
 
 database.connectToDatabase();
 database.createAdminUser();
+database.connectToFirebase();
 cronJobs.startCronJobs();
 
 app.use('/auth', routers.authRouter);

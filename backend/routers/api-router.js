@@ -28,4 +28,10 @@ apiRouter.get('/dashboard/dashboard-reports', controllers.dashboard.dashboardRep
 apiRouter.get('/dashboard/dashboard-charts', controllers.dashboard.getDataForCharts);
 apiRouter.get('/dashboard/logs', controllers.dashboard.getLogs);
 
+apiRouter.post('/chat/send-AI-first-message', controllers.chat.sendFirstMessage);
+apiRouter.post('/chat/send-message', controllers.chat.sendMessage);
+apiRouter.patch('/chat/close-conversation', controllers.chat.closeChat);
+
+apiRouter.use(middleware.error);
+
 export default apiRouter;
