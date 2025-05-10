@@ -1,23 +1,40 @@
 import './Home.css';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import AppContext from '../../state/AppContext';
 import { useNavigate } from 'react-router-dom';
 import '../Search/Search.jsx';
-import { Box, Button, CardMedia, Typography } from '@mui/material';
-import photo from '../../assets/home_main_photo.jpg';
+import { Box, Button, CardMedia, Typography, FormControl, InputLabel, Input, IconButton, Tooltip, Card, CardActionArea, CardContent } from '@mui/material';
+import photo from '../../assets/landing_page_background.png';
 import { jwtDecode } from 'jwt-decode';
 import { SERVER } from '../../config/global.jsx';
 import AdminDashboard from '../AdminDashboard/AdminDashboard.jsx';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import SearchIcon from '@mui/icons-material/Search';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import EmergencyIcon from '@mui/icons-material/Emergency';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import LaptopChromebookIcon from '@mui/icons-material/LaptopChromebook';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import CarRentalIcon from '@mui/icons-material/CarRental';
+import searchPhoto from '../../assets/search_home_image.jpg';
+import formPhoto from '../../assets/home_image_form.jpg';
+
+const fillTheFormAsterisk = 'Already know what you want? Search directly for the desired model!';
 
 function Home() {
     const { auth } = useContext(AppContext);
+    const heroSectionRef = useRef(null);
+    const howItWorksSectionRef = useRef(null);
+    const whyToChooseUsRef = useRef(null);
 
     const [isLoading, setIsLoading] = useState(true);
 
     const [token, setToken] = useState('');
     const [user, setUser] = useState('');
+
+    const [email, setEmail] = useState('');
 
     const navigate = useNavigate();
 
@@ -52,7 +69,16 @@ function Home() {
     }, [auth.token]);
 
     function redirectToRegister() {
-        navigate('/register');
+        navigate('/register', {
+            state: {
+                email: email,
+            }
+        });
+    }
+
+    function scrollToNextSection(ref) {
+        console.log(ref.current);
+        ref.current?.scrollIntoView({ behavior: 'smooth' });
     }
 
     if (isLoading) {
@@ -63,118 +89,207 @@ function Home() {
         <Box className='home-page'>
             {
                 token ? (
-                    <Box>
-                        <Box className='home-page-regular'>
-                            <Box className='home-left-page'>
-                                <Box className='home-section-title'>
-                                    <Typography className='home-title'>Search for a specific car</Typography>
-                                </Box>
-                                <Box className='home-section-description'>
-                                    <Typography className='home-connected-description'>
-                                        Search for the best rental offer for your dream car.
-                                    </Typography>
-                                    <Typography className='home-bullets'>
-                                        <CheckCircleIcon color='success' className='check-icon' />Choose from thousands of cars <br />
-                                        <CheckCircleIcon color='success' className='check-icon' />Filter by brand, model, price or bodytype <br />
-                                        <CheckCircleIcon color='success' className='check-icon' />Instant availability <br />
-                                    </Typography>
-                                </Box>
-                                <Box className='home-redirect-button'>
-                                    <Button
-                                        variant='contained'
-                                        onClick={() => {
-                                            navigate('/search');
-                                        }}
-                                    >
-                                        Search
-                                    </Button>
-                                </Box>
-                            </Box>
-
-                            <Box className='home-right-page'>
-                                <Box className='home-section-title'>
-                                    <Typography className='home-title'>Recommendation Form</Typography>
-                                </Box>
-                                <Box className='home-section-description'>
-                                    <Typography className='home-connected-description'>
-                                        Fill out the form in just a minute to find out which car suits you.
-                                    </Typography>
-                                    <Typography className='home-bullets'>
-                                        <CheckCircleIcon color='success' className='check-icon' />Less than 1 minute to answer<br />
-                                        <CheckCircleIcon color='success' className='check-icon' />Personalized car based on your preferences and lifestyle<br />
-                                        <CheckCircleIcon color='success' className='check-icon' />Stop wasting your time <br />
-                                    </Typography>
-                                </Box>
-                                <Box className='home-redirect-button'>
-                                    <Button
-                                        variant='contained'
-                                        onClick={() => {
-                                            navigate('/form');
-                                        }}
-                                    >
-                                        Form
-                                    </Button>
-                                </Box>
-                            </Box>
+                    <Box className='home-page-authenticated' ref={heroSectionRef}>
+                        <Box className='home-page-welcome'>
+                            <Typography className='home-page-welcome-text'>Welcome back, {user.firstname} {user.lastname}!</Typography>
+                            <Typography className='home-page-subtitle'>Looking for your next car? Take a look at your posibilities</Typography>
                         </Box>
 
-                        {
-                                user.status === 'regular' ? null : (
-                                    <Box className='home-dashboard'>
-                                        <Box className='home-dashboard-section'>
-                                            <Typography className='home-title'>Admin Dashboard</Typography>
-                                        </Box>
+                        <Box className='home-page-authenticated-content'>
+                            <Card className='home-page-card'>
+                                <CardActionArea
+                                    onClick={() => navigate('/search')}
+                                >
+                                    <CardMedia
+                                        component='img'
+                                        height='140'
+                                        alt='search image'
+                                        src={searchPhoto}
+                                    />
+                                    <CardContent>
+                                        <Typography className='home-card-title'>Search</Typography>
+                                        <Typography className='home-card-subtitle'>Look for the desired car by make, model, bodytype and price</Typography>
+                                    </CardContent>
+                                </CardActionArea>
+                            </Card>
 
-                                        <Box className='home-dashboard-button'>
-                                            <Button
-                                                variant='contained'
-                                                onClick={() => {
-                                                    navigate('/dashboard');
-                                                }}
-                                            >
-                                                Dashboard
-                                            </Button>
-                                        </Box>
-                                    </Box>
-                                )
-                            }
+                            <Card className='home-page-card'>
+                                <CardActionArea
+                                    onClick={() => navigate('/form')}
+                                >
+                                    <CardMedia
+                                        component='img'
+                                        height='140'
+                                        alt='search image'
+                                        src={formPhoto}
+                                    />
+                                    <CardContent>
+                                        <Typography className='home-card-title'>Form</Typography>
+                                        <Typography className='home-card-subtitle'>Fill out the form that will recommend the right car for your personality and behavior</Typography>
+                                    </CardContent>
+                                </CardActionArea>
+                            </Card>
+                        </Box>
                     </Box>
                 ) : (
-                    <Box className='home-landing-page'>
-                        <Box className='home-hero'>
+                    <Box className='home-landing-page' ref={heroSectionRef}>
+                        <Box className='home-hero-section'>
                             <Box className='home-motto'>
-                                <Typography component='h1'>The Smart Way To Find The Perfect Car</Typography>
-                            </Box>
-                            <Box className='home-description'>
-                                <Typography component='h1'>CarMinds helps you discover the perfect car for your lifestyle, whether you need a short-term rental,
-                                    a flexible subscription or a test drive before buying. Sign up now and enjoy exclusive benefits absolutely free!</Typography>
-                                <Button
-                                    className='home-register-button'
-                                    onClick={redirectToRegister}
-                                >Sign up</Button>
-                            </Box>
-                        </Box>
-                        <Box className='home-main'>
-                            <CardMedia
-                                className='home-main-photo'
-                                component='img'
-                                srcSet={photo}
-                                alt='Car landing page photo'
-                            />
-                            <Box className='home-main-text'>
-                                <Box className='home-header'>
-                                    <Typography className='home-header-text'>Start your journey with the perfect car!</Typography>
+                                <Box className='home-car'>
+                                    <Box
+                                        className='home-car-photo'
+                                        component='img'
+                                        src={photo}
+                                        alt='Car for landing page'
+                                    />
                                 </Box>
-                                <Box className='home-subtitle'>
-                                    <Typography className='home-subtitle-text'>Join CarMinds today and get free access to personalized car recommendations, special rental offers and seamless booking -
-                                        all designed to make your driving experience effortless!
-                                    </Typography>
+                                <Box className='home-header'>
+                                    <Box className='home-title'>
+                                        <Typography className='home-title-text'>The Smart Way To Find Your Perfect Car</Typography>
+                                    </Box>
+                                    <Box className='home-subtitle'>
+                                        <Typography className='home-subtitle-text'>The perfect car is not a myth! We choose it for you based on your needs and preferences!</Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+
+                            <Box className='home-redirect-register'>
+                                <Box className='home-register'>
+                                    <Typography className='home-register-text'>Sign up right now to benefit from our services</Typography>
+                                </Box>
+                                <Box className='home-register-input'>
+                                    <Box className='home-register-input-email'>
+                                        <FormControl className='login-input'>
+                                            <InputLabel htmlFor='email-input' className='login-label'>Email</InputLabel>
+                                            <Input
+                                                id='email-input'
+                                                label='Email'
+                                                type='text'
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                required
+                                            >
+                                            </Input>
+                                        </FormControl>
+                                    </Box>
+                                    <Box className='home-register-redirect-button'>
+                                        <Button
+                                            className='home-register-button'
+                                            onClick={redirectToRegister}
+                                        >
+                                            Sign up
+                                        </Button>
+                                    </Box>
                                 </Box>
                             </Box>
                         </Box>
                     </Box>
                 )
             }
+
+            <Box className='home-next-section button-section1'>
+                <IconButton
+                    className='next-section-button'
+                    onClick={() => scrollToNextSection(howItWorksSectionRef)}
+                >
+                    <KeyboardArrowDownIcon />
+                </IconButton>
+            </Box>
+
+            <Box className='home-how-it-works-section' ref={howItWorksSectionRef}>
+                <Box className='home-how-it-works-title'>
+                    <Box className='home-how-it-works-header'>
+                        <Typography className='home-how-it-works-header-text'>How it works</Typography>
+                    </Box>
+                    <Box className='home-how-it-works-subtitle'>
+                        <Typography className='home-how-it-works-subtitle-text'>Discover the perfect car in just 3 steps</Typography>
+                    </Box>
+                </Box>
+
+                <Box className='home-how-it-works-steps'>
+                    <Box className='home-how-it-works-step'>
+                        <EditNoteIcon className='home-step-icon' />
+                        <Box className='home-step-description'>
+                            <Box className='home-step-title-asterisk'>
+                                <Typography className='home-step-title'>Fill in the form</Typography>
+                                <Tooltip className='home-step-asterisk' title={fillTheFormAsterisk}>
+                                    <IconButton>
+                                        <EmergencyIcon className='asterisk' />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                            <Typography className='home-step-subtitle'>Answer questions to find the car for your needs </Typography>
+
+                        </Box>
+                    </Box>
+
+                    <Box className='home-how-it-works-step'>
+                        <SearchIcon className='home-step-icon' />
+                        <Box className='home-step-description'>
+                            <Typography className='home-step-title'>Choose the right car</Typography>
+                            <Typography className='home-step-subtitle'>Select your favourite model from those available</Typography>
+                        </Box>
+                    </Box>
+
+                    <Box className='home-how-it-works-step'>
+                        <DirectionsCarIcon className='home-step-icon' />
+                        <Box className='home-step-description'>
+                            <Typography className='home-step-title'>Book the car</Typography>
+                            <Typography className='home-step-subtitle'>Fill in the required details to enjoy the car</Typography>
+                        </Box>
+                    </Box>
+                </Box>
+
+                <Box className='home-next-section'>
+                    <IconButton
+                        className='next-section-button button-section2'
+                        onClick={() => scrollToNextSection(whyToChooseUsRef)}
+                    >
+                        <KeyboardArrowDownIcon />
+                    </IconButton>
+                </Box>
+            </Box>
+
+            <Box className='home-why-to-choose-us-section' ref={whyToChooseUsRef}>
+                <Box className='home-why-to-choose-us-title'>
+                    <Box className='home-why-to-choose-us-header'>
+                        <Typography className='home-why-to-choose-us-header-text'>Why to choose us</Typography>
+                    </Box>
+                    <Box className='home-why-to-choose-us-subtitle'>
+                        <Typography className='home-why-to-choose-us-subtitle-text'>Unlock the reasons our product is perfect for your needs</Typography>
+                    </Box>
+                </Box>
+
+                <Box className='home-why-to-choose-us-content'>
+                    <Box className='home-why-to-choose-us-reason'>
+                        <PsychologyIcon className='home-step-icon' />
+                        <Box className='home-reason'>
+                            <Typography className='home-reason-title'>AI integration</Typography>
+                            <Typography className='home-reason-subtitle'>Powered by AI, our smart form finds the perfect match for you.</Typography>
+                        </Box>
+                    </Box>
+                    <Box className='home-why-to-choose-us-reason'>
+                        <LaptopChromebookIcon className='home-step-icon' />
+                        <Box className='home-reason'>
+                            <Typography className='home-reason-title'>Just 1 click away</Typography>
+                            <Typography className='home-reason-subtitle'>Simplifying your search, accelerating your journey.</Typography>
+                        </Box>
+                    </Box>
+                    <Box className='home-why-to-choose-us-reason'>
+                        <SupportAgentIcon className='home-step-icon' />
+                        <Box className='home-reason'>
+                            <Typography className='home-reason-title'>24/7 technical suport</Typography>
+                            <Typography className='home-reason-subtitle'>Whatever the issue, we've got your back. Our support agents are here to help you.</Typography>
+                        </Box>
+                    </Box>
+                    <Box className='home-why-to-choose-us-reason'>
+                        <CarRentalIcon className='home-step-icon' />
+                        <Box className='home-reason'>
+                            <Typography className='home-reason-title'>Flexibility</Typography>
+                            <Typography className='home-reason-subtitle'>Your rental, your rules. From duration to insurances.</Typography>
+                        </Box>
+                    </Box>
+                </Box>
+            </Box>
         </Box>
     );
 }
