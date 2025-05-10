@@ -167,7 +167,15 @@ const extractDriverLicenseData = (text) => {
 const sendDocuments = async (req, res, next) => {
     try {
         const files = req.files;
-        
+        const idCard = files['id-card'][0].destination + files['id-card'][0].filename;
+        const driverLicense = files['driver-license'][0].destination + files['driver-license'][0].filename;
+        const user = await models.User.findOne({
+            _id: req.user._id,
+        });
+        user.idCard = idCard;
+        user.driverLicense = driverLicense;
+        await user.save();
+
         if(Object.keys(files).length !== 2) {
             return res.status(400).json({
                 message: "ID Card or driver's license was not uploaded, please try again!",

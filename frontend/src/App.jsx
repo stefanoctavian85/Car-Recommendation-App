@@ -14,7 +14,6 @@ import Form from './components/Form/Form.jsx';
 import Cars from './components/Cars/Cars.jsx';
 import CarDetails from './components/CarDetails/CarDetails.jsx';
 import RentCar from './components/RentCar/RentCar.jsx';
-import Chat from './components/Chat/Chat.jsx';
 
 import AppContext from './state/AppContext.jsx';
 import AuthStore from './state/stores/AuthStore.jsx';
@@ -39,6 +38,7 @@ function App() {
       setToken(storedToken);
     } else {
       setIsAuthenticated(false);
+      setToken('');
     }
 
     const timeout = setTimeout(() => {

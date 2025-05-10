@@ -1,6 +1,6 @@
 import './Register.css';
 import React, { useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
 import AppContext from '../../state/AppContext.jsx';
 import { Box, Container, Typography, Button, Avatar, FormControl, Input, InputAdornment, IconButton, InputLabel, FormHelperText } from '@mui/material';
@@ -33,12 +33,17 @@ function Register() {
     const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         setIsLoading(true);
 
         if (auth.isAuthenticated) {
             navigate('/profile');
+        } else {
+            if (location.state?.email) {
+                setEmail(location.state.email);
+            } 
         }
 
         const timeout = setTimeout(() => {
@@ -223,6 +228,7 @@ function Register() {
                         label="Email"
                         type='text'
                         required
+                        value={email}
                         endAdornment={
                             emailTouched && (
                                 <InputAdornment position='end'>

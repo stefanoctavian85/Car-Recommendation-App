@@ -1,10 +1,9 @@
 import './Chat.css';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Box, FormControl, IconButton, List, ListItem, Typography } from '@mui/material';
+import { Box, FormControl, IconButton, List, ListItem, Typography, Input, InputAdornment, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import MinimizeIcon from '@mui/icons-material/Minimize';
 import CloseIcon from '@mui/icons-material/Close';
-import Input from '@mui/joy/Input';
 import SendIcon from '@mui/icons-material/Send';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { SERVER } from '../../config/global.jsx';
@@ -12,60 +11,75 @@ import { firebaseConfig } from '../../config/firebase.jsx';
 import AppContext from '../../state/AppContext.jsx';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, onValue, ref } from 'firebase/database';
-import { jwtDecode } from 'jwt-decode';
 
 const firebase = initializeApp(firebaseConfig);
 const database = getDatabase(firebase);
 
-function Chat() {
+const closeChatAlertDialog = "Keep in mind that you will lose the conversation and will not be able to receive a response. If you dont want this, just minimize the chat!";
+const adminCloseChatAlertDialog = "Close this conversation only if you have solved the user's problem, otherwise the problem will remain unresolved!";
+
+function Chat({ adminConversationId }) {
     const { auth } = useContext(AppContext);
-    const startingTimeRef = useRef(null);
     const lastMessageRef = useRef(null);
 
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isCloseChatDialogOpen, setIsCloseChatDialogOpen] = useState(false);
 
     const [message, setMessage] = useState('');
     const [conversation, setConversation] = useState([]);
-    const [isConversationStarted, setIsConversationStarted] = useState(false);
-    const [startingConversationTime, setStartingConversationTime] = useState('');
+    const [conversationId, setConversationId] = useState('');
+    const [conversationStatus, setConversationStatus] = useState('');
+
+    const [documents, setDocuments] = useState([]);
 
     useEffect(() => {
-        if (isChatOpen === true && isConversationStarted === false) {
-            setIsConversationStarted(true);
-            const startingTime = Date.now();
-            startingTimeRef.current = startingTime;
-            setStartingConversationTime(startingTime);
+        if (isChatOpen === true && conversationId === '' && auth.authStore.user.status !== 'admin') {
             fetch(`${SERVER}/api/chat/send-AI-first-message`, {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${auth.token}`,
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ startingConversationTime: startingTime })
-            });
+                }
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    setConversationId(data.conversationId);
+                    setConversationStatus('open');
+                })
+        } else if (auth.authStore.user.status === 'admin' && adminConversationId !== '') {
+            setIsChatOpen(true);
+            setConversationId(adminConversationId);
+            const conversationRef = ref(database, `conversations/${adminConversationId}`);
+            onValue(conversationRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    setConversationStatus(data.status);
+                    const messagesArray = Object.values(data.messages);
+                    setConversation(messagesArray);
+                } else {
+                    setConversation([]);
+                }
+            })
         }
     }, [isChatOpen]);
 
     useEffect(() => {
-        let userId;
-        if (!auth.authStore.user._id) {
-            userId = jwtDecode(auth.token).id;
-        } else {
-            userId = auth.authStore.user._id;
-        }
-        const conversationRef = ref(database, `conversations/${userId}-${startingConversationTime}/messages`);
+        const conversationRef = ref(database, `conversations/${conversationId}/messages`);
 
         onValue(conversationRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 const messagesArray = Object.values(data);
                 setConversation(messagesArray);
-                console.log(messagesArray);
             } else {
                 setConversation([]);
             }
         })
-    }, [startingConversationTime]);
+    }, [conversationId]);
 
     useEffect(() => {
         scrollToLastMessage();
@@ -81,34 +95,34 @@ function Chat() {
         setIsChatOpen(!isChatOpen);
     }
 
-    async function closeChat(e) {
-        if (isConversationStarted) {
-            const response = await fetch(`${SERVER}/api/chat/close-conversation`, {
+    async function closeChat() {
+        setIsCloseChatDialogOpen(false);
+        if (conversationId) {
+            await fetch(`${SERVER}/api/chat/close-conversation`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${auth.token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ startingConversationTime: startingTimeRef.current })
+                body: JSON.stringify({ conversationId })
             });
         }
+        setConversationId('');
+        setConversation([]);
         setIsChatOpen(false);
-        setStartingConversationTime('');
-        setIsConversationStarted(false);
-        startingTimeRef.current = null;
     }
 
     async function sendMessage() {
-        if (message.trim() === '') return;
-
+        if (message.trim() === '' && documents.length === 0) return;
+        console.log(documents.length);
         try {
-            const response = await fetch(`${SERVER}/api/chat/send-message`, {
+            await fetch(`${SERVER}/api/chat/send-message`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${auth.token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message, startingConversationTime: startingTimeRef.current })
+                body: JSON.stringify({ message, conversationId })
             });
             setMessage('');
         } catch (err) {
@@ -121,6 +135,14 @@ function Chat() {
             e.preventDefault();
             sendMessage();
         }
+    }
+
+    function handleFileChange(e) {
+        const documentsLength = documents.length;
+        setDocuments((prevDoc) => ({
+            ...prevDoc,
+            [`document-${documentsLength + 1}`]: e.target.files[0],
+        }));
     }
 
     return (
@@ -146,7 +168,7 @@ function Chat() {
                                     <MinimizeIcon className='chat-button-icon' onClick={toggleChat} />
                                 </IconButton>
                                 <IconButton className='chat-button-close'>
-                                    <CloseIcon className='chat-button-icon' onClick={closeChat} />
+                                    <CloseIcon className='chat-button-icon' onClick={() => setIsCloseChatDialogOpen(true)} />
                                 </IconButton>
                             </Box>
                         </Box>
@@ -192,33 +214,76 @@ function Chat() {
                                 ) : null
                             }
                         </Box>
-                        <Box className='chat-input-message'>
-                            <Box className='input-form' component='form'>
-                                <FormControl className='chat-input'>
-                                    <Input
-                                        className='chat-input-buttons'
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        value={message}
-                                        onKeyDown={handleEnterKey}
-                                        endDecorator={
-                                            <>
-                                                <IconButton>
-                                                    <AttachFileIcon className='chat-input-button' />
-                                                </IconButton>
-                                                <IconButton>
-                                                    <SendIcon className='chat-input-button' onClick={() => sendMessage()} />
-                                                </IconButton>
-                                            </>
-                                        }
-                                    >
-                                    </Input>
-                                </FormControl>
-                            </Box>
-                        </Box>
+                        {
+                            conversationStatus === 'open' ? (
+                                <Box className='chat-input-message'>
+                                    <Box className='input-form' component='form'>
+                                        <FormControl className='chat-input'>
+                                            <Input
+                                                className='chat-input-buttons'
+                                                onChange={(e) => setMessage(e.target.value)}
+                                                value={message}
+                                                onKeyDown={handleEnterKey}
+                                                required
+                                                disableUnderline
+                                                endAdornment={
+                                                    <InputAdornment position='end'>
+                                                        <FormControl className='chat-documents-input'>
+                                                            <IconButton component='label' className='chat-input-button'>
+                                                                <AttachFileIcon />
+                                                                <input
+                                                                    className='input-file'
+                                                                    type='file'
+                                                                    accept="image/*"
+                                                                    onChange={handleFileChange}
+                                                                />
+                                                            </IconButton>
+                                                        </FormControl>
+                                                        <IconButton>
+                                                            <SendIcon
+                                                                className='chat-input-button'
+                                                                onClick={sendMessage}
+                                                            />
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                }
+                                            >
+                                            </Input>
+                                        </FormControl>
+                                    </Box>
+                                </Box>
+                            ) : null
+                        }
+
                     </Box>
                 )
-
             }
+
+            <Box className='close-chat-dialog'>
+                <Dialog
+                    open={isCloseChatDialogOpen}
+                    onClose={closeChat}
+                >
+                    <DialogTitle>
+                        {"Are you sure you want to close the chat?"}
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            {
+                                auth.authStore.user.status === 'regular' ? closeChatAlertDialog : adminCloseChatAlertDialog
+                            }
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions className='dialog-buttons'>
+                        <Button className='dialog-button' autoFocus onClick={() => setIsCloseChatDialogOpen(false)} variant='contained'>
+                            Back
+                        </Button>
+                        <Button className='dialog-button' autoFocus onClick={closeChat} variant='contained'>
+                            Close chat
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </Box>
         </Box>
     );
 }

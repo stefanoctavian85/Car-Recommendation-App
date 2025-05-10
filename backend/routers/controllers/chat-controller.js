@@ -4,24 +4,26 @@ import { v4 as uuid } from 'uuid';
 import dayjs from 'dayjs';
 import { SERVER } from '../../utils/global.js';
 import fetch from 'node-fetch';
+import models from "../../models/index.js";
 
 const sendFirstMessage = async (req, res, next) => {
-    let { startingConversationTime } = req.body;
     const userId = req.user._id.toString();
-
-    try {;
+    const userFullName = req.user.firstname + " " + req.user.lastname;
+    let startingConversationTime = Date.now();
+    try {
         const conversationId = `${userId}-${startingConversationTime}`;
         const newConversation = {
+            userFullName: userFullName,
             userId: userId,
             status: 'open',
             category: 'unknown',
-            messages: {}
+            messages: {},
         };
         const conversationRef = ref(database, `conversations/${conversationId}`);
         await set(conversationRef, newConversation);
         const messageRef = ref(database, `conversations/${conversationId}/messages`);
 
-        startingConversationTime = new Date(startingConversationTime).toISOString()
+        startingConversationTime = new Date(startingConversationTime).toISOString();
         const welcomeMessageId = uuid();
         const welcomeMessage = {
             messageId: welcomeMessageId,
@@ -33,6 +35,7 @@ const sendFirstMessage = async (req, res, next) => {
 
         return res.status(200).json({
             message: "Conversation started successfully!",
+            conversationId,
         });
     } catch (err) {
         next(err);
@@ -40,14 +43,12 @@ const sendFirstMessage = async (req, res, next) => {
 }
 
 const sendMessage = async (req, res, next) => {
-    const { message, startingConversationTime } = req.body;
-    const userId = req.user._id.toString();
-
+    const { message, conversationId } = req.body;
+    const userFullName = req.user.firstname + " " + req.user.lastname;
     try {
         const conversations = ref(database, 'conversations');
         const snapshot = await get(conversations);
 
-        let conversationId;
         let flaskResponse, response;
         let conversation = '';
         let children = [];
@@ -58,15 +59,13 @@ const sendMessage = async (req, res, next) => {
 
         for (const child of children) {
             const convCopy = child.val();
-            const conversationTime = child.key.split("-")[1];
-            if (convCopy.userId === userId && convCopy.status === 'open' && startingConversationTime == conversationTime) {
-                conversationId = child.key;
+            if (child.key === conversationId && convCopy.status === 'open') {
                 conversation = convCopy;
                 break;    
             }
         }
 
-        if (conversation.category === 'unknown') {
+        if (conversation.category === 'unknown' || conversation.category === 'others') {
             flaskResponse = await fetch(`${SERVER}/chatbot/categorize`, {
                 method: 'POST',
                 headers: {
@@ -82,6 +81,7 @@ const sendMessage = async (req, res, next) => {
         const messageId = uuid();
         const newMessage = {
             messageId: messageId,
+            senderFullName: userFullName,
             sender: req.user.status,
             message: message,
             timestamp: dayjs().toISOString(),
@@ -105,13 +105,16 @@ const sendMessage = async (req, res, next) => {
 }
 
 const closeChat = async (req, res, next) => {
-    const { startingConversationTime } = req.body;
-    const userId = req.user._id.toString();
-    const conversationId = `${userId}-${startingConversationTime}`;
+    const { conversationId } = req.body;
+
     try {
-        if (startingConversationTime) {
+        if (conversationId) {
             const conversationRef = ref(database, `conversations/${conversationId}`);
-            await update(conversationRef, { status: 'closed' });
+            if (req.user.status === 'admin') {
+                await update(conversationRef, { status: 'solved' });
+            } else {
+                await update(conversationRef, { status: 'closed' });
+            }
 
             return res.status(200).json({
                 message: "Chat closed!",
@@ -127,8 +130,43 @@ const closeChat = async (req, res, next) => {
     }
 }
 
+const getConversationInfo = async (req, res, next) => {
+    const { conversationId } = req.params;
+
+    try {
+        const conversationRef = ref(database, `conversations/${conversationId}`);
+        const snapshot = await get(conversationRef);
+        const conversation = snapshot.val();
+        let conversationInfo = {
+            userId: conversation.userId,
+            userFullName: conversation.userFullName,
+            category: conversation.category.charAt(0).toUpperCase() + conversation.category.slice(1).toLowerCase(),
+            status: conversation.status.charAt(0).toUpperCase() + conversation.status.slice(1).toLowerCase(),
+        }
+
+        const userId = conversation.userId;
+        const userInfo = await models.User.findOne({
+            _id: userId,
+        });
+
+        conversationInfo = { ...conversationInfo,
+            'email': userInfo.email,
+            'userStatus': userInfo.status.charAt(0).toUpperCase() + userInfo.status.slice(1).toLowerCase(),
+            'phoneNumber': userInfo.phoneNumber,
+            'documentsStatus': userInfo.statusAccountVerified.charAt(0).toUpperCase() + userInfo.statusAccountVerified.slice(1).toLowerCase()
+        };
+
+        return res.status(200).json({
+            conversationInfo,
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
 export default {
     sendFirstMessage,
     sendMessage,
-    closeChat
+    closeChat,
+    getConversationInfo,
 }

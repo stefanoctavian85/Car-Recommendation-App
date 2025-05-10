@@ -86,6 +86,7 @@ function Navbar() {
                                     >
                                         <Button
                                             variant='default'
+                                            className='navbar-button'
                                         >
                                             {page}
                                         </Button>
@@ -123,8 +124,7 @@ function Navbar() {
                     ) : (
                         <Box className='navbar-settings'>
                             <Button
-                                color='primary'
-                                variant='contained'
+                                className='navbar-login-button'
                                 onClick={handleLoginStatus}
                             >
                                 Log in

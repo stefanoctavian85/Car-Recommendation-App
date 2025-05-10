@@ -25,13 +25,9 @@ const columns = [{
     headerName: 'ID',
     width: 90
 }, {
-    field: 'firstname',
-    headerName: 'First name',
-    width: 150
-}, {
-    field: 'lastname',
-    headerName: 'Last name',
-    width: 150
+    field: 'fullname',
+    headerName: 'Full name',
+    width: 150,
 }, {
     field: 'email',
     headerName: 'Email',
@@ -81,8 +77,7 @@ function Logs() {
             .then((data) => {
                 const rows = data.logs.map(log => ({
                     id: log._id,
-                    firstname: log.userId.firstname || '',
-                    lastname: log.userId.lastname || '',
+                    fullname: log.userId.firstname + " " + log.userId.lastname || '',
                     email: log.userId.email || '',
                     car: log.carId.Masina || '',
                     price: log.totalPrice || 0,
@@ -119,39 +114,45 @@ function Logs() {
 
     return (
         <Box className='logs-page'>
-            <FormControl className='logs-form'>
-                <InputLabel id='date-filter-label'>Date filter</InputLabel>
-                <Select
-                    labelId='date-filter-label'
-                    id='date-filter-select'
-                    value={dateFilter}
-                    label='Date filter'
-                    onChange={handleChange}
-                >
-                    {
-                        FILTER_OPTIONS.map((element) => (
-                            <MenuItem value={element.value}>{element.label}</MenuItem>
-                        ))
-                    }
-                </Select>
-            </FormControl>
+            <Box className='logs-input'>
+                <FormControl className='logs-form'>
+                    <InputLabel id='date-filter-label'>Date</InputLabel>
+                    <Select
+                        labelId='date-filter-label'
+                        id='date-filter-select'
+                        value={dateFilter}
+                        label='Date'
+                        onChange={handleChange}
+                    >
+                        {
+                            FILTER_OPTIONS.map((element) => (
+                                <MenuItem value={element.value}>{element.label}</MenuItem>
+                            ))
+                        }
+                    </Select>
+                </FormControl>
+            </Box>
 
             {
                 logs.length > 0 ? (
                     <DataGrid
+                        className='logs-table'
                         columns={columns}
                         rows={logs}
                         initialState={{
                             pagination: {
                                 paginationModel: {
-                                    pageSize: 20,
+                                    pageSize: 10,
                                 },
                             },
                         }}
-                        pageSizeOptions={[20]}
+                        pageSizeOptions={[10]}
                         disableRowSelectionOnClick
+                        keepNonExistentRowsSelected
                     />
-                ) : null
+                ) : <Box className='no-data-grid'>
+                    <Typography className='no-data-text'>There are no logs for the selected date.</Typography>
+                </Box>
             }
         </Box>
     );

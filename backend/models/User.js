@@ -40,6 +40,12 @@ const userSchema = new mongoose.Schema({
         enum: ['uninitialized', 'rejected', 'pending', 'approved'],
         default: 'uninitialized',
         required: true,
+    },
+    idCard: {
+        type: String,
+    },
+    driverLicense: {
+        type: String,
     }
 }, { collection: 'Users'});
 

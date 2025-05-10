@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Navbar from "../Navbar/Navbar.jsx";
 import { Outlet } from "react-router-dom";
 import Chat from '../Chat/Chat.jsx';
@@ -12,7 +12,7 @@ function MainLayout() {
             <Navbar />
             <Outlet />
             {
-                auth.token ? (
+                auth.token && auth.authStore.user.status === 'regular' ? (
                     <>
                         <Chat />
                     </>

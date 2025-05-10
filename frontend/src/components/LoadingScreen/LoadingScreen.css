@@ -5,6 +5,7 @@
     height: calc(100vh - 50px);
     width: 100%;
     animation: skyChange 5s infinite alternate;
+    padding-top: 50px;
 }
 
 .loading-container {

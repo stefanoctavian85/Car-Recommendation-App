@@ -1,0 +1,39 @@
+.admin-conversations-page {
+    padding-top: 20px !important;
+    background-color: inherit !important;
+}
+
+.admin-conversations-input {
+    display: flex !important;
+    width: 100% !important;
+}
+
+.admin-conversations-filter-form {
+    width: 150px !important;
+    margin-right: auto !important;
+    margin-left: 100px !important;
+}
+
+.admin-conversations-table {
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.solve-conversation {
+    display: flex;
+    justify-content: space-around;
+}
+
+.conversations-error {
+    margin-top: 20px;
+}
+
+.admin-conversations-error-message {
+    text-align: center;
+    font-size: 20px !important;
+    color: #f44336;
+}
+
+.solve-conversation-button {
+    text-transform: none !important;
+}

@@ -17,7 +17,7 @@ function ProtectedAdminRoute() {
     useEffect(() => {
         if (auth.token) {
             setIsLoading(true);
-            const userId = jwtDecode(auth.authStore.token).id;
+            const userId = jwtDecode(auth.token).id;
 
             fetch(`${SERVER}/api/users/${userId}/profile`, {
                 method: 'GET',

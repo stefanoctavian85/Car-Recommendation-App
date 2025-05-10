@@ -57,3 +57,12 @@
     display: flex;
     justify-content: end;
 }
+
+.navbar-login-button {
+    text-transform: none !important;
+    color: white !important;
+}
+
+.navbar-button {
+    text-transform: none !important;
+}

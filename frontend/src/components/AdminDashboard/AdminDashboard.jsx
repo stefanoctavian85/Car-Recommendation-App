@@ -14,6 +14,9 @@ import PersonIcon from '@mui/icons-material/Person';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 import Logs from '../Logs/Logs.jsx';
 import Dashboard from '../Dashboard/Dashboard.jsx';
+import ChatIcon from '@mui/icons-material/Chat';
+import AdminConversations from '../AdminConversations/AdminConversations.jsx';
+import Ticket from '../Ticket/Ticket.jsx';
 
 const NAVIGATION = [
     {
@@ -29,6 +32,11 @@ const NAVIGATION = [
         segment: 'logs',
         title: 'Logs',
         icon: <ShoppingCartIcon />
+    },
+    {
+        segment: 'tickets',
+        title: 'Tickets',
+        icon: <ChatIcon />
     }
 ];
 
@@ -110,7 +118,7 @@ function SidebarFooterAccount() {
     );
 }
 
-function PageContent({ pathname }) {
+function PageContent({ pathname, router, state }) {
     return (
         <Box className='page-content' sx={{
             bgcolor: 'background.default',
@@ -122,6 +130,14 @@ function PageContent({ pathname }) {
 
             {
                 pathname === '/dashboard' ? <Dashboard /> : null
+            }
+
+            {
+                pathname === '/tickets' ? <AdminConversations router={router} /> : null
+            }
+
+            {
+                pathname === '/solve-conversation' ? <Ticket state={state} router={router} /> : null
             }
         </Box>
     );
@@ -137,12 +153,20 @@ function AdminDashboard() {
     const navigate = useNavigate();
 
     const [pathname, setPathname] = useState('/dashboard');
+    const [state, setState] = useState(null);
 
     const router = useMemo(() => {
         return {
             pathname,
             searchParams: new URLSearchParams(),
-            navigate: (path) => setPathname(String(path)),
+            navigate: (path, options) => {
+                setPathname(String(path));
+                if (options && options.state) {
+                    setState(options.state);
+                } else {
+                    setState(null);
+                }
+            }
         }
     }, [pathname]);
 
@@ -195,7 +219,7 @@ function AdminDashboard() {
                     sidebarFooter: SidebarFooterAccount
                 }}
             >
-                <PageContent pathname={pathname}/>
+                <PageContent pathname={pathname} router={router} state={state}/>
             </DashboardLayout>
         </AppProvider>
     );

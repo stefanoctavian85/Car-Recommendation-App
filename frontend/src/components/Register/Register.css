@@ -40,7 +40,7 @@
     color: rgb(223, 216, 216) !important;
 }
 
-.MuiInputBase-root.Mui-focused {
+.register-input .MuiInputBase-root.Mui-focused {
     background-image: linear-gradient(to right, #1e2936, #121a24);
 }
 

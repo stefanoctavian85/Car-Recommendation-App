@@ -6,7 +6,7 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
 
     try {
-        const user = await models.User.findOne({
+        let user = await models.User.findOne({
             email: email
         });
 
@@ -18,9 +18,12 @@ const login = async (req, res, next) => {
                 }, process.env.JWT_SECRET, {
                     expiresIn: '1h'
                 });
+
+                const userObj = user.toObject();
+                delete userObj.password;
                 res.status(200).json({
                     token,
-                    user
+                    user: userObj
                 });
             } else {
                 res.status(404).json({
@@ -44,7 +47,7 @@ const register = async (req, res, next) => {
         const userExists = await models.User.findOne({ email: email });
         if (!userExists) {
             const hashedPassword = await bcrypt.hash(password, 10);
-            const user = await models.User.create({email: email, firstname: firstname, lastname: lastname, password: hashedPassword, status: "regular", statusAccountVerified: 'uninitialized'});
+            let user = await models.User.create({ email: email, firstname: firstname, lastname: lastname, password: hashedPassword, status: "regular", statusAccountVerified: 'uninitialized' });
             await user.save();
 
             const token = jwt.sign({
@@ -53,9 +56,11 @@ const register = async (req, res, next) => {
                 expiresIn: '1h'
             });
 
+            const userObj = user.toObject();
+            delete userObj.password;
             res.status(200).json({
                 token,
-                user
+                user: userObj
             });
         } else {
             res.status(400).json({

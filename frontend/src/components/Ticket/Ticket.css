@@ -1,0 +1,44 @@
+.user-ticket-info, .ticket-info {
+    display: flex;
+    flex-direction: row;
+    padding: 30px;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+    width: fit-content;
+    background: linear-gradient(rgba(255, 255, 255, 0.051), rgba(255, 255, 255, 0.041)) !important;
+    width: 400px;
+    gap: 50px !important;
+}
+
+.user-info-left-part, .ticket-info-left-part {
+    min-width: 150px;
+}
+
+.user-ticket-info {
+    margin: 20px 50px;
+}
+
+.ticket-info {
+    margin: 20px 50px;
+}
+
+.ticket-user-info {
+    color: #9e9e9e !important;
+}
+
+.ticket-user-info, .ticket-user-detail {
+    margin: 5px 0px !important;
+}
+
+.ticket-buttons {
+    margin: 20px 50px;
+    max-width: 400px;
+    display: flex;
+    justify-content: center;
+}
+
+.ticket-solve-button {
+    text-transform: none !important;
+    font-size: 16px !important;
+}
+

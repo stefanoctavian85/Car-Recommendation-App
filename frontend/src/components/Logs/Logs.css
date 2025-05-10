@@ -1,7 +1,20 @@
 .logs-page {
-    margin-top: 20px !important;
+    padding-top: 20px !important;
+    background-color: inherit !important;
+}
+
+.logs-input {
+    display: flex !important;
+    width: 100% !important;
 }
 
 .logs-form {
     width: 150px !important;
+    margin-right: auto !important;
+    margin-left: 100px !important;
+}
+
+.logs-table {
+    margin: 20px auto;
+    width: fit-content;
 }
