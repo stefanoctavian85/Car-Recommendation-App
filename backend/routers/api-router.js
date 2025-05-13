@@ -1,6 +1,7 @@
 import express from 'express';
 import controllers from './controllers/index.js';
 import middleware from '../middleware/index.js';
+import path from 'path';
 
 const apiRouter = express.Router();
 apiRouter.use(middleware.auth);
@@ -8,7 +9,7 @@ apiRouter.use(middleware.auth);
 apiRouter.get('/users/:uid/profile', controllers.profile.userInformation);
 apiRouter.post('/users/:uid/forms', controllers.form.predict);
 apiRouter.patch('/users/save-phone-number', controllers.profile.savePhoneNumber);
-apiRouter.post('/users/send-documents', middleware.uploadFiles, controllers.profile.sendDocuments, controllers.profile.checkDocuments);
+apiRouter.post('/users/send-documents', middleware.uploadProfileDocuments, controllers.profile.sendDocuments, controllers.profile.checkDocuments);
 
 apiRouter.get('/reservations/:cid', controllers.reservation.getReservations);
 apiRouter.get('/reservations/check-another-reservation/:uid/:cid', controllers.reservation.checkAnotherReservation);
@@ -32,6 +33,8 @@ apiRouter.get('/chat/send-AI-first-message', controllers.chat.sendFirstMessage);
 apiRouter.post('/chat/send-message', controllers.chat.sendMessage);
 apiRouter.patch('/chat/close-conversation', controllers.chat.closeChat);
 apiRouter.get('/chat/get-conversation-info/:conversationId', controllers.chat.getConversationInfo);
+apiRouter.post('/chat/attach-documents', middleware.uploadChatDocuments, controllers.chat.attachFilesToConversation);
+apiRouter.get('/chat/download-documents/:filename', controllers.chat.downloadDocuments);
 
 apiRouter.use(middleware.error);
 

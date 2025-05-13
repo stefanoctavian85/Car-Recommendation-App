@@ -81,13 +81,17 @@ function Ticket({ state, router }) {
                     </Box>
                 </Box>
 
-                <Box className='ticket-buttons'>
-                    <Button
-                        className='ticket-solve-button'
-                        variant='contained'
-                        onClick={closeChat}
-                    >Solve</Button>
-                </Box>
+                {
+                    conversationInfo.status === 'Open' ? (
+                        <Box className='ticket-buttons'>
+                            <Button
+                                className='ticket-solve-button'
+                                variant='contained'
+                                onClick={closeChat}
+                            >Solve</Button>
+                        </Box>
+                    ) : null
+                }
             </Box>
 
             <Box className='ticket-chat'>

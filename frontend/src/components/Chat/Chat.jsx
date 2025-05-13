@@ -11,6 +11,7 @@ import { firebaseConfig } from '../../config/firebase.jsx';
 import AppContext from '../../state/AppContext.jsx';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, onValue, ref } from 'firebase/database';
+import DownloadIcon from '@mui/icons-material/Download';
 
 const firebase = initializeApp(firebaseConfig);
 const database = getDatabase(firebase);
@@ -49,7 +50,7 @@ function Chat({ adminConversationId }) {
                 .then((data) => {
                     setConversationId(data.conversationId);
                     setConversationStatus('open');
-                })
+                });
         } else if (auth.authStore.user.status === 'admin' && adminConversationId !== '') {
             setIsChatOpen(true);
             setConversationId(adminConversationId);
@@ -114,17 +115,39 @@ function Chat({ adminConversationId }) {
 
     async function sendMessage() {
         if (message.trim() === '' && documents.length === 0) return;
-        console.log(documents.length);
+
         try {
-            await fetch(`${SERVER}/api/chat/send-message`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message, conversationId })
-            });
-            setMessage('');
+            if (message.trim() !== '') {
+                await fetch(`${SERVER}/api/chat/send-message`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message, conversationId })
+                })
+                    .finally(() => {
+                        setMessage('');
+                    })
+            }
+
+            if (documents.length > 0) {
+                const formData = new FormData();
+                formData.append('conversationId', conversationId);
+                documents.forEach((doc) => {
+                    formData.append('documents', doc);
+                });
+                fetch(`${SERVER}/api/chat/attach-documents`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                    },
+                    body: formData,
+                })
+                    .finally(() => {
+                        setDocuments([]);
+                    });
+            }
         } catch (err) {
             console.log(err);
         }
@@ -138,11 +161,39 @@ function Chat({ adminConversationId }) {
     }
 
     function handleFileChange(e) {
-        const documentsLength = documents.length;
-        setDocuments((prevDoc) => ({
-            ...prevDoc,
-            [`document-${documentsLength + 1}`]: e.target.files[0],
-        }));
+        const files = Array.from(e.target.files);
+        setDocuments((prevDocs) => ([
+            ...prevDocs,
+            ...files,
+        ]));
+    }
+
+    function downloadDocuments(message) {
+        for (const doc of message.documents) {
+            const filename = doc.split('/').pop();
+            fetch(`${SERVER}/api/chat/download-documents/${filename}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                },
+            })
+            .then((res) => {
+                if (res.ok) {
+                    return res.blob();
+                }
+            })
+            .then((blob) => {
+                if (blob) {
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            })
+        }
     }
 
     return (
@@ -163,14 +214,18 @@ function Chat({ adminConversationId }) {
                             <Box className='chat-left-bar'>
                                 <Typography className='char-bar-title'>Support Chat</Typography>
                             </Box>
-                            <Box className='chat-right-bar'>
-                                <IconButton className='chat-button-minimize'>
-                                    <MinimizeIcon className='chat-button-icon' onClick={toggleChat} />
-                                </IconButton>
-                                <IconButton className='chat-button-close'>
-                                    <CloseIcon className='chat-button-icon' onClick={() => setIsCloseChatDialogOpen(true)} />
-                                </IconButton>
-                            </Box>
+                            {
+                                auth.authStore.user.status === 'regular' ? (
+                                    <Box className='chat-right-bar'>
+                                        <IconButton className='chat-button-minimize'>
+                                            <MinimizeIcon className='chat-button-icon' onClick={toggleChat} />
+                                        </IconButton>
+                                        <IconButton className='chat-button-close'>
+                                            <CloseIcon className='chat-button-icon' onClick={() => setIsCloseChatDialogOpen(true)} />
+                                        </IconButton>
+                                    </Box>
+                                ) : null
+                            }
                         </Box>
                         <Box className='chat-history-messages'>
                             {
@@ -185,7 +240,7 @@ function Chat({ adminConversationId }) {
                                                             {
                                                                 message.sender === 'AI' ? (
                                                                     <Box className='chat-message-AI'>
-                                                                        <Typography className='message'>{message.message}</Typography>
+                                                                        <Typography className='message-text'>{message.message}</Typography>
                                                                     </Box>
                                                                 ) : null
                                                             }
@@ -193,7 +248,22 @@ function Chat({ adminConversationId }) {
                                                             {
                                                                 message.sender === 'regular' ? (
                                                                     <Box className='chat-message-regular'>
-                                                                        <Typography className='message'>{message.message}</Typography>
+                                                                        <Box className='message'>
+                                                                            <Typography className='message-text'>{message.message}
+                                                                                {
+                                                                                    message.type === 'document' ? (
+                                                                                        <Box className='document-message-right-part'>
+                                                                                            <IconButton
+                                                                                                className='chat-button-open'
+                                                                                                onClick={() => downloadDocuments(message)}
+                                                                                            >
+                                                                                                <DownloadIcon className='chat-icon' />
+                                                                                            </IconButton>
+                                                                                        </Box>
+                                                                                    ) : null
+                                                                                }
+                                                                            </Typography>
+                                                                        </Box>
                                                                     </Box>
                                                                 ) : null
                                                             }
@@ -201,7 +271,7 @@ function Chat({ adminConversationId }) {
                                                             {
                                                                 message.sender === 'admin' ? (
                                                                     <Box className='chat-message-admin'>
-                                                                        <Typography className='message'>{message.message}</Typography>
+                                                                        <Typography className='message-text'>{message.message}</Typography>
                                                                     </Box>
                                                                 ) : null
                                                             }
@@ -236,6 +306,7 @@ function Chat({ adminConversationId }) {
                                                                     type='file'
                                                                     accept="image/*"
                                                                     onChange={handleFileChange}
+                                                                    multiple
                                                                 />
                                                             </IconButton>
                                                         </FormControl>

@@ -76,6 +76,12 @@ function Home() {
         });
     }
 
+    function redirectToDashboard() {
+        if (user.status === 'admin') {
+            navigate('/dashboard');
+        }
+    }
+
     function scrollToNextSection(ref) {
         console.log(ref.current);
         ref.current?.scrollIntoView({ behavior: 'smooth' });
@@ -130,6 +136,21 @@ function Home() {
                                 </CardActionArea>
                             </Card>
                         </Box>
+
+                        {
+                            user.status === 'admin' ? (
+                                <Box className='admin-dashboard'>
+                                    <Typography className='admin-dashboard-title'>Admin Dashboard</Typography>
+                                    <Button
+                                        className='admin-dashboard-button'
+                                        variant='contained'
+                                        onClick={redirectToDashboard}
+                                    >
+                                        Dashboard
+                                    </Button>
+                                </Box>
+                            ) : null
+                        }
                     </Box>
                 ) : (
                     <Box className='home-landing-page' ref={heroSectionRef}>

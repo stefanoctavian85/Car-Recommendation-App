@@ -14,10 +14,15 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage }).fields([{
+const uploadProfileDocuments = multer({ storage: storage }).fields([{
     name: 'id-card', maxCount: 1, 
 }, {
     name: 'driver-license', maxCount: 1,
 }]);
 
-export default upload;
+const uploadChatDocuments = multer({ storage: storage }).array('documents', 10);
+
+export {
+    uploadProfileDocuments,
+    uploadChatDocuments
+};

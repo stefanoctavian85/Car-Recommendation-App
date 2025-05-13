@@ -5,6 +5,8 @@ import dayjs from 'dayjs';
 import { SERVER } from '../../utils/global.js';
 import fetch from 'node-fetch';
 import models from "../../models/index.js";
+import path from "path";
+import utils from "../../utils/index.js";
 
 const sendFirstMessage = async (req, res, next) => {
     const userId = req.user._id.toString();
@@ -26,6 +28,7 @@ const sendFirstMessage = async (req, res, next) => {
         startingConversationTime = new Date(startingConversationTime).toISOString();
         const welcomeMessageId = uuid();
         const welcomeMessage = {
+            type: 'text',
             messageId: welcomeMessageId,
             sender: "AI",
             message: "Write a short description of the problem you are facing!",
@@ -46,24 +49,11 @@ const sendMessage = async (req, res, next) => {
     const { message, conversationId } = req.body;
     const userFullName = req.user.firstname + " " + req.user.lastname;
     try {
-        const conversations = ref(database, 'conversations');
-        const snapshot = await get(conversations);
-
+        const conversationRef = ref(database, `conversations/${conversationId}`);
+        const snapshot = await get(conversationRef);
+        const conversation = snapshot.val();
+        
         let flaskResponse, response;
-        let conversation = '';
-        let children = [];
-
-        snapshot.forEach(child => {
-            children.push(child);
-        });
-
-        for (const child of children) {
-            const convCopy = child.val();
-            if (child.key === conversationId && convCopy.status === 'open') {
-                conversation = convCopy;
-                break;    
-            }
-        }
 
         if (conversation.category === 'unknown' || conversation.category === 'others') {
             flaskResponse = await fetch(`${SERVER}/chatbot/categorize`, {
@@ -80,6 +70,7 @@ const sendMessage = async (req, res, next) => {
 
         const messageId = uuid();
         const newMessage = {
+            type: 'text',
             messageId: messageId,
             senderFullName: userFullName,
             sender: req.user.status,
@@ -99,6 +90,62 @@ const sendMessage = async (req, res, next) => {
         res.status(200).json({
             message: "Message sent successfully!",
         });
+    } catch (err) {
+        next(err);
+    }
+}
+
+const attachFilesToConversation = async (req, res, next) => {
+    try {
+        const files = req.files;
+        const conversationId = req.body.conversationId;
+        const userFullName = req.user.firstname + " " + req.user.lastname;
+
+        let newMessage = {};
+        if (conversationId) {
+            const messageRef = ref(database, `conversations/${conversationId}/messages`);
+            const documents = files.map((file) => (
+                file.destination + file.filename
+            ));
+
+            const messageId = uuid();
+            newMessage = {
+                type: 'document',
+                messageId: messageId,
+                senderFullName: userFullName,
+                sender: req.user.status,
+                message: `${userFullName} uploaded ${files.length} documents to this conversation.`,
+                documents: documents,
+                timestamp: dayjs().toISOString(),
+            };
+            await push(messageRef, newMessage);
+        } else {
+            return res.status(404).json({
+                message: "Conversation not found!",
+            })
+        }
+
+        res.status(200).json({
+            message: "Message sent successfully!",
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
+const downloadDocuments = async (req, res, next) => {
+    try {
+        const filename = req.params.filename;
+        const filePath = path.join(utils.pathUtils.filesRootPath, "uploads", filename);
+
+        res.download(filePath, (error) => {
+            if (error) {
+                console.error(error);
+                res.status(500).json({
+                    message: 'Internal Server Error',
+                });
+            }
+        })
     } catch (err) {
         next(err);
     }
@@ -149,7 +196,8 @@ const getConversationInfo = async (req, res, next) => {
             _id: userId,
         });
 
-        conversationInfo = { ...conversationInfo,
+        conversationInfo = {
+            ...conversationInfo,
             'email': userInfo.email,
             'userStatus': userInfo.status.charAt(0).toUpperCase() + userInfo.status.slice(1).toLowerCase(),
             'phoneNumber': userInfo.phoneNumber,
@@ -167,6 +215,8 @@ const getConversationInfo = async (req, res, next) => {
 export default {
     sendFirstMessage,
     sendMessage,
+    attachFilesToConversation,
+    downloadDocuments,
     closeChat,
     getConversationInfo,
 }
