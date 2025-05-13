@@ -1,6 +1,7 @@
 import joblib
 import numpy as np
 from flask import Flask, request, jsonify
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -15,7 +16,6 @@ label_encoder_gearbox = joblib.load("./car-recommendation/joblib_files/labelenco
 label_encoder_car = joblib.load("./car-recommendation/joblib_files/labelencoder_y.joblib")
 standard_scaler = joblib.load("./car-recommendation/joblib_files/standardscaler.joblib")
 
-
 @app.route('/chatbot/categorize', methods=['POST'])
 def categorize():
     data = request.get_json()
@@ -28,31 +28,34 @@ def categorize():
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
-
     responses = np.array(data['responses'])
-    numeric_responses = []
-    transformed_responses = []
-    for i, col in enumerate(responses):
-        if i == 3:
-            transformed_responses.append(label_encoder_gearbox.transform([col])[0])
-        elif i == 4:
-            transformed_responses.append(label_encoder_bodytype.transform([col])[0])
-        elif i == 5:
-            transformed_responses.append(label_encoder_fueltype.transform([col])[0])
-        elif i == 6:
-            transformed_responses.append(label_encoder_transmission.transform([col])[0])
-        else:
-            numeric_responses.append(col)
 
-    numeric_responses = np.array(numeric_responses).reshape(1, -1)
-    numeric_responses = standard_scaler.transform(numeric_responses)
+    df = pd.DataFrame([{
+        'Anul productiei': int(responses[0]),
+        'Capacitate cilindrica': int(responses[1]),
+        'Putere': int(responses[2]),
+        'Cutie de viteze': responses[3],
+        'Tip Caroserie': responses[4],
+        'Combustibil': responses[5],
+        'Transmisie': responses[6],
+        'Pret': int(responses[7]),
+        'Consum Urban': int(responses[8]),
+        'Consum Extraurban': int(responses[9]),
+    }])
 
-    transformed_responses = np.concatenate([transformed_responses, numeric_responses.flatten()])
-    transformed_responses = np.array(transformed_responses).reshape(1, -1)
+    df['Combustibil'] = label_encoder_fueltype.transform(df['Combustibil'])
+    df['Tip Caroserie'] = label_encoder_bodytype.transform(df['Tip Caroserie'])
+    df['Cutie de viteze'] = label_encoder_gearbox.transform(df['Cutie de viteze'])
+    df['Transmisie'] = label_encoder_transmission.transform(df['Transmisie'])
 
-    predictions = model_recommendation.predict_proba(transformed_responses)
-    predictions = np.argsort(predictions, axis=1)[:, -3:]
-    predictions = np.sort(predictions)
+    numeric_responses = ['Anul productiei', 'Capacitate cilindrica', 'Putere', 'Consum Urban', 'Consum Extraurban', 'Pret']
+    categoric_responses = ['Combustibil', 'Tip Caroserie', 'Cutie de viteze', 'Transmisie']
+
+    scaled_responses = standard_scaler.transform(df[numeric_responses])
+    final_responses = np.hstack([scaled_responses, df[categoric_responses]])
+    
+    predictions = model_recommendation.predict_proba(final_responses)[0]
+    predictions = np.argsort(predictions)[::-1][:3]
     predictions = predictions.ravel()
     predictions = label_encoder_car.inverse_transform(predictions).tolist()
     return jsonify(predictions)
