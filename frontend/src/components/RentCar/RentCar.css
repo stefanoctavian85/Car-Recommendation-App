@@ -247,62 +247,25 @@
     font-weight: 700 !important;
 }
 
-.rental-final {
-    background-image: linear-gradient(to bottom right, #2e2a2a, #1e1c1c);
-    min-height: 350px !important;
-}
-
-.rental-final-success {
+.payment-section-header {
     display: flex;
-    text-align: center;
-    justify-content: center;
-    flex-direction: row;
-    gap: 10px
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid white;
 }
 
-.rental-final-title {
+.payment-title {
     font-size: 24px !important;
     font-weight: bold !important;
-    color: #66bb6a;
-    margin: 32px 0px !important;
+    color: white;
 }
 
-.success-icon {
-    font-size: 36px !important;
-    color: #ffde34;
-    margin: 32px 0px !important;
-}
-
-.rental-final-content {
-    display: flex !important;
-    justify-content: center !important;
-    flex-direction: column !important;
-    text-align: center;
-}
-
-.rental-final-subtitle {
-    font-size: 1.8rem !important;
-    color: #66bb6a;
-    margin-bottom: 1rem;
-    font-weight: 700;
-}
-
-.rental-final-text {
-    border-bottom: 1px solid #333;
-    color: #e0e0e0;
-    margin-bottom: 1.5rem !important;
-    padding-bottom: 10px !important;
-    line-height: 1.6;
-    margin: 0 auto 1.5rem;
-    font-size: 1.5rem !important;
-}
-
-.team-message {
-    color: #b3b3b3;
-    font-style: italic;
-    padding: 1rem;
-    margin: 0 auto;
-    font-size: 1.2rem !important;
+.payment-subtitle {
+    font-size: 20px !important;
+    color: rgb(214, 214, 214);
+    font-weight: 500 !important;
+    margin-bottom: 10px !important;
 }
 
 @media (max-width: 1500px) {

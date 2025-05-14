@@ -68,4 +68,10 @@
     position: relative;
     top: 12px;
     margin-bottom: 10px;
+    text-transform: none;
+    font-size: 18px !important;
+}
+
+.search-icon {
+    font-size: 18px !important;
 }

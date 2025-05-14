@@ -1,7 +1,6 @@
 import express from 'express';
 import controllers from './controllers/index.js';
 import middleware from '../middleware/index.js';
-import path from 'path';
 
 const apiRouter = express.Router();
 apiRouter.use(middleware.auth);
@@ -15,6 +14,8 @@ apiRouter.get('/reservations/:cid', controllers.reservation.getReservations);
 apiRouter.get('/reservations/check-another-reservation/:uid/:cid', controllers.reservation.checkAnotherReservation);
 apiRouter.post('/reservations/check-availability', controllers.reservation.checkDateAvailability);
 apiRouter.post('/reservations/calculate-rental-price', controllers.reservation.calculateRentalPrice);
+apiRouter.post('/reservations/create-payment-intent', controllers.reservation.createPaymentIntent);
+apiRouter.post('/reservations/check-payment', controllers.reservation.checkPayment);
 apiRouter.post('/reservations/rent-car', controllers.reservation.rentCar);
 apiRouter.get('/reservations/get-reservations-by-id/:uid', controllers.reservation.getReservationById);
 apiRouter.patch('/reservations/change-rental-details', controllers.reservation.changeRentalDetails);

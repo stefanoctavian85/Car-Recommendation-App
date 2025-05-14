@@ -14,12 +14,12 @@ import Form from './components/Form/Form.jsx';
 import Cars from './components/Cars/Cars.jsx';
 import CarDetails from './components/CarDetails/CarDetails.jsx';
 import RentCar from './components/RentCar/RentCar.jsx';
-
 import AppContext from './state/AppContext.jsx';
 import AuthStore from './state/stores/AuthStore.jsx';
 import CarsStore from './state/stores/CarsStore.jsx';
 import AdminDashboard from './components/AdminDashboard/AdminDashboard.jsx';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen.jsx';
+import RentConfirmation from './components/RentConfirmation/RentConfirmation.jsx';
 
 function App() {
   const [authStore] = useState(new AuthStore());
@@ -102,6 +102,10 @@ function App() {
 
               <Route element={<ProtectedRoute />}>
                 <Route path='/rent-car' element={<RentCar />}></Route>
+              </Route>
+
+              <Route element={<ProtectedRoute />}>
+                <Route path='/rent-confirmation' element={<RentConfirmation />}></Route>
               </Route>
             </Route>
 

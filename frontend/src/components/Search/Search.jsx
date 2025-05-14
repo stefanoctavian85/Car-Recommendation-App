@@ -250,7 +250,7 @@ function Search() {
                         <Button
                             variant='contained'
                             size='medium'
-                            endIcon={<SendIcon />}
+                            endIcon={<SendIcon className='search-icon' />}
                             onClick={(e) => searchCars(e)}
                         >Search</Button>
                     </Box>

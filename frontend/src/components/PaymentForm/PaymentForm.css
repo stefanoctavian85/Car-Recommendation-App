@@ -1,0 +1,46 @@
+.payment-content {
+    width: 100%;
+    max-width: 600px;
+    margin: 15px auto !important;
+}
+
+.payment-submit {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px !important;
+}
+
+.payment-submit-button {
+    text-transform: none !important;
+}
+
+.payment-error {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.payment-error-message {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    color: #9f0808;
+}
+
+.payment-error-redirect {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.payment-error-redirect-message {
+    font-size: 20px !important;
+    font-weight: 500 !important;
+}
+
+.payment-error-redirect-button {
+    text-transform: none !important;
+}

@@ -257,9 +257,11 @@ function CarDetails() {
                             </Box>
                         </Box>
                         <Box className='car-rent-button'>
-                            <Button onClick={() => {
-                                setOpen(true);
-                                rentCar();
+                            <Button
+                                className='rent-car-button'
+                                onClick={() => {
+                                    setOpen(true);
+                                    rentCar();
                             }}>Rent</Button>
                         </Box>
                     </Box>

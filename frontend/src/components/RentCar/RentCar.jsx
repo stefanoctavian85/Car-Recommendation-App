@@ -19,11 +19,28 @@ import PaletteIcon from '@mui/icons-material/Palette';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import AddRoadIcon from '@mui/icons-material/AddRoad';
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import dayjs from 'dayjs';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import PaymentForm from '../PaymentForm/PaymentForm.jsx';
 
-const steps = ['Select rental details', 'Complete the final documents', 'Rent the car'];
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const appearence = {
+    theme: 'night',
+    labels: 'floating',
+    variables: {
+        colorBackground: '#272424',
+        spacingUnit: '5px',
+    },
+    rules: {
+        '.Input': {
+            border: 'none',
+        }
+    }
+}
+
+const steps = ['Select rental details', 'Complete the final documents', 'Payment'];
 
 const currentDate = dayjs();
 
@@ -58,12 +75,13 @@ function RentCar() {
     const [rentalPrice, setRentalPrice] = useState(0);
     const [rentalPriceErrorMessage, setRentalPriceErrorMessage] = useState('');
 
-    const [finalErrorMessage, setFinalErrorMessage] = useState('');
+    const [clientSecret, setClientSecret] = useState('');
 
     const [isLoading, setIsLoading] = useState(false);
 
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+
     const location = useLocation();
 
     useEffect(() => {
@@ -129,7 +147,7 @@ function RentCar() {
 
         setIsFullInsuranceChecked(insuranceOptions.thirdPartyLiability && insuranceOptions.collisionDamageWaiver && insuranceOptions.theftProtection);
         setIsIndeterminate(!isFullInsuranceChecked && (insuranceOptions.thirdPartyLiability || insuranceOptions.collisionDamageWaiver || insuranceOptions.theftProtection));
-    
+
         const timeout = setTimeout(() => {
             setIsLoading(false);
         }, 1500);
@@ -178,21 +196,26 @@ function RentCar() {
 
     useEffect(() => {
         const allChecked = insuranceOptions.thirdPartyLiability && insuranceOptions.collisionDamageWaiver
-                        && insuranceOptions.theftProtection;
+            && insuranceOptions.theftProtection;
         setIsFullInsuranceChecked(allChecked);
         setIsIndeterminate(!allChecked && (insuranceOptions.thirdPartyLiability || insuranceOptions.collisionDamageWaiver || insuranceOptions.theftProtection));
-        
+
     }, [insuranceOptions]);
 
     function handleBackStep() {
-        if (activeStep > 0) {
+        if (activeStep === 0) {
+            navigate(`/car-details?id=${car._id}`);
+        } else if (activeStep > 0) {
             setActiveStep((prevActiveStep) => prevActiveStep - 1);
         }
     }
 
     async function handleNextStep() {
         if (activeStep === 0) {
-            if (dayjs(startDate).isAfter(endDate) || dayjs(endDate).isBefore(startDate) || endDate === '') {
+            if (startDate === '' || endDate === '') {
+                setReservationErrorMessage('You must select the rental period!');
+                return;
+            } else if (dayjs(startDate).isAfter(endDate) || dayjs(endDate).isBefore(startDate) || endDate === '') {
                 setReservationErrorMessage('You cannot select the end date before the start date or the start date after the end date!');
                 return;
             } else {
@@ -219,6 +242,7 @@ function RentCar() {
                     setReservationErrorMessage(data.message);
                 }
 
+                let price = 0;
                 const res = await fetch(`${SERVER}/api/reservations/calculate-rental-price`, {
                     method: 'POST',
                     headers: {
@@ -235,11 +259,35 @@ function RentCar() {
 
                 const dataPrice = await res.json();
                 if (res.ok) {
+                    price = dataPrice.rentalPrice;
                     setRentalPrice(dataPrice.rentalPrice);
                     setRentalPriceErrorMessage('');
                 } else {
                     setRentalPriceErrorMessage(dataPrice.message);
                 }
+
+                fetch(`${SERVER}/api/reservations/create-payment-intent`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json',
+                        'Accept-Language': 'en',
+                    },
+                    body: JSON.stringify({
+                        carId: car._id,
+                        rentalPrice: price,
+                        insuranceOptions,
+                        nrDays: dayjs(endDate).diff(dayjs(startDate), 'day') + 1,
+                    }),
+                })
+                    .then((res) => {
+                        if (res.ok) {
+                            return res.json();
+                        }
+                    })
+                    .then((data) => {
+                        setClientSecret(data.clientSecret);
+                    });
             }
             const timeout = setTimeout(() => {
                 setIsLoading(false);
@@ -248,77 +296,12 @@ function RentCar() {
         }
 
         if (activeStep === 1) {
-            setIsLoading(true);
-            if (location.state.from === '/car-details') {
-                fetch(`${SERVER}/api/reservations/rent-car`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${auth.token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        cid: car._id,
-                        startDate,
-                        endDate,
-                        insuranceOptions,
-                        rentalPrice
-                    })
-                })
-                    .then(res => {
-                        if (res.ok) {
-                            return res.json();
-                        }
-                    })
-                    .then(data => {
-                        if (data.completed === true) {
-                            setFinalErrorMessage('');
-                            setActiveStep((prevActiveStep) => prevActiveStep + 1);
-                        } else {
-                            setFinalErrorMessage(data.message);
-                        }
-                    })
-            } else if (location.state.from === '/profile') {
-                fetch(`${SERVER}/api/reservations/change-rental-details`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `Bearer ${auth.token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        cid: car._id,
-                        startDate,
-                        endDate,
-                        insuranceOptions,
-                        rentalPrice
-                    })
-                })
-                    .then(res => {
-                        if (res.ok) {
-                            return res.json();
-                        }
-                    })
-                    .then(data => {
-                        if (data.completed === true) {
-                            setFinalErrorMessage('');
-                            setActiveStep((prevActiveStep) => prevActiveStep + 1);
-                        } else {
-                            setFinalErrorMessage(data.message);
-                        }
-                    })
-            }
-            console.log('test');
-            const timeout = setTimeout(() => {
-                setIsLoading(false);
-            }, 1500);
-            return () => clearTimeout(timeout);
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
         }
 
         if (activeStep === 2) {
-            navigate('/profile', {
-                state: {
-                    valueTab: '2'
-                }
-            });
+
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
         }
     }
 
@@ -379,10 +362,14 @@ function RentCar() {
         } else {
             setInsuranceOptions((prevOptions) => {
                 const newOptions = { ...prevOptions, [name]: checked };
-                
+
                 return newOptions;
             })
         }
+    }
+
+    function handlePaymentStatus(status) {
+        setPaymentStatus(status);
     }
 
     if (isLoading) {
@@ -576,8 +563,8 @@ function RentCar() {
                                         </Box>
 
                                         <Box className='user-info'>
-                                                <CalendarMonthIcon className='profile-icon' />
-                                                <Typography>{startDate.format('MM/DD')} - {endDate.format('MM/DD/YYYY')}</Typography>
+                                            <CalendarMonthIcon className='profile-icon' />
+                                            <Typography>{startDate.format('MM/DD')} - {endDate.format('MM/DD/YYYY')}</Typography>
                                         </Box>
                                     </Box>
 
@@ -622,35 +609,46 @@ function RentCar() {
 
                     {
                         activeStep === 2 ? (
-                            <Box className='rental-final'>
-                                <Box className='rental-final-success'>
-                                    <Typography component='h1' className='rental-final-title'>Congratulations!</Typography>
-                                    <EmojiEmotionsIcon className='success-icon' />
+                            <Box className='payment-section'>
+                                <Box className='payment-section-header'>
+                                    <Typography className='payment-title'>Payment</Typography>
+                                    <Typography className='payment-subtitle'>Rental Price: {rentalPrice}</Typography>
                                 </Box>
-                                <Box className='rental-final-content'>
-                                    <Typography component='h2' className='rental-final-subtitle'>The payment was successful!</Typography>
-                                    <Typography component='h3' className='rental-final-text'>
-                                        Thank you for trusting us and our services!
-                                        From now on, you can see your new car on your profile!
-                                    </Typography>
-                                    <Typography className='team-message'>The CarMinds team wishes you safe travels and enjoy your car!</Typography>
+                                <Box className='payment-content'>
+                                    <Elements stripe={stripePromise} options={{
+                                        clientSecret: clientSecret,
+                                        locale: 'en',
+                                        appearance: appearence,
+                                    }}>
+                                        {
+                                            clientSecret && <PaymentForm
+                                            car={car}
+                                            startDate={startDate}
+                                            endDate={endDate}
+                                            insuranceOptions={insuranceOptions}
+                                            rentalPrice={rentalPrice}
+                                            />
+                                        }
+                                    </Elements>
                                 </Box>
                             </Box>
                         ) : null
                     }
+
                 </Box>
                 <Box className='rent-buttons'>
+                    <Button onClick={handleBackStep} className='back-button'>Back</Button>
                     {
                         activeStep !== 2 ? (
-                            <Button onClick={handleBackStep} className='back-button'>Back</Button>
+                            <Button onClick={handleNextStep} className='next-stepper-button'>
+                                {
+                                    activeStep < 2 ? 'Next' :
+                                        activeStep === 2 ? 'Pay' : 'See your rented cars now!'
+                                }
+                            </Button>
                         ) : null
                     }
-                    <Button onClick={handleNextStep} className='next-stepper-button'>
-                        {
-                            activeStep === 0 ? 'Next' :
-                                activeStep === 1 ? 'Pay' : 'See your rented cars now!'
-                        }
-                    </Button>
+
                 </Box>
             </Fragment>
         </Box>

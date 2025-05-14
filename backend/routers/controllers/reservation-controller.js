@@ -1,6 +1,9 @@
 import models from "../../models/index.js";
 import dayjs from 'dayjs';
 import messages from '../../utils/index.js';
+import { CLIENT } from '../../utils/global.js';
+import stripe from '../../utils/stripe-configuration.js';
+
 
 const RESERVATIONS_LIMIT_PER_USER = 3;
 
@@ -186,6 +189,74 @@ const calculateRentalPrice = async (req, res, next) => {
     }
 }
 
+const createPaymentIntent = async (req, res, next) => {
+    try {
+        const { carId, rentalPrice, insuranceOptions, nrDays } = req.body;
+
+        if (!carId || !rentalPrice || !nrDays) {
+            return res.status(400).json({
+                message: 'Missing required fields!',
+            });
+        }
+
+        const car = await models.Car.findById({ _id: carId });
+        if (!car) {
+            return res.status(404).json({
+                message: 'Car not found!',
+            });
+        }
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: rentalPrice * 100,
+            currency: 'eur',
+            metadata: {
+                userId: req.user._id.toString(),
+                carId: carId,
+                insuranceOptions: JSON.stringify(insuranceOptions),
+                nrDays: nrDays,
+            },
+        });
+
+        return res.status(200).json({
+            clientSecret: paymentIntent.client_secret,
+        });
+    } catch(err) {
+        next(err);
+    }
+}
+
+const checkPayment = async (req, res, next) => {
+    try {
+        const { paymentIntent } = req.body;
+
+        if (!paymentIntent) {
+            return res.status(400).json({
+                succeeded: false,
+            })
+        }
+
+        const payment = await stripe.paymentIntents.retrieve(paymentIntent);
+
+        if (!payment) {
+            return res.status(400).json({
+                succeeded: false,
+            });
+        }
+
+        if (payment.status === 'succeeded') {
+            return res.status(200).json({
+                succeeded: true,
+            });
+        } else {
+            return res.status(400).json({
+                succeeded: false,
+            });
+        }
+    } catch (err) {
+        next(err);
+    }
+}
+
 const rentCar = async (req, res, next) => {
     try {
         const { cid, startDate, endDate, insuranceOptions, rentalPrice } = req.body;
@@ -299,6 +370,8 @@ export default {
     checkAnotherReservation,
     checkDateAvailability,
     calculateRentalPrice,
+    createPaymentIntent,
+    checkPayment,
     rentCar,
     getReservationById,
     changeRentalDetails

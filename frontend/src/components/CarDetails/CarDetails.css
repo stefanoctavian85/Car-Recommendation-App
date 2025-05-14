@@ -140,7 +140,6 @@
     width: 100%;
     padding: 10px !important;
     font-weight: 600 !important;
-    text-transform: uppercase !important;
     transition: all 0.3s !important;
     margin-top: 5px;
 }
@@ -272,4 +271,8 @@
     font-size: 20px;
     position: relative;
     top: 1px;
+}
+
+.rent-car-button {
+    text-transform: none !important;
 }
