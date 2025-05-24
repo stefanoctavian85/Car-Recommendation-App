@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import StandardScaler
+
 
 def na_values(df: pd.DataFrame, col_name, group_by_cols=None):
     if group_by_cols is None:
@@ -30,84 +33,125 @@ def na_values(df: pd.DataFrame, col_name, group_by_cols=None):
             else:
                 df.at[index, col_name] = similar_cars[col_name].mode()[0]
 
+def missing_values(cars: pd.DataFrame):
+    cars["Marca"] = cars["Marca"] + " " + cars["Model"]
+    cars = cars.drop(["Model"], axis=1)
+    cars = cars.rename(columns={"Marca": "Masina"})
+
+    cars = cars.rename(columns={'Anul producției': 'Anul productiei'})
+
+    cars['Consum Urban'] = cars['Consum Urban'].str.extract(r'(\d+\.?\d*)')
+    cars['Consum Urban'] = pd.to_numeric(cars['Consum Urban'])
+    cars['Consum Extraurban'] = cars['Consum Extraurban'].str.extract(r'(\d+\.?\d*)')
+    cars['Consum Extraurban'] = pd.to_numeric(cars['Consum Extraurban'])
+
+    cars["Moneda"] = cars["Pret"].str.extract(r'(EUR|RON)')
+    cars["Pret"] = cars["Pret"].str.extract(r'(\d+\s?\d*)')
+    cars["Pret"] = cars["Pret"].str.replace(" ", "")
+    cars["Pret"] = cars.apply(lambda row: float(row["Pret"]) / 5.00 if row["Moneda"] == "RON" else row["Pret"], axis=1)
+    cars = cars.drop(["Moneda"], axis=1)
+
+    cars["Capacitate cilindrica"] = cars["Capacitate cilindrica"].str.extract(r'(\d+\s?\d*)')
+    cars["Capacitate cilindrica"] = cars["Capacitate cilindrica"].str.replace(" ", "")
+    cars["Capacitate cilindrica"] = pd.to_numeric(cars["Capacitate cilindrica"])
+
+    cars["Putere"] = cars["Putere"].str.extract(r'(\d*)')
+    cars["Putere"] = pd.to_numeric(cars["Putere"])
+
+    cars["KM"] = cars["KM"].str.extract(r'([\d\s]+)')[0].str.replace(" ", "", regex=True)
+    cars["KM"] = pd.to_numeric(cars["KM"])
+
+    cars["Emisii CO2"] = cars["Emisii CO2"].str.extract(r'(\d*)')
+    cars["Emisii CO2"] = pd.to_numeric(cars["Emisii CO2"])
+
+    cars['Volan pe dreapta'] = cars['Volan pe dreapta'].apply(lambda x: "Da" if x == "Da" else "Nu")
+
+    cars["Combustibil"] = cars["Combustibil"].apply(
+        lambda x: "Benzina" if x in ["Benzina", "Benzina + GPL", "Benzina + CNG"] else
+        "Hibrid" if x in ["Hibrid", "Hibrid Plug-In"]
+        else x)
+
+    cars["Tip Caroserie"] = cars["Tip Caroserie"].apply(lambda x: "Sedan" if x in ["Sedan", "Combi"] else
+    "Compact" if x in ["Compacta", "Masina mica", "Masina de oras"] else
+    "Sport" if x in ["Cabrio", "Coupe"] else x)
+
+    cars["Transmisie"] = cars["Transmisie"].apply(lambda x: "4x4" if x in ["4x4 (automat)", "4x4 (manual)"] else x)
+
+    cars["Norma de poluare"] = cars["Norma de poluare"].apply(lambda x: "Euro 5" if x in ["Euro 5", "Euro 5b"] else
+    "Euro 6" if x in ["Euro 6", "Euro 6b", "Euro 6c", "Euro 6d", "Euro 6d-Temp"]
+    else x)
+
+    cars["Norma de poluare"] = np.where((cars["Combustibil"] == "Electric") & (cars["Norma de poluare"].isna()),
+                                        "Euro 6", cars["Norma de poluare"])
+
+    cars["Norma de poluare"] = cars.apply(
+        lambda x: "Euro 6" if (x["Anul productiei"] >= 2015) & (x["Anul productiei"] <= 2025) else
+        "Euro 5" if (x["Anul productiei"] >= 2009) & (x["Anul productiei"] <= 2014) else
+        "Euro 4" if (x["Anul productiei"] >= 2005) & (x["Anul productiei"] <= 2008) else
+        "Euro 3" if (x["Anul productiei"] >= 2000) & (x["Anul productiei"] <= 2004) else
+        "Euro 2" if (x["Anul productiei"] >= 1996) & (x["Anul productiei"] <= 2000) else
+        "Euro 1" if (x["Anul productiei"] >= 1992) & (x["Anul productiei"] <= 1995) else
+        "Non-euro", axis=1)
+
+    group = ['Masina', 'Anul productiei', 'Combustibil']
+
+    na_values(cars, "Numar locuri")
+    na_values(cars, "Numar de portiere")
+    na_values(cars, "Consum Urban")
+    na_values(cars, "Consum Extraurban")
+    na_values(cars, "Capacitate cilindrica", group)
+    na_values(cars, "Putere", group)
+    na_values(cars, "Cutie de viteze")
+    na_values(cars, "Transmisie")
+    na_values(cars, "Norma de poluare", group)
+    na_values(cars, "Emisii CO2", group)
+
+    cars['Consum Mixt'] = (cars['Consum Urban'] + cars['Consum Extraurban']) / 2
+    cars['Consum Mixt'] = round(cars['Consum Mixt'], 1)
+
+    cars['Capacitate cilindrica'] = cars['Capacitate cilindrica'].apply(lambda x: 0 if pd.isna(x) else x)
+
+    cars.loc[(cars["Combustibil"] == "Electric") | (cars["Combustibil"] == "Hibrid"), "Emisii CO2"] = 0
+
+    cars = cars.dropna(subset=['Putere', 'Transmisie', 'KM', 'Numar locuri', 'Consum Urban', 'Consum Extraurban', 'Consum Mixt', 'Emisii CO2'])
+
+    return cars
+
+
+def calculate_number_of_facilities(row):
+    facilities_columns = ["Audio si tehnologie", "Confort si echipamente optionale",
+                          "Electronice si sisteme de asistenta", "Performanta", "Siguranta"]
+    total_number = 0
+
+    for column in facilities_columns:
+        value = row[column]
+        if pd.isna(value) or value.strip() == '':
+            continue
+
+        facilities = [x.strip() for x in value.split(', ')]
+        total_number += len(facilities)
+
+    return total_number
+
+def eliminate_outliers(cars: pd.DataFrame):
+    numerical_columns = cars.select_dtypes(exclude="object").columns
+
+    X = cars[numerical_columns]
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    iso = IsolationForest(random_state=42)
+    iso.fit(X_scaled)
+
+    predictions = iso.predict(X_scaled)
+    cars["is_outlier"] = predictions
+    cars = cars[cars["is_outlier"] == 1]
+    cars = cars.drop(columns=["is_outlier"])
+    return cars
 
 cars = pd.read_csv("raw/cars_dataset.csv")
-
-cars["Marca"] = cars["Marca"] + " " + cars["Model"]
-cars = cars.drop(["Model"], axis=1)
-cars = cars.rename(columns={"Marca": "Masina"})
-
-cars = cars.rename(columns={'Anul producției': 'Anul productiei'})
-
-cars['Consum Urban'] = cars['Consum Urban'].str.extract(r'(\d+\.?\d*)')
-cars['Consum Urban'] = pd.to_numeric(cars['Consum Urban'])
-cars['Consum Extraurban'] = cars['Consum Extraurban'].str.extract(r'(\d+\.?\d*)')
-cars['Consum Extraurban'] = pd.to_numeric(cars['Consum Extraurban'])
-
-cars["Moneda"] = cars["Pret"].str.extract(r'(EUR|RON)')
-cars["Pret"] = cars["Pret"].str.extract(r'(\d+\s?\d*)')
-cars["Pret"] = cars["Pret"].str.replace(" ", "")
-cars["Pret"] = cars.apply(lambda row: float(row["Pret"]) / 5.00 if row["Moneda"] == "RON" else row["Pret"], axis=1)
-cars = cars.drop(["Moneda"], axis=1)
-
-cars["Capacitate cilindrica"] = cars["Capacitate cilindrica"].str.extract(r'(\d+\s?\d*)')
-cars["Capacitate cilindrica"] = cars["Capacitate cilindrica"].str.replace(" ", "")
-cars["Capacitate cilindrica"] = pd.to_numeric(cars["Capacitate cilindrica"])
-
-cars["Putere"] = cars["Putere"].str.extract(r'(\d*)')
-cars["Putere"] = pd.to_numeric(cars["Putere"])
-
-cars["KM"] = cars["KM"].str.extract(r'([\d\s]+)')[0].str.replace(" ", "", regex=True)
-cars["KM"] = pd.to_numeric(cars["KM"])
-
-cars["Emisii CO2"] = cars["Emisii CO2"].str.extract(r'(\d*)')
-cars["Emisii CO2"] = pd.to_numeric(cars["Emisii CO2"])
-
-cars['Volan pe dreapta'] = cars['Volan pe dreapta'].apply(lambda x: "Da" if x == "Da" else "Nu")
-
-cars["Combustibil"] = cars["Combustibil"].apply(lambda x: "Benzina" if x in ["Benzina", "Benzina + GPL", "Benzina + CNG"] else
-                                                            "Hibrid" if x in ["Hibrid", "Hibrid Plug-In"]
-                                                            else x)
-
-cars["Tip Caroserie"] = cars["Tip Caroserie"].apply(lambda x: "Sedan" if x in ["Sedan", "Combi"] else
-                                                                "Compact" if x in ["Compacta", "Masina mica", "Masina de oras"] else
-                                                                "Sport" if x in ["Cabrio", "Coupe"] else x)
-
-cars["Transmisie"] = cars["Transmisie"].apply(lambda x: "4x4" if x in ["4x4 (automat)", "4x4 (manual)"] else x)
-
-cars["Norma de poluare"] = cars["Norma de poluare"].apply(lambda x: "Euro 5" if x in ["Euro 5", "Euro 5b"] else
-                                                                    "Euro 6" if x in ["Euro 6", "Euro 6b", "Euro 6c", "Euro 6d", "Euro 6d-Temp"]
-                                                                    else x)
-
-cars["Norma de poluare"] = np.where((cars["Combustibil"] == "Electric") & (cars["Norma de poluare"].isna()), "Euro 6", cars["Norma de poluare"])
-
-cars["Norma de poluare"] = cars.apply(lambda x: "Euro 6" if (x["Anul productiei"] >= 2015) & (x["Anul productiei"] <= 2025) else
-                                                "Euro 5" if (x["Anul productiei"] >= 2009) & (x["Anul productiei"] <= 2014) else
-                                                "Euro 4" if (x["Anul productiei"] >= 2005) & (x["Anul productiei"] <= 2008) else
-                                                "Euro 3" if (x["Anul productiei"] >= 2000) & (x["Anul productiei"] <= 2004) else
-                                                "Euro 2" if (x["Anul productiei"] >= 1996) & (x["Anul productiei"] <= 2000) else
-                                                "Euro 1" if (x["Anul productiei"] >= 1992) & (x["Anul productiei"] <= 1995) else
-                                                "Non-euro", axis=1)
-
-group = ['Masina', 'Anul productiei', 'Combustibil']
-
-na_values(cars, "Numar locuri")
-na_values(cars, "Numar de portiere")
-na_values(cars, "Consum Urban")
-na_values(cars, "Consum Extraurban")
-na_values(cars, "Capacitate cilindrica", group)
-na_values(cars, "Putere", group)
-na_values(cars, "Cutie de viteze")
-na_values(cars, "Transmisie")
-na_values(cars, "Norma de poluare", group)
-na_values(cars, "Emisii CO2", group)
-
-cars['Consum Mixt'] = (cars['Consum Urban'] + cars['Consum Extraurban']) / 2
-cars['Consum Mixt'] = round(cars['Consum Mixt'], 1)
-
-cars['Capacitate cilindrica'] = cars['Capacitate cilindrica'].apply(lambda x: 0 if pd.isna(x)
-                                                                    else x)
-
-cars = cars.dropna(subset=['Putere', 'Transmisie', 'KM', 'Numar locuri', 'Consum Urban', 'Consum Extraurban', 'Consum Mixt'])
-
+cars = missing_values(cars)
+cars["Nr_total_dotari"] = cars.apply(calculate_number_of_facilities, axis=1)
+cars = eliminate_outliers(cars)
 cars.to_csv("raw/cars_cleaned_dataset.csv", index=False)

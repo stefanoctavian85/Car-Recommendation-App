@@ -11,7 +11,7 @@ cars = cars.groupby(by="Masina").filter(lambda x: len(x) > 10)
 X = cars.drop(["Masina", "Culoare", "Imagine", "Versiune", 'Numar de portiere', 'Generatie', 'Norma de poluare',
                'Audio si tehnologie', 'Confort si echipamente optionale', 'Electronice si sisteme de asistenta',
                'Performanta', 'Siguranta', 'Optiuni culoare', 'Consum Mixt', 'Volan pe dreapta', "Numar locuri",
-               "Emisii CO2", "KM"], axis=1)
+               "Emisii CO2", "KM", "Nr_total_dotari"], axis=1)
 y = cars["Masina"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)

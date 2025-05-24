@@ -1,10 +1,7 @@
 .env
-
 .idea/
-.vscode/
-
+.raw/
 env/
 venv/
-
 LICENSE
 README.md
