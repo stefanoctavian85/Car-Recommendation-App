@@ -3,6 +3,73 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
+import translators as ts
+import ast
+
+equipments_columns = ['Audio si tehnologie', 'Confort si echipamente optionale', 'Electronice si sisteme de asistenta', 'Performanta', 'Siguranta']
+
+def extract_unique_equipment(df: pd.DataFrame, columns):
+    equipments_dict = {}
+
+    for column in columns:
+        unique_values = set()
+        for row in df[column]:
+            if pd.isna(row):
+                continue
+            else:
+                items = ast.literal_eval(row)
+                for item in items:
+                    unique_values.add(item)
+        equipments_dict[column] = sorted(unique_values)
+
+        max_len = max(len(values) for values in equipments_dict.values())
+        for col, values in equipments_dict.items():
+            equipments_dict[col] = values + [None] * (max_len - len(values))
+
+    equipments_df = pd.DataFrame(equipments_dict)
+    return equipments_df
+
+def translate_equipments(df: pd.DataFrame):
+    translated_equipments_dict = {}
+
+    for column in df.columns:
+        translated_values = []
+        for value in df[column]:
+            if pd.isna(value):
+                translated_values.append(None)
+            else:
+                try:
+                    translated_word = ts.translate_text(value, translator='google', from_language='ro', to_language='en')
+                except:
+                    translated_values.append(value)
+                    continue
+
+                translated_values.append(translated_word)
+        translated_equipments_dict[f"{column}_en"] = translated_values
+
+    translated_equipments = pd.DataFrame(translated_equipments_dict)
+    return translated_equipments
+
+def translate_equipments_for_df(df, translations_df, columns_to_translate):
+    df_translated = df.copy()
+    for column in columns_to_translate:
+        translations_dict = dict(zip(translations_df[f"{column}"], translations_df[f"{column}_en"]))
+        translated_column = []
+
+        for row in df[column]:
+            if pd.isna(row):
+                translated_column.append(row)
+            else:
+                try:
+                    items = ast.literal_eval(row)
+                    translated_items = [translations_dict.get(item, item) for item in items]
+                    translated_column.append(str(translated_items))
+                except:
+                    translated_column.append(row)
+
+        df_translated[column] = translated_column
+
+    return df_translated
 
 
 def na_values(df: pd.DataFrame, col_name, group_by_cols=None):
@@ -67,15 +134,31 @@ def missing_values(cars: pd.DataFrame):
     cars['Volan pe dreapta'] = cars['Volan pe dreapta'].apply(lambda x: "Da" if x == "Da" else "Nu")
 
     cars["Combustibil"] = cars["Combustibil"].apply(
-        lambda x: "Benzina" if x in ["Benzina", "Benzina + GPL", "Benzina + CNG"] else
+        lambda x: "Gasoline" if x in ["Benzina", "Benzina + GPL", "Benzina + CNG"] else
         "Hibrid" if x in ["Hibrid", "Hibrid Plug-In"]
         else x)
 
+    cars["Cutie de viteze"] = cars["Cutie de viteze"].apply(lambda x: "Manual" if x == "Manuala"
+                                                            else "Automatic")
+
     cars["Tip Caroserie"] = cars["Tip Caroserie"].apply(lambda x: "Sedan" if x in ["Sedan", "Combi"] else
     "Compact" if x in ["Compacta", "Masina mica", "Masina de oras"] else
-    "Sport" if x in ["Cabrio", "Coupe"] else x)
+    "Sport" if x in ["Cabrio", "Coupe"] else
+    "Minivan" if x == "Monovolum" else x)
 
-    cars["Transmisie"] = cars["Transmisie"].apply(lambda x: "4x4" if x in ["4x4 (automat)", "4x4 (manual)"] else x)
+
+    cars["Transmisie"] = cars["Transmisie"].apply(lambda x: "AWD" if x in ["4x4 (automat)", "4x4 (manual)"]
+                                                  else "FWD" if x == "Fata"
+                                                  else "RWD" if x == "Spate"
+                                                  else x)
+
+    cars["Volan pe dreapta"] = cars["Volan pe dreapta"].apply(lambda x: "Yes" if x == "Da"
+                                                              else "No")
+
+    cars["Optiuni culoare"] = cars["Optiuni culoare"].apply(lambda x: "Metallic" if x == "Metalizata"
+                                                            else "Matte" if x == "Mat"
+                                                            else "Pearl" if x == "Perlat"
+                                                            else x)
 
     cars["Norma de poluare"] = cars["Norma de poluare"].apply(lambda x: "Euro 5" if x in ["Euro 5", "Euro 5b"] else
     "Euro 6" if x in ["Euro 6", "Euro 6b", "Euro 6c", "Euro 6d", "Euro 6d-Temp"]
@@ -92,6 +175,19 @@ def missing_values(cars: pd.DataFrame):
         "Euro 2" if (x["Anul productiei"] >= 1996) & (x["Anul productiei"] <= 2000) else
         "Euro 1" if (x["Anul productiei"] >= 1992) & (x["Anul productiei"] <= 1995) else
         "Non-euro", axis=1)
+
+    cars["Culoare"] = cars["Culoare"].apply(lambda x: "White" if x == "Alb"
+                                 else "Blue" if x == "Albastru"
+                                 else "Silver" if x == "Argint"
+                                 else "Beige" if x == "Bej"
+                                 else "Yellow" if x == "Galben/Auriu"
+                                 else "Grey" if x == "Gri"
+                                 else "Brown" if x == "Maro"
+                                 else "Black" if x == "Negru"
+                                 else "Orange" if x == "Portocaliu"
+                                 else "Red" if x == "Rosu"
+                                 else "Green" if x == "Green"
+                                 else "Others")
 
     group = ['Masina', 'Anul productiei', 'Combustibil']
 
@@ -154,4 +250,10 @@ cars = pd.read_csv("raw/cars_dataset.csv")
 cars = missing_values(cars)
 cars["Nr_total_dotari"] = cars.apply(calculate_number_of_facilities, axis=1)
 cars = eliminate_outliers(cars)
-cars.to_csv("raw/cars_cleaned_dataset.csv", index=False)
+
+unique_equipments = extract_unique_equipment(cars, equipments_columns)
+translated_unique_equipments = translate_equipments(unique_equipments)
+final_translated_equipments = pd.concat([unique_equipments, translated_unique_equipments], axis=1)
+
+final_cars_df = translate_equipments_for_df(cars, final_translated_equipments, equipments_columns)
+final_cars_df.to_csv("raw/cars_cleaned_dataset.csv", index=False)
