@@ -292,6 +292,8 @@ const checkDocuments = async (req, res, next) => {
             });
         } else {
             req.user.statusAccountVerified = 'approved';
+            req.user.driverLicenseExpirationDate = driverInfo.expirationDate;
+            req.user.idCardExpirationDate = idCardInfo.expirationDate;
             await req.user.save();
             return res.status(200).json({
                 message: 'The documents have been validated! Now you can enjoy our services!',

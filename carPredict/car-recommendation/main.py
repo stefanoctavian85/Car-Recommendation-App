@@ -1,36 +1,70 @@
+import numpy as np
 from scipy.stats import randint
 import matplotlib.pyplot as plt
 import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, learning_curve
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
 
-X_train_df = pd.read_csv("processed_data/X_train.csv", index_col=0)
-X_test_df = pd.read_csv("processed_data/X_test.csv", index_col=0)
+
+def display_learning_curve():
+    train_sizes, train_scores, test_scores = learning_curve(estimator=rfc,
+                                                            X=X_train_df, y=y_train,
+                                                            train_sizes=np.linspace(0.1, 1.0, 10),
+                                                            scoring='accuracy',
+                                                            n_jobs=1,
+                                                            cv=2)
+
+    train_mean = np.mean(train_scores, axis=1)
+    train_std = np.std(train_scores, axis=1)
+    test_mean = np.mean(test_scores, axis=1)
+    test_std = np.std(test_scores, axis=1)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(train_sizes, train_mean, color='r', label="Training accuracy")
+    plt.plot(train_sizes, test_mean, color='g', label="Validation accuracy")
+    plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color='r')
+    plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color='g')
+
+    plt.title("Learning Curve")
+    plt.xlabel("Training set size")
+    plt.ylabel("Accuracy")
+    plt.grid()
+    plt.tight_layout()
+    plt.legend()
+    plt.savefig("processed_data/learning_curve.png")
+
+
+X_train_df = pd.read_csv("processed_data/X_train.csv")
+X_test_df = pd.read_csv("processed_data/X_test.csv")
 y_train_df = pd.read_csv("processed_data/y_train.csv")
 y_test_df = pd.read_csv("processed_data/y_test.csv")
 
-label_encoder_car = joblib.load("joblib_files/labelencoder_y.joblib")
+X_train_df = X_train_df.drop(columns=['Cluster'])
+X_test_df = X_test_df.drop(columns=['Cluster'])
 
 y_train = y_train_df.values.ravel()
 y_test = y_test_df.values.ravel()
 
-clf = RandomForestClassifier(random_state=42, n_jobs=-1, n_estimators=229, max_depth=19, min_samples_leaf=2, min_samples_split=3)
-clf.fit(X_train_df, y_train)
+rfc = RandomForestClassifier(random_state=42, n_jobs=-1, n_estimators=229, max_depth=19, min_samples_leaf=2,
+                             min_samples_split=3)
+rfc.fit(X_train_df, y_train)
 
-joblib.dump(clf, "joblib_files/model_ML.joblib")
+joblib.dump(rfc, "joblib_files/model_ML.joblib")
 
-y_predict = clf.predict(X_test_df)
+y_predict = rfc.predict(X_test_df)
 accuracy = accuracy_score(y_predict, y_test)
 print("Test dataset accuracy - ", accuracy)
 
-y_predict2 = clf.predict(X_train_df)
+y_predict2 = rfc.predict(X_train_df)
 accuracy_train = accuracy_score(y_predict2, y_train)
 print("Train dataset accuracy - ", accuracy_train)
+
+# display_learning_curve()
 
 # param_dist = {
 #     "n_estimators": randint(10, 300),
@@ -44,4 +78,3 @@ print("Train dataset accuracy - ", accuracy_train)
 #
 # print("Best params: ", random_search.best_params_)
 # print("Best score: ", random_search.best_score_)
-

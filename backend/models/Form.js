@@ -19,7 +19,11 @@ const formSchema = new mongoose.Schema({
     predictions: [{
         type: String,
         required: true,
-    }]
+    }],
+    cluster: {
+        type: String,
+        required: true,
+    }
 }, { timestamps: true, collection: 'Forms' });
 
 export default mongoose.model("Form", formSchema);

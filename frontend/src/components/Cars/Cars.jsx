@@ -206,7 +206,9 @@ function Cars() {
                         </Box>
 
                     ) : (
-                        <Typography>No results found!</Typography>
+                        <Box className='no-results-box'>
+                            <Typography className='no-results-text'>No results found!</Typography>
+                        </Box>
                     )
                 }
             </Box>

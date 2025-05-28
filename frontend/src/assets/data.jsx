@@ -20,22 +20,22 @@ const data = [
     {
         question: "What gearbox do you want?",
         type: 'choice',
-        options: ["Manuala", "Automata"],
+        options: ["Manual", "Automatic"],
     },
     {
         question: "Which body type do you prefer?",
         type: 'choice',
-        options: ["Compact", "Monovolum", "Sedan", "Sport", "SUV"],
+        options: ["Compact", "Minivan", "Sedan", "Sport", "SUV"],
     },
     {
         question: "Select fuel type",
         type: 'choice',
-        options: ['Benzina', 'Diesel', 'Hibrid', 'Electric'],
+        options: ['Gasoline', 'Diesel', 'Hibrid', 'Electric'],
     },
     {
         question: 'What car transmission are you looking for?',
         type: 'choice',
-        options: ["Fata", "Spate", "4x4"],
+        options: ["FWD", "RWD", "AWD"],
     },
     {
         question: "Car price",

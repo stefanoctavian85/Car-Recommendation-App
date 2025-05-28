@@ -118,6 +118,7 @@ function Form() {
             setIsLoading(true);
             const updatedResponses = [...responses, finalResponse];
             const updatedQuestions = [...questions, data[index].question];
+            setIndex(index + 1);
             const response = await fetch(`${SERVER}/api/users/${userId}/forms`, {
                 method: 'POST',
                 headers: {
@@ -130,13 +131,13 @@ function Form() {
                 }),
             });
 
+            const fetchData = await response.json();
+
             if (response.ok) {
-                const data = await response.json();
-                setPredictions(data.cars);
-                setIndex(index + 1);
+                setPredictions(fetchData.cars);
                 setError('');
             } else {
-                setError('An error occured. Please try again later!');
+                setError(fetchData.error);
             }
 
             const timeout = setTimeout(() => {
@@ -154,6 +155,10 @@ function Form() {
             model: carParts[1]
         });
         navigate('/cars?' + new URLSearchParams(cars.carsStore.getSearchParams()).toString());
+    }
+
+    function redirectHome() {
+        navigate('/');
     }
 
     if (isLoading) {
@@ -313,7 +318,13 @@ function Form() {
                         </Box>
                     ) : (
                         <Box className='form-error'>
-                            {error}
+                            <Typography className='form-error-text'>{error}</Typography>
+                            <Button
+                                variant='contained'
+                                className='form-error-button'
+                                onClick={redirectHome}>
+                                Home
+                            </Button>
                         </Box>
                     )
                 }

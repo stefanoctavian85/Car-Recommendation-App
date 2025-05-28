@@ -7,6 +7,7 @@ apiRouter.use(middleware.auth);
 
 apiRouter.get('/users/:uid/profile', controllers.profile.userInformation);
 apiRouter.post('/users/:uid/forms', controllers.form.predict);
+apiRouter.get('/users/quick-recommendations', controllers.form.quickRecommendations);
 apiRouter.patch('/users/save-phone-number', controllers.profile.savePhoneNumber);
 apiRouter.post('/users/send-documents', middleware.uploadProfileDocuments, controllers.profile.sendDocuments, controllers.profile.checkDocuments);
 

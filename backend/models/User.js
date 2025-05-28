@@ -46,6 +46,9 @@ const userSchema = new mongoose.Schema({
     },
     driverLicense: {
         type: String,
+    },
+    cluster: {
+        type: Number,
     }
 }, { collection: 'Users'});
 

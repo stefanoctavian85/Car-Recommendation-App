@@ -11,15 +11,15 @@
 }
 
 .results-title {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    letter-spacing: 0.5px;
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    margin-bottom: 12px !important;
+    letter-spacing: 0.5px !important;
 }
 
 .results-number {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .results {
@@ -179,4 +179,16 @@
 
 .results-pagination .MuiPagination-ul .Mui-selected {
     background-color: #3498db;
+}
+
+.no-results-box {
+    display: flex;
+    justify-content: center;
+    margin-top: 100px !important;
+}
+
+.no-results-text {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    color: rgb(209, 209, 209) !important;
 }

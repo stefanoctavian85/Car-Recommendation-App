@@ -168,29 +168,31 @@ function Profile() {
     async function sendDocuments(e) {
         e.preventDefault();
 
-        if (Object.keys(files).length < 2) {
-            setFileMessage("Please upload the ID card and driver's license!");
+        if (auth.authStore.user.statusAccountVerified !== 'uninitialized') {
+            setFileMessage("You have already sent the documents!");
             return;
         } else {
             setFileMessage("");
-        }
+            if (Object.keys(files).length < 2) {
+                setFileMessage("Please upload the ID card and driver's license!");
+                return;
+            } else {
+                setFileMessage("");
+            }
 
-        const formData = new FormData();
-        formData.append("id-card", files["id-card"]);
-        formData.append("driver-license", files["driver-license"]);
+            const formData = new FormData();
+            formData.append("id-card", files["id-card"]);
+            formData.append("driver-license", files["driver-license"]);
 
-        const response = await fetch(`${SERVER}/api/users/send-documents`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${auth.token}`,
-            },
-            body: formData
-        });
+            const response = await fetch(`${SERVER}/api/users/send-documents`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                },
+                body: formData
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            setFileMessage("");
-        } else {
+            const data = await response.json();
             setFileMessage(data.message);
         }
     }

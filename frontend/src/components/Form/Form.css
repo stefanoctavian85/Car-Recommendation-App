@@ -221,3 +221,23 @@
     color: #9f0808;
     font-size: 20px !important;
 }
+
+.form-error {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+}
+
+.form-error-text {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    text-align: center;
+    color: #9f0808;
+}
+
+.form-error-button {
+    text-transform: none !important;
+    max-width: 100px !important;
+    padding: 10px 20px !important;
+}

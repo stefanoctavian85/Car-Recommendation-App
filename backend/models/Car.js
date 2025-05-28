@@ -57,6 +57,10 @@ const carSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    Cluster: {
+        type: Number,
+        required: true,
+    }
 }, { collection: 'Cars' });
 
 export default mongoose.model("Car", carSchema);

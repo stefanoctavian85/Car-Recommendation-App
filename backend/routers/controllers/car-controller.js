@@ -102,8 +102,6 @@ const searchSpecificCars = async (req, res, next) => {
             query.Pret = { $lte: parseInt(price) };
         }
 
-        query.Status = "Available";
-
         const limit = 20;
         const skip = (page - 1) * limit;
 

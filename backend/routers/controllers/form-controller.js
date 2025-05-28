@@ -29,7 +29,16 @@ const predict = async (req, res, next) => {
             })
         });
 
+        if (!flaskResponse.ok) {
+            const data = await flaskResponse.json();
+            return res.status(flaskResponse.status).json({
+                error: data.error,
+            })
+        };
+
         const prediction = await flaskResponse.json();
+        const cluster = prediction.cluster;
+        const cars = prediction.cars;
 
         const combinedResponses = questions.map((question, index) => ({
             question,
@@ -39,18 +48,54 @@ const predict = async (req, res, next) => {
         const form = await models.Form.create({
             userId: user._id,
             responses: combinedResponses,
-            predictions: prediction
+            predictions: cars,
+            cluster: cluster
         });
         await form.save();
 
+        req.user.cluster = cluster;
+        await user.save();
+
         return res.status(200).json({
-            cars: prediction
+            cars
         });
     } catch (err) {
         next(err);
     }
 }
 
+const quickRecommendations = async (req, res, next) => {
+    try {
+        const user = req.user;
+
+        if (!user.cluster) {
+            return res.status(404).json({
+                message: 'Cluster not found!',
+            });
+        }
+
+        const userCluster = user.cluster;
+
+        const latestFiveCars = await models.Car.find({ Cluster: userCluster },
+            { Masina: 1, "Anul productiei": 1, Combustibil: 1, "Tip Caroserie": 1, Imagine: 1 })
+            .sort({ _id: -1 }).limit(4);
+        
+        if (!latestFiveCars) {
+            return res.status(404).json({
+                message: 'Cars not found!',
+            });
+        }
+
+        return res.status(200).json({
+            recommendations: latestFiveCars,
+        });
+
+    } catch (err) {
+        next(err);
+    }
+}
+
 export default {
-    predict,    
+    predict,
+    quickRecommendations,
 }
