@@ -166,7 +166,7 @@ function AdminConversations({ router }) {
                                 onClick={solveConversation}
                                 variant='contained'
                             >
-                                Solve conversation
+                                Solve ticket
                             </Button>
                         </Box>
                     </Box>

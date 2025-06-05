@@ -183,7 +183,7 @@
 .files-message {
     text-align: center;
     margin-top: 1rem;
-    color: #aaa;
+    color: #F44336;
     font-size: 0.9rem;
 }
 
@@ -369,4 +369,18 @@
 .rented-car-price svg {
     font-size: 18px;
     margin-left: 4px;
+}
+
+.documents-form > .section-gdpr {
+    margin-top: 10px; 
+}
+
+.checkbox-gdpr {
+    color: white !important;
+    margin-right: 20px !important;
+}
+
+.checkbox-gdpr-label {
+    font-size: 14px;
+    color: #b3b3b3;
 }

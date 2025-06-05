@@ -41,12 +41,6 @@ const userSchema = new mongoose.Schema({
         default: 'uninitialized',
         required: true,
     },
-    idCard: {
-        type: String,
-    },
-    driverLicense: {
-        type: String,
-    },
     cluster: {
         type: Number,
     }

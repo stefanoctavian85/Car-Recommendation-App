@@ -1,7 +1,7 @@
 import './Home.css';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import AppContext from '../../state/AppContext';
-import { data, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../Search/Search.jsx';
 import { Box, Button, CardMedia, Typography, FormControl, InputLabel, Input, IconButton, Tooltip, Card, CardActionArea, CardContent } from '@mui/material';
 import photo from '../../assets/landing_page_background.png';

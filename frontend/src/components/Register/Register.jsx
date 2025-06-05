@@ -193,6 +193,7 @@ function Register() {
             const user = data.user;
             localStorage.setItem("token", JSON.stringify(token));
             auth.authStore.login(token, user);
+            auth.setToken(token);
             auth.setIsAuthenticated(auth.authStore.getAuthStatus());
             navigate("/");
         } else {

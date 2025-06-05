@@ -2,6 +2,7 @@ import models from "../../models/index.js";
 import tesseract from 'node-tesseract-ocr';
 import sharp from 'sharp';
 import path from 'path';
+import fs from 'fs';
 
 const userInformation = async (req, res, next) => {
     try {
@@ -167,14 +168,6 @@ const extractDriverLicenseData = (text) => {
 const sendDocuments = async (req, res, next) => {
     try {
         const files = req.files;
-        const idCard = files['id-card'][0].destination + files['id-card'][0].filename;
-        const driverLicense = files['driver-license'][0].destination + files['driver-license'][0].filename;
-        const user = await models.User.findOne({
-            _id: req.user._id,
-        });
-        user.idCard = idCard;
-        user.driverLicense = driverLicense;
-        await user.save();
 
         if(Object.keys(files).length !== 2) {
             return res.status(400).json({
@@ -185,8 +178,8 @@ const sendDocuments = async (req, res, next) => {
         const idCardFilePath = files['id-card'][0].path;
 
         let idCardData;
-        const preprocessedIdCard = await preprocessIDCard(idCardFilePath);
-        await tesseract.recognize(preprocessedIdCard, config)
+        const preprocessedIdCardPath = await preprocessIDCard(idCardFilePath);
+        await tesseract.recognize(preprocessedIdCardPath, config)
                                             .then((text) => {
                                                 idCardData = extractIDCardData(text);
                                             })
@@ -195,10 +188,10 @@ const sendDocuments = async (req, res, next) => {
                                             });
 
         const driverLicenseFilePath = files['driver-license'][0].path;
-        const preprocessedDriverLicense = await preprocessDriverLicense(driverLicenseFilePath);
+        const preprocessedDriverLicensePath = await preprocessDriverLicense(driverLicenseFilePath);
 
         let driverInfo;
-        await tesseract.recognize(preprocessedDriverLicense, config)
+        await tesseract.recognize(preprocessedDriverLicensePath, config)
                                             .then((text) => {
                                                 driverInfo = extractDriverLicenseData(text);
                                             })
@@ -209,8 +202,13 @@ const sendDocuments = async (req, res, next) => {
         req.user.statusAccountVerified = 'pending';
         await req.user.save(); 
 
+        fs.unlink(idCardFilePath, () => {});
+        fs.unlink(driverLicenseFilePath, () => {});
+
         req.user.driverInfo = driverInfo;
         req.user.idCardInfo = idCardData;
+        req.user.idCardFilePath = preprocessedIdCardPath;
+        req.user.driverLicenseFilePath = preprocessedDriverLicensePath;
 
         next();
     } catch (err) {
@@ -220,8 +218,12 @@ const sendDocuments = async (req, res, next) => {
 
 const checkDocuments = async (req, res, next) => {
     try {
+        const driverLicenseFilePath = req.user.driverLicenseFilePath;
+        const idCardFilePath = req.user.idCardFilePath;
         const driverInfo = req.user.driverInfo;
         const idCardInfo = req.user.idCardInfo;
+        delete req.user.driverLicenseFilePath;
+        delete req.user.idCardFilePath;
         const user = req.user;
 
         let validDocuments = true;
@@ -283,6 +285,9 @@ const checkDocuments = async (req, res, next) => {
                 validDocuments = false;
             }
         }
+
+        fs.unlink(idCardFilePath, () => {});
+        fs.unlink(driverLicenseFilePath, () => {});
 
         if (validDocuments === false) {
             req.user.statusAccountVerified = 'rejected';

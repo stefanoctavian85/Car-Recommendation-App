@@ -190,6 +190,7 @@
 .recommendations-subtitle-text {
     font-size: 28px !important;
     color: rgb(221, 221, 221);
+    margin-bottom: 10px !important;
 }
 
 .home-how-it-works-steps {
@@ -363,7 +364,6 @@
     justify-content: center;
     flex-direction: column;
     align-items: center;
-    margin-top: 30px;
 }
 
 .admin-dashboard-title {

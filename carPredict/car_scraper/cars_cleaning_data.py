@@ -94,9 +94,9 @@ def na_values(df: pd.DataFrame, col_name, group_by_cols=None):
         if len(similar_cars) > 0:
             if is_numeric_dtype(df[col_name]):
                 if col_name == "Numar locuri" or col_name == "Numar de portiere":
-                    df.at[index, col_name] = int(similar_cars[col_name].median())
+                    df.at[index, col_name] = int(similar_cars[col_name].mean())
                 else:
-                    df.at[index, col_name] = round(similar_cars[col_name].median(), 1)
+                    df.at[index, col_name] = round(similar_cars[col_name].mean(), 1)
             else:
                 df.at[index, col_name] = similar_cars[col_name].mode()[0]
 

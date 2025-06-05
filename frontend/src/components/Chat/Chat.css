@@ -93,7 +93,9 @@
 }
 
 .chat-messages .MuiListItem-root {
-    padding: 8px 0;
+    display: flex !important;
+    width: 100% !important;
+    padding: 8px 0 !important;
 }
 
 .chat-messages .MuiTypography-root {
@@ -112,8 +114,10 @@
 }
 
 .chat-message-AI, .chat-message-admin {
-    align-self: flex-start !important;
-    margin-right: auto !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    align-items: end !important;
 }
 
 .chat-message-regular .message-text {
@@ -122,9 +126,25 @@
 }
 
 .chat-message-regular {
-    align-self: flex-end !important;
-    margin-left: auto !important;
-    margin-right: 0 !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+}
+
+.chat-message-regular-documents {
+    display: flex !important;
+    flex-direction: row !important;
+    background-color: #364156;
+    border-radius: 14px;
+    border-bottom-right-radius: 4px;
+    gap: 0px;
+    max-width: 80%;
+}
+
+.document-message-right-part {
+    display: flex !important;
+    align-items: center !important;
+    padding-right: 8px !important;
 }
 
 .chat-input-message {

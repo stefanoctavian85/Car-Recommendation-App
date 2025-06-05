@@ -1,6 +1,6 @@
 import { Box, Button, Typography } from '@mui/material';
 import './Ticket.css';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext';
 import { SERVER } from '../../config/global.jsx';
@@ -11,6 +11,8 @@ function Ticket({ state, router }) {
 
     const [conversationId, setConversationId] = useState('');
     const [conversationInfo, setConversationInfo] = useState({});
+
+    const [documentsMessage, setDocumentsMessage] = useState("");
 
     const navigate = useNavigate();
 
@@ -34,7 +36,7 @@ function Ticket({ state, router }) {
         } else {
             navigate('/');
         }
-    }, [state]);
+    }, [state, conversationInfo]);
 
     async function closeChat() {
         if (conversationId) {
@@ -50,6 +52,31 @@ function Ticket({ state, router }) {
         router.navigate('/tickets');
     }
 
+    async function approveDocuments() {
+        if (conversationId) {
+            await fetch(`${SERVER}/api/chat/approve-documents`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ uid: conversationInfo.id })
+            })
+            .then((res) => {
+                if (res.ok) {
+                    return res.json();
+                }
+            })
+            .then((data) => {
+                setDocumentsMessage(data.message);
+            })
+            .catch((error) => {
+                console.log("Error: " + error.message);
+                setDocumentsMessage("An error occured! Please try again later!");
+            });
+        }
+    }
+
     return (
         <Box className='solve-ticket-page'>
             <Box className='user-ticket-info'>
@@ -61,11 +88,11 @@ function Ticket({ state, router }) {
                     <Typography className='ticket-user-info'>Documents status</Typography>
                 </Box>
                 <Box className='user-info-right-part'>
-                    <Typography className='ticket-user-detail'>{conversationInfo.userFullName}</Typography>
-                    <Typography className='ticket-user-detail'>{conversationInfo.email}</Typography>
-                    <Typography className='ticket-user-detail'>{conversationInfo.phoneNumber}</Typography>
-                    <Typography className='ticket-user-detail'>{conversationInfo.userStatus}</Typography>
-                    <Typography className='ticket-user-detail'>{conversationInfo.documentsStatus}</Typography>
+                    <Typography className='ticket-user-detail'>{conversationInfo.userFullName || "-"}</Typography>
+                    <Typography className='ticket-user-detail'>{conversationInfo.email || "-"}</Typography>
+                    <Typography className='ticket-user-detail'>{conversationInfo.phoneNumber || "-"}</Typography>
+                    <Typography className='ticket-user-detail'>{conversationInfo.userStatus || "-"}</Typography>
+                    <Typography className='ticket-user-detail'>{conversationInfo.documentsStatus || "-"}</Typography>
                 </Box>
             </Box>
 
@@ -81,21 +108,39 @@ function Ticket({ state, router }) {
                     </Box>
                 </Box>
 
-                {
-                    conversationInfo.status === 'Open' ? (
-                        <Box className='ticket-buttons'>
-                            <Button
-                                className='ticket-solve-button'
-                                variant='contained'
-                                onClick={closeChat}
-                            >Solve</Button>
-                        </Box>
-                    ) : null
-                }
+                <Box className='ticket-buttons'>
+                    {
+                        conversationInfo.documentsStatus !== "Approved" && (
+                            <Box className='ticket-button'>
+                                <Button
+                                    className='ticket-approve-documents'
+                                    variant='contained'
+                                    onClick={approveDocuments}
+                                >Approve documents</Button>
+                            </Box>
+                        )
+                    }
+
+                    {
+                        conversationInfo.status === 'Open' && (
+                            <Box className='ticket-button'>
+                                <Button
+                                    className='ticket-solve-button'
+                                    variant='contained'
+                                    onClick={closeChat}
+                                >Solve</Button>
+                            </Box>
+                        )
+                    }
+                </Box>
+
+                <Box className='documents-message'>
+                    <Typography className='documents-message-text'>{documentsMessage}</Typography>
+                </Box>
             </Box>
 
-            <Box className='ticket-chat'>
-                <Chat adminConversationId={state.conversationId} />
+            <Box className='ticket-chat-box'>
+                <Chat className='ticket-chat' adminConversationId={state.conversationId} />
             </Box>
         </Box>
     );

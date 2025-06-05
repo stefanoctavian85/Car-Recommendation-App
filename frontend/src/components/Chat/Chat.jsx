@@ -177,22 +177,22 @@ function Chat({ adminConversationId }) {
                     'Authorization': `Bearer ${auth.token}`,
                 },
             })
-            .then((res) => {
-                if (res.ok) {
-                    return res.blob();
-                }
-            })
-            .then((blob) => {
-                if (blob) {
-                    const link = document.createElement("a");
-                    link.href = URL.createObjectURL(blob);
-                    link.download = filename;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            })
+                .then((res) => {
+                    if (res.ok) {
+                        return res.blob();
+                    }
+                })
+                .then((blob) => {
+                    if (blob) {
+                        const link = document.createElement("a");
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                })
         }
     }
 
@@ -248,22 +248,27 @@ function Chat({ adminConversationId }) {
                                                             {
                                                                 message.sender === 'regular' ? (
                                                                     <Box className='chat-message-regular'>
-                                                                        <Box className='message'>
-                                                                            <Typography className='message-text'>{message.message}
-                                                                                {
-                                                                                    message.type === 'document' ? (
-                                                                                        <Box className='document-message-right-part'>
-                                                                                            <IconButton
-                                                                                                className='chat-button-open'
-                                                                                                onClick={() => downloadDocuments(message)}
-                                                                                            >
-                                                                                                <DownloadIcon className='chat-icon' />
-                                                                                            </IconButton>
-                                                                                        </Box>
-                                                                                    ) : null
-                                                                                }
-                                                                            </Typography>
-                                                                        </Box>
+                                                                        {
+                                                                            message.type === 'text' && (
+                                                                                <Typography className='message-text'>{message.message}</Typography>
+                                                                            )
+                                                                        }
+
+                                                                        {
+                                                                            message.type === 'document' && (
+                                                                                <Box className='chat-message-regular-documents'>
+                                                                                    <Typography className='message-text'>{message.message}</Typography>
+                                                                                    <Box className='document-message-right-part'>
+                                                                                        <IconButton
+                                                                                            className='chat-button-open'
+                                                                                            onClick={() => downloadDocuments(message)}
+                                                                                        >
+                                                                                            <DownloadIcon className='chat-icon' />
+                                                                                        </IconButton>
+                                                                                    </Box>
+                                                                                </Box>
+                                                                            )
+                                                                        }
                                                                     </Box>
                                                                 ) : null
                                                             }

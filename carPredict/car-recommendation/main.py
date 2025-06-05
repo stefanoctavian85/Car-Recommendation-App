@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import RandomizedSearchCV, learning_curve
+from sklearn.tree import DecisionTreeClassifier
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -17,7 +18,7 @@ def display_learning_curve():
                                                             train_sizes=np.linspace(0.1, 1.0, 10),
                                                             scoring='accuracy',
                                                             n_jobs=1,
-                                                            cv=2)
+                                                            cv=5)
 
     train_mean = np.mean(train_scores, axis=1)
     train_std = np.std(train_scores, axis=1)
@@ -26,7 +27,7 @@ def display_learning_curve():
 
     plt.figure(figsize=(10, 6))
     plt.plot(train_sizes, train_mean, color='r', label="Training accuracy")
-    plt.plot(train_sizes, test_mean, color='g', label="Validation accuracy")
+    plt.plot(train_sizes, test_mean, color='g', label="Testing accuracy")
     plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color='r')
     plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color='g')
 
@@ -54,6 +55,9 @@ rfc = RandomForestClassifier(random_state=42, n_jobs=-1, n_estimators=229, max_d
                              min_samples_split=3)
 rfc.fit(X_train_df, y_train)
 
+# rfc = DecisionTreeClassifier(random_state=42, max_depth=18, min_samples_leaf=5, min_samples_split=4)
+# rfc.fit(X_train_df, y_train)
+
 joblib.dump(rfc, "joblib_files/model_ML.joblib")
 
 y_predict = rfc.predict(X_test_df)
@@ -66,6 +70,10 @@ print("Train dataset accuracy - ", accuracy_train)
 
 # display_learning_curve()
 
+print("Classification report: \n" + classification_report(y_test, y_predict))
+# print("Confusion matrix:")
+# print(confusion_matrix(y_test, y_predict))
+
 # param_dist = {
 #     "n_estimators": randint(10, 300),
 #     "max_depth": randint(3, 20),
@@ -73,7 +81,7 @@ print("Train dataset accuracy - ", accuracy_train)
 #     "min_samples_leaf": randint(1, 20)
 # }
 #
-# random_search = RandomizedSearchCV(clf, param_dist, scoring='accuracy', verbose=1, random_state=42, n_iter=50)
+# random_search = RandomizedSearchCV(rfc, param_dist, scoring='accuracy', verbose=1, random_state=42, n_iter=50)
 # random_search.fit(X_train_df, y_train)
 #
 # print("Best params: ", random_search.best_params_)

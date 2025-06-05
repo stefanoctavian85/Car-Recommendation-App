@@ -52,20 +52,27 @@ const sendMessage = async (req, res, next) => {
         const conversationRef = ref(database, `conversations/${conversationId}`);
         const snapshot = await get(conversationRef);
         const conversation = snapshot.val();
-        
+
         let flaskResponse, response;
 
         if (conversation.category === 'unknown' || conversation.category === 'others') {
-            flaskResponse = await fetch(`${SERVER}/chatbot/categorize`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': "application/json",
-                },
-                body: JSON.stringify({ message })
-            });
-            response = await flaskResponse.json();
-            const conversationRef = ref(database, `conversations/${conversationId}`);
-            await update(conversationRef, { category: response.category });
+            try {
+                flaskResponse = await fetch(`${SERVER}/chatbot/categorize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': "application/json",
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (flaskResponse.ok) {
+                    response = await flaskResponse.json();
+                    const conversationRef = ref(database, `conversations/${conversationId}`);
+                    await update(conversationRef, { category: response.category });
+                }
+            } catch (error) {
+                console.log("Flask server is not reachable!");
+            }
         }
 
         const messageId = uuid();
@@ -198,6 +205,7 @@ const getConversationInfo = async (req, res, next) => {
 
         conversationInfo = {
             ...conversationInfo,
+            'id': userInfo._id,
             'email': userInfo.email,
             'userStatus': userInfo.status.charAt(0).toUpperCase() + userInfo.status.slice(1).toLowerCase(),
             'phoneNumber': userInfo.phoneNumber,
@@ -212,6 +220,37 @@ const getConversationInfo = async (req, res, next) => {
     }
 }
 
+const approveDocumentsByAdmin = async (req, res, next) => {
+    try {
+        const { uid } = req.body;
+
+        if (!uid) {
+            return res.status(400).json({
+                message: "Missing user id",
+            });
+        }
+
+        const user = await models.User.findOne({
+            _id: uid,
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found!",
+            });
+        }
+
+        user.statusAccountVerified = 'approved';
+        await user.save();
+
+        return res.status(200).json({
+            message: "User's documents status has been changed successfully!",
+        });
+    } catch (err) {
+        next(err);
+    }
+}
+
 export default {
     sendFirstMessage,
     sendMessage,
@@ -219,4 +258,5 @@ export default {
     downloadDocuments,
     closeChat,
     getConversationInfo,
+    approveDocumentsByAdmin,
 }

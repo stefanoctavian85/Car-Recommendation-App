@@ -37,6 +37,7 @@ apiRouter.patch('/chat/close-conversation', controllers.chat.closeChat);
 apiRouter.get('/chat/get-conversation-info/:conversationId', controllers.chat.getConversationInfo);
 apiRouter.post('/chat/attach-documents', middleware.uploadChatDocuments, controllers.chat.attachFilesToConversation);
 apiRouter.get('/chat/download-documents/:filename', controllers.chat.downloadDocuments);
+apiRouter.patch('/chat/approve-documents', controllers.chat.approveDocumentsByAdmin);
 
 apiRouter.use(middleware.error);
 

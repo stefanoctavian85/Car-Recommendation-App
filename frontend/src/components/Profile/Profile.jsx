@@ -1,10 +1,10 @@
 import './Profile.css';
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
 import { jwtDecode } from 'jwt-decode';
-import { Box, Tab, Typography, Tabs, FormControl, InputLabel, Input, InputAdornment, Button, List, ListItem, Card, CardContent } from '@mui/material';
+import { Box, Tab, Typography, Tabs, FormControl, InputLabel, Input, InputAdornment, Button, List, ListItem, Card, CardContent, FormControlLabel, Checkbox } from '@mui/material';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 import TabContext from '@mui/lab/TabContext';
 import TabPanel from '@mui/lab/TabPanel';
@@ -36,6 +36,7 @@ function Profile() {
 
     const [files, setFiles] = useState({});
     const [fileMessage, setFileMessage] = useState('');
+    const [hasAcceptedGDPR, setHasAcceptedGDPR] = useState(false);
 
     const [rentedCars, setRentedCars] = useState([]);
 
@@ -48,7 +49,12 @@ function Profile() {
 
     useEffect(() => {
         setIsLoading(true);
-        const userId = jwtDecode(auth.token).id;
+        let userId = jwtDecode(auth.token)?.id;
+
+        if (!userId) {
+            const token = JSON.parse(localStorage.getItem("token"));
+            userId = jwtDecode(token).id;
+        }
 
         fetch(`${SERVER}/api/users/${userId}/profile`, {
             method: 'GET',
@@ -168,32 +174,42 @@ function Profile() {
     async function sendDocuments(e) {
         e.preventDefault();
 
-        if (auth.authStore.user.statusAccountVerified !== 'uninitialized') {
-            setFileMessage("You have already sent the documents!");
-            return;
-        } else {
+        if (hasAcceptedGDPR === true) {
             setFileMessage("");
-            if (Object.keys(files).length < 2) {
-                setFileMessage("Please upload the ID card and driver's license!");
+            if (auth.authStore.user.statusAccountVerified !== 'uninitialized') {
+                setFileMessage("You have already sent the documents!");
+                console.log(auth.authStore.user.statusAccountVerified);
                 return;
             } else {
                 setFileMessage("");
+                if (Object.keys(files).length < 2) {
+                    setFileMessage("Please upload the ID card and driver's license!");
+                    return;
+                } else {
+                    setFileMessage("");
+                }
+
+                const formData = new FormData();
+                formData.append("id-card", files["id-card"]);
+                formData.append("driver-license", files["driver-license"]);
+
+                const response = await fetch(`${SERVER}/api/users/send-documents`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                setFileMessage(data.message);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
             }
-
-            const formData = new FormData();
-            formData.append("id-card", files["id-card"]);
-            formData.append("driver-license", files["driver-license"]);
-
-            const response = await fetch(`${SERVER}/api/users/send-documents`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
-                },
-                body: formData
-            });
-
-            const data = await response.json();
-            setFileMessage(data.message);
+        } else {
+            setFileMessage("You must agree to the processing of your documents in order to continue.");
+            return;
         }
     }
 
@@ -345,6 +361,22 @@ function Profile() {
                                                         />
                                                     </Button>
                                                 </FormControl>
+                                            </Box>
+
+                                            <Box className='documents-form'>
+                                                <FormControlLabel
+                                                    className='section-gdpr'
+                                                    control={<Checkbox
+                                                        className='checkbox-gdpr'
+                                                        onChange={(e) => setHasAcceptedGDPR(e.target.checked)}
+                                                    />}
+                                                    label={
+                                                        <span className='checkbox-gdpr-label'>
+                                                            I fully agree that my documents may be processed
+                                                            for the purpose of verifying my identity and eligibility to rent a vehicle, in accordance with the
+                                                            Privacy Policy.
+                                                        </span>
+                                                    } />
                                             </Box>
 
                                             <Box className='send-documents'>
