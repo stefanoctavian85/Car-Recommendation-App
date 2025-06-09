@@ -3,18 +3,26 @@ import tesseract from 'node-tesseract-ocr';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
+import mongoose from "mongoose";
 
 const userInformation = async (req, res, next) => {
     try {
         const { uid } = req.params;
 
+        if (!mongoose.Types.ObjectId.isValid(uid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
+            });
+        }
+
         const user = await models.User.findOne({
             _id: uid,
         });
+
         if (!user) {
             return res.status(404).json({
-                message: "User not found",
-            })
+                message: "User not found!",
+            });
         }
 
         return res.status(200).json({

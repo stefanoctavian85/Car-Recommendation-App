@@ -93,6 +93,13 @@ const dashboardReports = async (req, res, next) => {
 const getDataForCharts = async (req, res, next) => {
     try {
         const { filter } = req.query;
+
+        if (req.user.status !== 'admin') {
+            return res.status(401).json({
+                message: 'Unauthorized',
+            });
+        }
+
         const monthDays = dayjs().date();
 
         const lastMonthDate = dayjs(todaysDate).subtract(monthDays - 1, 'day').toDate();

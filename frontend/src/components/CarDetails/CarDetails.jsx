@@ -262,7 +262,7 @@ function CarDetails() {
                                 onClick={() => {
                                     setOpen(true);
                                     rentCar();
-                            }}>Rent</Button>
+                                }}>Rent</Button>
                         </Box>
                     </Box>
                 </Box>
@@ -344,11 +344,30 @@ function CarDetails() {
                     <Box className='car-equipments'>
                         <TabContext value={valueTab}>
                             <TabList onChange={handleChangeTab} centered>
-                                <Tab label='Audio and technology' value="0" disabled={!car['Audio si tehnologie']}></Tab>
-                                <Tab label='Electronics and assistance systems' value="1" disabled={!car['Electronice si sisteme de asistenta']}></Tab>
-                                <Tab label='Performance' value="2" disabled={!car['Performanta']}></Tab>
-                                <Tab label='Safety' value="3" disabled={!car['Siguranta']}></Tab>
-                                <Tab label='Optionals' value="4" disabled={!car['Confort si echipamente optionale']}></Tab>
+                                {
+                                    car['Audio si tehnologie'] &&
+                                    <Tab label='Audio and technology' value="0" disabled={!car['Audio si tehnologie']}></Tab>
+                                }
+
+                                {
+                                    car['Electronice si sisteme de asistenta'] &&
+                                    <Tab label='Electronics and assistance systems' value="1" disabled={!car['Electronice si sisteme de asistenta']}></Tab>
+                                }
+
+                                {
+                                    car['Performanta'] &&
+                                    <Tab label='Performance' value="2" disabled={!car['Performanta']}></Tab>
+                                }
+
+                                {
+                                    car['Siguranta'] &&
+                                    <Tab label='Safety' value="3" disabled={!car['Siguranta']}></Tab>
+                                }
+
+                                {
+                                    car['Confort si echipamente optionale'] &&
+                                    <Tab label='Optionals' value="4" disabled={!car['Confort si echipamente optionale']}></Tab>
+                                }
                             </TabList>
 
                             <TabPanel value="0">

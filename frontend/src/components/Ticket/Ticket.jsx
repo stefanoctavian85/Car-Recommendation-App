@@ -13,6 +13,7 @@ function Ticket({ state, router }) {
     const [conversationInfo, setConversationInfo] = useState({});
 
     const [documentsMessage, setDocumentsMessage] = useState("");
+    const [error, setError] = useState('');
 
     const navigate = useNavigate();
 
@@ -25,18 +26,24 @@ function Ticket({ state, router }) {
                     'Authorization': `Bearer ${auth.token}`,
                 }
             })
-                .then((res) => {
+                .then(async (res) => {
+                    const data = await res.json();
                     if (res.ok) {
-                        return res.json();
+                        setError('');
+                        setConversationInfo(data.conversationInfo);
+                    } else {
+                        setError(data.message);
                     }
                 })
-                .then((data) => {
-                    setConversationInfo(data.conversationInfo);
-                });
+                .catch(() => {
+                    setError("Something went wrong!")
+                })
+                ;
+
         } else {
             navigate('/');
         }
-    }, [state, conversationInfo]);
+    }, [state, auth.token]);
 
     async function closeChat() {
         if (conversationId) {
@@ -62,86 +69,97 @@ function Ticket({ state, router }) {
                 },
                 body: JSON.stringify({ uid: conversationInfo.id })
             })
-            .then((res) => {
-                if (res.ok) {
-                    return res.json();
-                }
-            })
-            .then((data) => {
-                setDocumentsMessage(data.message);
-            })
-            .catch((error) => {
-                console.log("Error: " + error.message);
-                setDocumentsMessage("An error occured! Please try again later!");
-            });
+                .then(async (res) => {
+                    const data = await res.json();
+                    if (res.ok) {
+                        setError('');
+                        setDocumentsMessage(data.message);
+                    } else {
+                        console.log(data.message);
+                        setError(data.message);
+                    }
+                })
+                .catch((error) => {
+                    setError(error.message);
+                });
         }
     }
 
     return (
         <Box className='solve-ticket-page'>
-            <Box className='user-ticket-info'>
-                <Box className='user-info-left-part'>
-                    <Typography className='ticket-user-info'>Full name</Typography>
-                    <Typography className='ticket-user-info'>Email</Typography>
-                    <Typography className='ticket-user-info'>Phone number</Typography>
-                    <Typography className='ticket-user-info'>Account status</Typography>
-                    <Typography className='ticket-user-info'>Documents status</Typography>
-                </Box>
-                <Box className='user-info-right-part'>
-                    <Typography className='ticket-user-detail'>{conversationInfo.userFullName || "-"}</Typography>
-                    <Typography className='ticket-user-detail'>{conversationInfo.email || "-"}</Typography>
-                    <Typography className='ticket-user-detail'>{conversationInfo.phoneNumber || "-"}</Typography>
-                    <Typography className='ticket-user-detail'>{conversationInfo.userStatus || "-"}</Typography>
-                    <Typography className='ticket-user-detail'>{conversationInfo.documentsStatus || "-"}</Typography>
-                </Box>
-            </Box>
-
-            <Box className='ticket-box'>
-                <Box className='ticket-info'>
-                    <Box className='ticket-info-left-part'>
-                        <Typography className='ticket-user-info'>Ticket category</Typography>
-                        <Typography className='ticket-user-info'>Ticket status</Typography>
-                    </Box>
-                    <Box className='ticket-info-right-part'>
-                        <Typography className='ticket-user-detail'>{conversationInfo.category}</Typography>
-                        <Typography className='ticket-user-detail'>{conversationInfo.status}</Typography>
-                    </Box>
-                </Box>
-
-                <Box className='ticket-buttons'>
-                    {
-                        conversationInfo.documentsStatus !== "Approved" && (
-                            <Box className='ticket-button'>
-                                <Button
-                                    className='ticket-approve-documents'
-                                    variant='contained'
-                                    onClick={approveDocuments}
-                                >Approve documents</Button>
+            {
+                !error ? (
+                    <Box>
+                        <Box className='user-ticket-info'>
+                            <Box className='user-info-left-part'>
+                                <Typography className='ticket-user-info'>Full name</Typography>
+                                <Typography className='ticket-user-info'>Email</Typography>
+                                <Typography className='ticket-user-info'>Phone number</Typography>
+                                <Typography className='ticket-user-info'>Account status</Typography>
+                                <Typography className='ticket-user-info'>Documents status</Typography>
                             </Box>
-                        )
-                    }
-
-                    {
-                        conversationInfo.status === 'Open' && (
-                            <Box className='ticket-button'>
-                                <Button
-                                    className='ticket-solve-button'
-                                    variant='contained'
-                                    onClick={closeChat}
-                                >Solve</Button>
+                            <Box className='user-info-right-part'>
+                                <Typography className='ticket-user-detail'>{conversationInfo.userFullName || "-"}</Typography>
+                                <Typography className='ticket-user-detail'>{conversationInfo.email || "-"}</Typography>
+                                <Typography className='ticket-user-detail'>{conversationInfo.phoneNumber || "-"}</Typography>
+                                <Typography className='ticket-user-detail'>{conversationInfo.userStatus || "-"}</Typography>
+                                <Typography className='ticket-user-detail'>{conversationInfo.documentsStatus || "-"}</Typography>
                             </Box>
-                        )
-                    }
-                </Box>
+                        </Box>
 
-                <Box className='documents-message'>
-                    <Typography className='documents-message-text'>{documentsMessage}</Typography>
-                </Box>
-            </Box>
+                        <Box className='ticket-box'>
+                            <Box className='ticket-info'>
+                                <Box className='ticket-info-left-part'>
+                                    <Typography className='ticket-user-info'>Ticket category</Typography>
+                                    <Typography className='ticket-user-info'>Ticket status</Typography>
+                                </Box>
+                                <Box className='ticket-info-right-part'>
+                                    <Typography className='ticket-user-detail'>{conversationInfo.category}</Typography>
+                                    <Typography className='ticket-user-detail'>{conversationInfo.status}</Typography>
+                                </Box>
+                            </Box>
 
-            <Box className='ticket-chat-box'>
-                <Chat className='ticket-chat' adminConversationId={state.conversationId} />
-            </Box>
+                            <Box className='ticket-buttons'>
+                                {
+                                    conversationInfo.documentsStatus !== "Approved" && (
+                                        <Box className='ticket-button'>
+                                            <Button
+                                                className='ticket-approve-documents'
+                                                variant='contained'
+                                                onClick={approveDocuments}
+                                            >Approve documents</Button>
+                                        </Box>
+                                    )
+                                }
+
+                                {
+                                    conversationInfo.status === 'Open' && (
+                                        <Box className='ticket-button'>
+                                            <Button
+                                                className='ticket-solve-button'
+                                                variant='contained'
+                                                onClick={closeChat}
+                                            >Solve</Button>
+                                        </Box>
+                                    )
+                                }
+                            </Box>
+
+                            <Box className='documents-message'>
+                                <Typography className='documents-message-text'>{documentsMessage}</Typography>
+                            </Box>
+                        </Box>
+
+                        <Box className='ticket-chat-box'>
+                            <Chat className='ticket-chat' adminConversationId={state.conversationId} />
+                        </Box>
+                    </Box>
+                ) : (
+                    <Box>
+                        <Typography>{error}</Typography>
+                    </Box>
+                )
+            }
         </Box>
     );
 }

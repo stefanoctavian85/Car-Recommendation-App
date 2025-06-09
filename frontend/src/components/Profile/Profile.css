@@ -1,14 +1,14 @@
 .profile-page {
+    border-radius: 8px;
+
+}
+
+.profile-tabs {
     background-color: #1e1e1e;
     color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    margin-top: 100px;
-    margin-left: 100px;
-    margin-right: 100px;
-}
-
-.profile-tabs {
+    margin: 100px;
     display: flex;
     flex: 1;
 }
@@ -284,11 +284,10 @@
 }
 
 .rented-car-reservation-details {
-    margin-top: 8px;
-    padding-top: 8px;
     border-top: 1px solid #4a4a4a;
     display: flex;
     align-items: center;
+    padding-top: 15px;
 }
 
 .rented-car-start-time,
@@ -354,7 +353,7 @@
 }
 
 .rented-car-price {
-    padding-top: 12px;
+    padding-top: 20px;
     margin: 0 auto;
 }
 

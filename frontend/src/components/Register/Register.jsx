@@ -43,7 +43,7 @@ function Register() {
         } else {
             if (location.state?.email) {
                 setEmail(location.state.email);
-            } 
+            }
         }
 
         const timeout = setTimeout(() => {
@@ -205,6 +205,13 @@ function Register() {
         navigate('/login');
     }
 
+    function handleSubmit(e) {
+        if (e.key == "Enter") {
+            e.preventDefault();
+            register();
+        }
+    }
+
     if (isLoading) {
         return (
             <LoadingScreen />
@@ -219,152 +226,154 @@ function Register() {
                 </Avatar>
                 <Typography component="h1" className='register-text'>Create a new account</Typography>
             </Box>
-            <Box className='register-form' component='form'>
-                <FormControl className='register-input' error={!!emailError}>
-                    <InputLabel htmlFor='email-input' className='register-label'>Email</InputLabel>
-                    <Input
-                        id='email-input'
-                        onChange={handleEmailChange}
-                        onBlur={handleEmailLive}
-                        label="Email"
-                        type='text'
-                        required
-                        value={email}
-                        endAdornment={
-                            emailTouched && (
+            <Box className='form' component='form' onKeyDown={handleSubmit}>
+                <Box className='register-form'>
+                    <FormControl className='register-input' error={!!emailError}>
+                        <InputLabel htmlFor='email-input' className='register-label'>Email</InputLabel>
+                        <Input
+                            id='email-input'
+                            onChange={handleEmailChange}
+                            onBlur={handleEmailLive}
+                            label="Email"
+                            type='text'
+                            required
+                            value={email}
+                            endAdornment={
+                                emailTouched && (
+                                    <InputAdornment position='end'>
+                                        {
+                                            emailError ? (
+                                                <ErrorIcon color='error' />
+                                            ) :
+                                                <CheckCircleIcon color='success' />
+                                        }
+                                    </InputAdornment>
+                                )
+                            }
+                        >
+                        </Input>
+                        {emailError ? (<FormHelperText error>{emailError}</FormHelperText>) : null}
+                    </FormControl>
+                </Box>
+                <Box className='register-form'>
+                    <FormControl className='register-input' error={!!firstnameError}>
+                        <InputLabel htmlFor='firstname-input' className='register-label'>First name</InputLabel>
+                        <Input
+                            id='firstname-input'
+                            onChange={handleFirstnameChange}
+                            onBlur={handleFirstnameLive}
+                            label="First name"
+                            type='text'
+                            required
+                            endAdornment={
+                                firstname && (
+                                    <InputAdornment position='end'>
+                                        {
+                                            firstnameError ? (
+                                                <ErrorIcon color='error' />
+                                            ) :
+                                                <CheckCircleIcon color='success' />
+                                        }
+                                    </InputAdornment>
+                                )
+                            }
+                        >
+                        </Input>
+                        {firstnameError ? (<FormHelperText error>{firstnameError}</FormHelperText>) : null}
+                    </FormControl>
+                </Box>
+                <Box className='register-form'>
+                    <FormControl className='register-input' error={!!lastnameError}>
+                        <InputLabel htmlFor='lastname-input' className='register-label'>Last name</InputLabel>
+                        <Input
+                            id='lastname-input'
+                            onChange={handleLastnameChange}
+                            onBlur={handleLastnameLive}
+                            label="Last name"
+                            type='text'
+                            required
+                            endAdornment={
+                                lastnameTouched && (
+                                    <InputAdornment position='end'>
+                                        {
+                                            lastnameError ? (
+                                                <ErrorIcon color='error' />
+                                            ) :
+                                                <CheckCircleIcon color='success' />
+                                        }
+                                    </InputAdornment>
+                                )
+                            }
+                        >
+                        </Input>
+                        {lastnameError ? (<FormHelperText error>{lastnameError}</FormHelperText>) : null}
+                    </FormControl>
+                </Box>
+                <Box className='register-form'>
+                    <FormControl className='register-input' error={!!passwordError}>
+                        <InputLabel htmlFor='password-input' className='register-label'>Password</InputLabel>
+                        <Input
+                            id='password-input'
+                            onChange={handlePasswordChange}
+                            onBlur={handlePasswordLive}
+                            label="Password"
+                            type={showPassword ? 'text' : 'password'}
+                            required
+                            endAdornment={
                                 <InputAdornment position='end'>
                                     {
-                                        emailError ? (
-                                            <ErrorIcon color='error' />
-                                        ) :
-                                            <CheckCircleIcon color='success' />
+                                        passwordTouched && (
+                                            <>
+                                                {
+                                                    passwordError ? (
+                                                        <ErrorIcon color='error' />
+                                                    ) : password ? (
+                                                        <CheckCircleIcon color='success' />
+                                                    ) : null}
+                                            </>
+                                        )
                                     }
+                                    <IconButton
+                                        aria-label={
+                                            showPassword ? 'display the password' : 'hide the password'
+                                        }
+                                        className='show-password-icon'
+                                        onClick={handleShowPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
                                 </InputAdornment>
-                            )
-                        }
+                            }
+                        >
+                        </Input>
+                        {passwordError ? (<FormHelperText error>{passwordError}</FormHelperText>) : null}
+                    </FormControl>
+                </Box>
+                <Box className='register-button'>
+                    <Button
+                        variant='contained'
+                        onClick={register}
                     >
-                    </Input>
-                    {emailError ? (<FormHelperText error>{emailError}</FormHelperText>) : null}
-                </FormControl>
-            </Box>
-            <Box className='register-form' component='form'>
-                <FormControl className='register-input' error={!!firstnameError}>
-                    <InputLabel htmlFor='firstname-input' className='register-label'>First name</InputLabel>
-                    <Input
-                        id='firstname-input'
-                        onChange={handleFirstnameChange}
-                        onBlur={handleFirstnameLive}
-                        label="First name"
-                        type='text'
-                        required
-                        endAdornment={
-                            firstname && (
-                                <InputAdornment position='end'>
-                                    {
-                                        firstnameError ? (
-                                            <ErrorIcon color='error' />
-                                        ) :
-                                            <CheckCircleIcon color='success' />
-                                    }
-                                </InputAdornment>
-                            )
-                        }
+                        Sign Up
+                    </Button>
+                </Box>
+                <Box className='register-error'>
+                    {error ? (<Typography>{error}</Typography>) : null}
+                </Box>
+                <Box className='redirect-register'>
+                    <Typography
+                        component='h2'
+                        className='redirect-title'
+                    >You don't have an account?</Typography>
+                    <Button
+                        className='redirect-button'
+                        variant='contained'
+                        onClick={login}
                     >
-                    </Input>
-                    {firstnameError ? (<FormHelperText error>{firstnameError}</FormHelperText>) : null}
-                </FormControl>
-            </Box>
-            <Box className='register-form' component='form'>
-                <FormControl className='register-input' error={!!lastnameError}>
-                    <InputLabel htmlFor='lastname-input' className='register-label'>Last name</InputLabel>
-                    <Input
-                        id='lastname-input'
-                        onChange={handleLastnameChange}
-                        onBlur={handleLastnameLive}
-                        label="Last name"
-                        type='text'
-                        required
-                        endAdornment={
-                            lastnameTouched && (
-                                <InputAdornment position='end'>
-                                    {
-                                        lastnameError ? (
-                                            <ErrorIcon color='error' />
-                                        ) :
-                                            <CheckCircleIcon color='success' />
-                                    }
-                                </InputAdornment>
-                            )
-                        }
-                    >
-                    </Input>
-                    {lastnameError ? (<FormHelperText error>{lastnameError}</FormHelperText>) : null}
-                </FormControl>
-            </Box>
-            <Box className='register-form' component='form'>
-                <FormControl className='register-input' error={!!passwordError}>
-                    <InputLabel htmlFor='password-input' className='register-label'>Password</InputLabel>
-                    <Input
-                        id='password-input'
-                        onChange={handlePasswordChange}
-                        onBlur={handlePasswordLive}
-                        label="Password"
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        endAdornment={
-                            <InputAdornment position='end'>
-                                {
-                                    passwordTouched && (
-                                        <>
-                                            {
-                                                passwordError ? (
-                                                    <ErrorIcon color='error' />
-                                                ) : password ? (
-                                                    <CheckCircleIcon color='success' />
-                                                ) : null}
-                                        </>
-                                    )
-                                }
-                                <IconButton
-                                    aria-label={
-                                        showPassword ? 'display the password' : 'hide the password'
-                                    }
-                                    className='show-password-icon'
-                                    onClick={handleShowPassword}
-                                    edge="end"
-                                >
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                </IconButton>
-                            </InputAdornment>
-                        }
-                    >
-                    </Input>
-                    {passwordError ? (<FormHelperText error>{passwordError}</FormHelperText>) : null}
-                </FormControl>
-            </Box>
-            <Box className='register-button'>
-                <Button
-                    variant='contained'
-                    onClick={register}
-                >
-                    Sign Up
-                </Button>
-            </Box>
-            <Box className='register-error'>
-                {error ? (<Typography>{error}</Typography>) : null}
-            </Box>
-            <Box className='redirect-register'>
-                <Typography
-                    component='h2'
-                    className='redirect-title'
-                >You don't have an account?</Typography>
-                <Button
-                    className='redirect-button'
-                    variant='contained'
-                    onClick={login}
-                >
-                    Log in
-                </Button>
+                        Log in
+                    </Button>
+                </Box>
             </Box>
         </Container>
     );

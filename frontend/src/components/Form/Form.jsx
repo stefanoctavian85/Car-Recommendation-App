@@ -137,7 +137,7 @@ function Form() {
                 setPredictions(fetchData.cars);
                 setError('');
             } else {
-                setError(fetchData.error);
+                setError(fetchData.message);
             }
 
             const timeout = setTimeout(() => {

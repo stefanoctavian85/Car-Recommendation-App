@@ -7,6 +7,7 @@ import fetch from 'node-fetch';
 import models from "../../models/index.js";
 import path from "path";
 import utils from "../../utils/index.js";
+import mongoose from "mongoose";
 
 const sendFirstMessage = async (req, res, next) => {
     const userId = req.user._id.toString();
@@ -191,6 +192,13 @@ const getConversationInfo = async (req, res, next) => {
         const conversationRef = ref(database, `conversations/${conversationId}`);
         const snapshot = await get(conversationRef);
         const conversation = snapshot.val();
+
+        if (!conversation) {
+            return res.status(400).json({
+                message: "Conversation not found!",
+            });
+        }
+
         let conversationInfo = {
             userId: conversation.userId,
             userFullName: conversation.userFullName,
@@ -199,22 +207,35 @@ const getConversationInfo = async (req, res, next) => {
         }
 
         const userId = conversation.userId;
-        const userInfo = await models.User.findOne({
-            _id: userId,
-        });
 
-        conversationInfo = {
-            ...conversationInfo,
-            'id': userInfo._id,
-            'email': userInfo.email,
-            'userStatus': userInfo.status.charAt(0).toUpperCase() + userInfo.status.slice(1).toLowerCase(),
-            'phoneNumber': userInfo.phoneNumber,
-            'documentsStatus': userInfo.statusAccountVerified.charAt(0).toUpperCase() + userInfo.statusAccountVerified.slice(1).toLowerCase()
-        };
+        if (userId) {
+            if (!mongoose.Types.ObjectId.isValid(userId)) {
+                return res.status(400).json({
+                    message: 'Something went wrong! Please try again later!',
+                });
+            }
 
-        return res.status(200).json({
-            conversationInfo,
-        });
+            const userInfo = await models.User.findOne({
+                _id: userId,
+            });
+
+            conversationInfo = {
+                ...conversationInfo,
+                'id': userInfo._id,
+                'email': userInfo.email,
+                'userStatus': userInfo.status.charAt(0).toUpperCase() + userInfo.status.slice(1).toLowerCase(),
+                'phoneNumber': userInfo.phoneNumber,
+                'documentsStatus': userInfo.statusAccountVerified.charAt(0).toUpperCase() + userInfo.statusAccountVerified.slice(1).toLowerCase()
+            };
+
+            return res.status(200).json({
+                conversationInfo,
+            });
+        } else {
+            return res.status(400).json({
+                message: "Missing user id",
+            });
+        }
     } catch (err) {
         next(err);
     }
@@ -225,11 +246,17 @@ const approveDocumentsByAdmin = async (req, res, next) => {
         const { uid } = req.body;
 
         if (!uid) {
-            return res.status(400).json({
+            return res.status(404).json({
                 message: "Missing user id",
             });
         }
 
+        if (!mongoose.Types.ObjectId.isValid(uid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
+            });
+        }
+        
         const user = await models.User.findOne({
             _id: uid,
         });
