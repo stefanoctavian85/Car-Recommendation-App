@@ -135,7 +135,7 @@ def missing_values(cars: pd.DataFrame):
 
     cars["Combustibil"] = cars["Combustibil"].apply(
         lambda x: "Gasoline" if x in ["Benzina", "Benzina + GPL", "Benzina + CNG"] else
-        "Hibrid" if x in ["Hibrid", "Hibrid Plug-In"]
+        "Hybrid" if x in ["Hibrid", "Hibrid Plug-In"]
         else x)
 
     cars["Cutie de viteze"] = cars["Cutie de viteze"].apply(lambda x: "Manual" if x == "Manuala"

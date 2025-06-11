@@ -10,7 +10,7 @@ import Login from './components/Login/Login.jsx';
 import Register from './components/Register/Register.jsx';
 import Search from './components/Search/Search.jsx';
 import Profile from './components/Profile/Profile.jsx';
-import Form from './components/Form/Form.jsx';
+import Recommendation from './components/Recommendation/Recommendation.jsx';
 import Cars from './components/Cars/Cars.jsx';
 import CarDetails from './components/CarDetails/CarDetails.jsx';
 import RentCar from './components/RentCar/RentCar.jsx';
@@ -89,7 +89,7 @@ function App() {
               </Route>
 
               <Route element={<ProtectedRoute />}>
-                <Route path='/form' element={<Form />}></Route>
+                <Route path='/recommendation' element={<Recommendation />}></Route>
               </Route>
 
               <Route element={<ProtectedRoute />}>

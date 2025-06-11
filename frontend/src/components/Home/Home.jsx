@@ -18,10 +18,10 @@ import LaptopChromebookIcon from '@mui/icons-material/LaptopChromebook';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import CarRentalIcon from '@mui/icons-material/CarRental';
 import searchPhoto from '../../assets/search_home_image.jpg';
-import formPhoto from '../../assets/home_image_form.jpg';
+import recommendationPhoto from '../../assets/home_image_form.jpg';
 import EmblaCarousel from '../GalleryCarousel/EmblaCarousel.jsx';
 
-const fillTheFormAsterisk = 'Already know what you want? Search directly for the desired model!';
+const asterisk = 'Already know what you want? Search directly for the desired model!';
 
 function Home() {
     const { auth } = useContext(AppContext);
@@ -148,18 +148,18 @@ function Home() {
 
                             <Card className='home-page-card'>
                                 <CardActionArea
-                                    onClick={() => navigate('/form')}
+                                    onClick={() => navigate('/recommendation')}
                                 >
                                     <CardMedia
                                         component='img'
                                         height='140'
                                         alt='search image'
-                                        src={formPhoto}
+                                        src={recommendationPhoto}
                                         className='home-card-photo'
                                     />
                                     <CardContent className='home-card-content'>
-                                        <Typography className='home-card-title'>Form</Typography>
-                                        <Typography className='home-card-subtitle'>Fill out the form that will recommend the right car for your personality and behavior</Typography>
+                                        <Typography className='home-card-title'>Recommendation</Typography>
+                                        <Typography className='home-card-subtitle'>Fill out one of the two recommendation methods to receive the car that best fits your personality and behavior</Typography>
                                     </CardContent>
                                 </CardActionArea>
                             </Card>
@@ -320,14 +320,14 @@ function Home() {
                         <EditNoteIcon className='home-step-icon' />
                         <Box className='home-step-description'>
                             <Box className='home-step-title-asterisk'>
-                                <Typography className='home-step-title'>Fill in the form</Typography>
-                                <Tooltip className='home-step-asterisk' title={fillTheFormAsterisk}>
+                                <Typography className='home-step-title'>Select a recommendation method</Typography>
+                                <Tooltip className='home-step-asterisk' title={asterisk}>
                                     <IconButton>
                                         <EmergencyIcon className='asterisk' />
                                     </IconButton>
                                 </Tooltip>
                             </Box>
-                            <Typography className='home-step-subtitle'>Answer questions to find the car for your needs </Typography>
+                            <Typography className='home-step-subtitle'>Provide details to find the car for your needs</Typography>
 
                         </Box>
                     </Box>
@@ -374,7 +374,7 @@ function Home() {
                         <PsychologyIcon className='home-step-icon' />
                         <Box className='home-reason'>
                             <Typography className='home-reason-title'>AI integration</Typography>
-                            <Typography className='home-reason-subtitle'>Powered by AI, our smart form finds the perfect match for you.</Typography>
+                            <Typography className='home-reason-subtitle'>Powered by AI, our smart system finds the perfect match for you.</Typography>
                         </Box>
                     </Box>
                     <Box className='home-why-to-choose-us-reason'>

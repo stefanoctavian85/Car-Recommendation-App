@@ -6,8 +6,9 @@ const apiRouter = express.Router();
 apiRouter.use(middleware.auth);
 
 apiRouter.get('/users/:uid/profile', controllers.profile.userInformation);
-apiRouter.post('/users/:uid/forms', controllers.form.predict);
-apiRouter.get('/users/quick-recommendations', controllers.form.quickRecommendations);
+apiRouter.post('/users/recommendations-by-text', controllers.recommendation.getRecommendationsByText);
+apiRouter.post('/users/forms', controllers.recommendation.predict);
+apiRouter.get('/users/quick-recommendations', controllers.recommendation.quickRecommendations);
 apiRouter.patch('/users/save-phone-number', controllers.profile.savePhoneNumber);
 apiRouter.post('/users/send-documents', middleware.uploadProfileDocuments, controllers.profile.sendDocuments, controllers.profile.checkDocuments);
 

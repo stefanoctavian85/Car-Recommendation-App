@@ -1,11 +1,33 @@
 .form-page {
     margin: 100px auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
-    max-width: 500px !important;
+    max-width: 600px !important;
     background-image: linear-gradient(to right, #1e2936, #121a24);
     border-radius: 12px;
     padding: 30px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-select, .form-description {
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-select-text, .form-description-title {
+    font-weight: 500 !important;
+}
+
+
+.form-description-input-area {
+    margin-top: 30px !important;
+    background-color: rgb(192, 192, 192) !important;
+    border-radius: 8px;
+    margin-bottom: 30px !important;
+}
+
+.form-description-text {
+    width: 100%;
 }
 
 .form-container {

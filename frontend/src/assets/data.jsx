@@ -30,7 +30,7 @@ const data = [
     {
         question: "Select fuel type",
         type: 'choice',
-        options: ['Gasoline', 'Diesel', 'Hibrid', 'Electric'],
+        options: ['Gasoline', 'Diesel', 'Hybrid', 'Electric'],
     },
     {
         question: 'What car transmission are you looking for?',

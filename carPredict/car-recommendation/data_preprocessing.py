@@ -172,6 +172,31 @@ cars['Cluster'] = np.nan
 cars.loc[X_train.index, "Cluster"] = training_clusters
 cars.loc[X_test.index, "Cluster"] = testing_clusters
 
+rows = []
+
+for column in cars.columns:
+    if column in numerical_columns:
+        rows.append({
+            "Column": column,
+            "Mean/Mode": cars[column].mean(),
+        })
+    elif column in categorical_columns:
+        rows.append({
+            "Column": column,
+            "Mean/Mode": cars[column].mode().iloc[0],
+        })
+
+mean_mode_values_df = pd.DataFrame(rows)
+mean_mode_values_df.to_csv("processed_data/mean_mode_values.csv", index=False)
+
+samples = []
+
+for column in categorical_columns:
+    group = cars.groupby(by=column).apply(lambda x: x.sample(n=min(500, len(x)), random_state=42))
+    samples.append(group)
+
+app_dataset = pd.concat(samples).drop_duplicates().reset_index(drop=True)
+
 joblib.dump(le_y, "joblib_files/labelencoder_y.joblib")
 joblib.dump(scaler, "joblib_files/standardscaler.joblib")
 joblib.dump(ohe, "joblib_files/onehotencoder.joblib")
@@ -182,11 +207,4 @@ y_train_df.to_csv("processed_data/y_train.csv", index=False)
 y_test_df.to_csv("processed_data/y_test.csv", index=False)
 cars.to_csv("processed_data/final_cars_dataset.csv", index=False)
 
-samples = []
-
-for column in categorical_columns:
-    group = cars.groupby(by=column).apply(lambda x: x.sample(n=min(500, len(x)), random_state=42))
-    samples.append(group)
-
-app_dataset = pd.concat(samples).drop_duplicates().reset_index(drop=True)
 app_dataset.to_csv("processed_data/app_dataset.csv", index=False)

@@ -1,5 +1,5 @@
 import auth from './auth-controller.js';
-import form from './form-controller.js';
+import recommendation from './recommendation-controller.js';
 import profile from './profile-controller.js';
 import car from './car-controller.js';
 import reservation from './reservation-controller.js';
@@ -8,7 +8,7 @@ import chat from './chat-controller.js';
 
 export default {
     auth,
-    form,
+    recommendation,
     profile,
     car,
     reservation,

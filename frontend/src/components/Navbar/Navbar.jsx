@@ -1,12 +1,12 @@
 import './Navbar.css';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import AppContext from '../../state/AppContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { AppBar, Container, Toolbar, Box, Button, Menu, MenuItem, Typography, Tooltip, List, ListItem } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import Logo from '../../assets/Logo.svg';
 
-const pages = ['Search', 'Form'];
+const pages = ['Search', 'Recommendation'];
 const settings = ['Profile', 'Log out'];
 
 function Navbar() {
@@ -48,8 +48,8 @@ function Navbar() {
 
     function handlePages(event) {
         if (isAuthenticated) {
-            if (event.target.textContent === "Form") {
-                navigate('/form');
+            if (event.target.textContent === "Recommendation") {
+                navigate('/recommendation');
             } else if (event.target.textContent === "Search") {
                 navigate('/search');
             }
