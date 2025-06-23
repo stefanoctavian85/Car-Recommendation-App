@@ -263,3 +263,11 @@
     max-width: 100px !important;
     padding: 10px 20px !important;
 }
+
+.form-description-length {
+    text-align: right;
+}
+
+.form-max-characters {
+    color: #ffffff;
+}

@@ -82,6 +82,7 @@ const getRecommendationsByText = async (req, res, next) => {
 const predict = async (req, res, next) => {
     try {
         const { questions, responses } = req.body;
+        const user = req.user;
 
         if (responses.length !== 10) {
             return res.status(400).json({
@@ -112,11 +113,11 @@ const predict = async (req, res, next) => {
                     message: data.error,
                 });
             };
-
+            
             const prediction = await flaskResponse.json();
             const cluster = prediction.cluster;
             const cars = prediction.cars;
-
+            
             const combinedResponses = questions.map((question, index) => ({
                 question,
                 answer: responses[index],
@@ -131,9 +132,9 @@ const predict = async (req, res, next) => {
             await form.save();
 
             req.user.cluster = cluster;
-            const user = req.user;
-            await user.save();
-
+            const userToSave = req.user;
+            await userToSave.save();
+            
             return res.status(200).json({
                 cars
             });

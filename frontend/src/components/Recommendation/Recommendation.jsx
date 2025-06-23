@@ -62,7 +62,7 @@ function Recommendation() {
     }
 
     function setTextForRecommendations(e) {
-        if (e.target.value.length < MAX_LENGTH_TEXT) {
+        if (e.target.value.length <= MAX_LENGTH_TEXT) {
             setText(e.target.value);
         }
     }
@@ -278,6 +278,10 @@ function Recommendation() {
                                                 maxLength: 300,
                                             }}
                                         />
+                                    </Box>
+
+                                    <Box className='form-description-length'>
+                                        <Typography className='form-max-characters'>{text.length} / {MAX_LENGTH_TEXT} max. number of characters</Typography>
                                     </Box>
 
                                     <Box className='form-button'>

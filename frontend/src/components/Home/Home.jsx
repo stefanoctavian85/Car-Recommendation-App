@@ -42,34 +42,37 @@ function Home() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setToken(auth.token);
-        setIsLoading(true);
+        if (auth.token) {
+            setToken(auth.token);
+            setIsLoading(true);
 
-        if (auth.authStore.getUser()) {
-            setUser(auth.authStore.getUser());
-        } else if (auth.authStore.token) {
-            const userId = jwtDecode(auth.authStore.token).id;
-            fetch(`${SERVER}/api/users/${userId}/profile`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
-                }
-            })
-                .then((res) => {
-                    if (res.ok) {
-                        return res.json();
+            if (auth.authStore.getUser()) {
+                setUser(auth.authStore.getUser());
+            } else if (auth.authStore.token) {
+                const userId = jwtDecode(auth.authStore.token).id;
+                fetch(`${SERVER}/api/users/${userId}/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
                     }
                 })
-                .then((data) => {
-                    setUser(data.user);
-                })
-        }
-
-        const timeout = setTimeout(() => {
+                    .then((res) => {
+                        if (res.ok) {
+                            return res.json();
+                        }
+                    })
+                    .then((data) => {
+                        setUser(data.user);
+                    })
+            }
+            const timeout = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timeout);
+        } else {
             setIsLoading(false);
-        }, 1000);
-        return () => clearTimeout(timeout);
-    }, [auth.token]);
+        }
+    }, []);
 
     useEffect(() => {
         if (user.cluster) {
@@ -105,7 +108,6 @@ function Home() {
     }
 
     function scrollToNextSection(ref) {
-        console.log(ref.current);
         ref.current?.scrollIntoView({ behavior: 'smooth' });
     }
 
