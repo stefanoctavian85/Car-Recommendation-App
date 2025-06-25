@@ -3,7 +3,8 @@
     max-width: fit-content;
     margin-top: 100px;
     padding: 50px 75px !important;
-    background-image: linear-gradient(to right, #1e2936, #121a24);
+    border-radius: 12px;
+    background-image: linear-gradient(to right, #006f9b, #003575);
 }
 
 .register-title {
@@ -16,7 +17,7 @@
 .register-text {
     font-size: 2rem !important;
     font-weight: 600 !important;
-    color: #dededf;
+    color: white;
 }
 
 .register-icon {
@@ -33,19 +34,15 @@
 }
 
 .register-label {
-    color: rgb(223, 216, 216) !important;
+    color: white !important;
 }
 
 .register-input .MuiInputBase-input {
-    color: rgb(223, 216, 216) !important;
-}
-
-.register-input .MuiInputBase-root.Mui-focused {
-    background-image: linear-gradient(to right, #1e2936, #121a24);
+    color: white !important;
 }
 
 .show-password-icon {
-    color: rgb(223, 216, 216) !important;
+    color: white !important;
 }
 
 .register-input {
@@ -67,18 +64,25 @@
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     position: relative;
     top: 12px;
+    text-transform: none !important;
 }
 
 .register-error {
     display: flex;
     justify-content: center;
-    font-size: 30px;
-    color: #7b160b;
+    color: #dc3545;
     margin-bottom: 20px;
+    margin-top: 30px;
+}
+
+.register-error-message {
+    font-size: 18px !important;
+    font-weight: 500 !important;
 }
 
 .redirect-title {
     margin-bottom: 4rem;
+    color: white !important;
 }
 
 .redirect-register {
@@ -95,4 +99,10 @@
     position: relative;
     top: 12px;
     margin-bottom: 10px;
+    text-transform: none !important;
+}
+
+.register-input-error {
+    color: #db2d2d !important;
+    font-size: 14px !important;
 }

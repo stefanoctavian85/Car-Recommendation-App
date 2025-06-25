@@ -11,7 +11,7 @@ import { SERVER } from '../../config/global.jsx';
 import { jwtDecode } from 'jwt-decode';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
-const MAX_LENGTH_TEXT = 300;
+const MAX_LENGTH_TEXT = 200;
 
 function Recommendation() {
     const { auth, cars } = useContext(AppContext);
@@ -68,6 +68,11 @@ function Recommendation() {
     }
 
     async function sendTextForRecommendations() {
+        if (text.length < 30) {
+            setError("A minimum of 30 characters is required to receive a recommendation!")
+            return;
+        }
+
         setIsLoading(true);
         try {
             const response = await fetch(`${SERVER}/api/users/recommendations-by-text`, {
@@ -230,15 +235,15 @@ function Recommendation() {
             {
                 recommendationType === '' && (<Box>
                     <Box className='form-select'>
-                        <Typography className='form-select-text'>Please select how you would like to respond for recommendation</Typography>
+                        <Typography className='form-select-text'>Please choose how to respond to the recommendation.</Typography>
                     </Box>
                     <Box className='form-radio-group choice'>
                         <FormControl>
                             <RadioGroup
                                 onClick={selectRecommendationType}
                             >
-                                <FormControlLabel value='form' label='Form' control={<Radio />} />
-                                <FormControlLabel value='description' label='Description' control={<Radio />} />
+                                <FormControlLabel className='label-select' value='form' label='Form' control={<Radio />} />
+                                <FormControlLabel className='label-select' value='description' label='Description' control={<Radio />} />
                             </RadioGroup>
                         </FormControl>
                     </Box>
@@ -262,7 +267,7 @@ function Recommendation() {
                         predictions.length === 0 ? (
                             <Box>
                                 <Box className='form-description'>
-                                    <Typography className='form-description-title'>Please write a detailed text, stating what kind of a car would you like</Typography>
+                                    <Typography className='form-description-title'>Please write a detailed message about the type of a car you're looking for</Typography>
                                 </Box>
 
                                 <Box className='form-description-content' component='form'>
@@ -292,6 +297,10 @@ function Recommendation() {
                                         >
                                             Submit
                                         </Button>
+                                    </Box>
+
+                                    <Box className='form-error'>
+                                        <Typography className='form-error-text'>{error}</Typography>
                                     </Box>
                                 </Box>
                             </Box>
@@ -352,6 +361,7 @@ function Recommendation() {
                                                         {
                                                             data[index].options.map((item, index) => (
                                                                 <FormControlLabel
+                                                                    className='label-select'
                                                                     key={index}
                                                                     value={item}
                                                                     label={item}

@@ -7,7 +7,7 @@
 .cars-results-title {
     margin-bottom: 40px;
     text-align: center;
-    color: white;
+    color: #333333;
 }
 
 .results-title {
@@ -18,8 +18,8 @@
 }
 
 .results-number {
-    font-size: 16px !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 18px !important;
+    color: #3d3d3d !important;
 }
 
 .results {
@@ -68,7 +68,6 @@
     flex-direction: column;
     justify-content: space-between;
     padding: 24px;
-    background: linear-gradient(to right, #f8f9fa, #e9ecef);
 }
 
 .results-car-name {
@@ -174,7 +173,7 @@
 }
 
 .results-pagination .MuiPagination-ul .MuiPaginationItem-root {
-    color: white;
+    color: #333333;
 }
 
 .results-pagination .MuiPagination-ul .Mui-selected {
@@ -190,5 +189,5 @@
 .no-results-text {
     font-size: 20px !important;
     font-weight: bold !important;
-    color: rgb(209, 209, 209) !important;
+    color: #333333 !important;
 }

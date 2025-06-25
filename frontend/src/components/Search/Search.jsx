@@ -142,7 +142,7 @@ function Search() {
         <Container className='search-container'>
             <Box className='search-page'>
                 <Box className='search-header'>
-                    <DirectionsCarIcon className='search-car' sx={{ fontSize: 40, color: '#3498db', mr: 2 }} />
+                    <DirectionsCarIcon className='search-car'/>
                     <Typography className='search-title'>
                         Looking for a car to rent?
                     </Typography>

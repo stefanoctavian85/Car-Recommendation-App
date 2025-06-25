@@ -5,9 +5,9 @@
 }
 
 .rental-final {
-    background-image: linear-gradient(to bottom right, #2e2a2a, #1e1c1c);
+    background-image: linear-gradient(to right, #006f9b, #003575);
     min-height: 350px !important;
-    border-radius: 8px !important;
+    border-radius: 12px !important;
 }
 
 .rental-final-success {
@@ -66,9 +66,17 @@
 .rental-final-button {
     display: flex;
     justify-content: center;
+    margin: 20px 0px;
 }
 
 .see-rented-cars-button {
     text-transform: none !important;
     margin-bottom: 30px !important;
+    font-size: 20px !important;
+}
+
+@media (max-width: 1500px) {
+    .rental-final {
+        min-width: 500px;
+    }
 }

@@ -1,5 +1,5 @@
 import './Register.css';
-import React, { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
 import AppContext from '../../state/AppContext.jsx';
@@ -49,6 +49,8 @@ function Register() {
         const timeout = setTimeout(() => {
             setIsLoading(false);
         }, 1500);
+
+        return () => clearTimeout(timeout);
     }, [auth.isAuthenticated]);
 
     function handleShowPassword() {
@@ -252,7 +254,7 @@ function Register() {
                             }
                         >
                         </Input>
-                        {emailError ? (<FormHelperText error>{emailError}</FormHelperText>) : null}
+                        {emailError ? (<FormHelperText className='register-input-error' error>{emailError}</FormHelperText>) : null}
                     </FormControl>
                 </Box>
                 <Box className='register-form'>
@@ -279,7 +281,7 @@ function Register() {
                             }
                         >
                         </Input>
-                        {firstnameError ? (<FormHelperText error>{firstnameError}</FormHelperText>) : null}
+                        {firstnameError ? (<FormHelperText className='register-input-error' error>{firstnameError}</FormHelperText>) : null}
                     </FormControl>
                 </Box>
                 <Box className='register-form'>
@@ -306,7 +308,7 @@ function Register() {
                             }
                         >
                         </Input>
-                        {lastnameError ? (<FormHelperText error>{lastnameError}</FormHelperText>) : null}
+                        {lastnameError ? (<FormHelperText className='register-input-error' error>{lastnameError}</FormHelperText>) : null}
                     </FormControl>
                 </Box>
                 <Box className='register-form'>
@@ -347,7 +349,7 @@ function Register() {
                             }
                         >
                         </Input>
-                        {passwordError ? (<FormHelperText error>{passwordError}</FormHelperText>) : null}
+                        {passwordError ? (<FormHelperText className='register-input-error' error>{passwordError}</FormHelperText>) : null}
                     </FormControl>
                 </Box>
                 <Box className='register-button'>
@@ -355,11 +357,11 @@ function Register() {
                         variant='contained'
                         onClick={register}
                     >
-                        Sign Up
+                        Sign up
                     </Button>
                 </Box>
                 <Box className='register-error'>
-                    {error ? (<Typography>{error}</Typography>) : null}
+                    {error ? (<Typography className='register-error-message'>{error}</Typography>) : null}
                 </Box>
                 <Box className='redirect-register'>
                     <Typography

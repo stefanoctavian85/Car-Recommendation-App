@@ -1,5 +1,5 @@
 import './RentCar.css';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { Box, Button, Checkbox, FormControlLabel, FormGroup, Step, StepLabel, Stepper, Typography, FormControl, InputLabel, Input, InputAdornment } from '@mui/material';
 import AppContext from '../../state/AppContext';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
@@ -27,17 +27,7 @@ import PaymentForm from '../PaymentForm/PaymentForm.jsx';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 const appearence = {
-    theme: 'night',
-    labels: 'floating',
-    variables: {
-        colorBackground: '#272424',
-        spacingUnit: '5px',
-    },
-    rules: {
-        '.Input': {
-            border: 'none',
-        }
-    }
+    labels: 'floating'
 }
 
 const steps = ['Select rental details', 'Complete the final documents', 'Payment'];
@@ -212,7 +202,7 @@ function RentCar() {
 
     async function handleNextStep() {
         if (activeStep === 0) {
-            if (startDate === '' || endDate === '') {
+            if (!startDate || !endDate) {
                 setReservationErrorMessage('You must select the rental period!');
                 return;
             } else if (dayjs(startDate).isAfter(endDate) || dayjs(endDate).isBefore(startDate) || endDate === '') {
@@ -300,7 +290,6 @@ function RentCar() {
         }
 
         if (activeStep === 2) {
-
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
         }
     }
@@ -368,17 +357,13 @@ function RentCar() {
         }
     }
 
-    function handlePaymentStatus(status) {
-        setPaymentStatus(status);
-    }
-
     if (isLoading) {
         return <LoadingScreen />
     }
 
     return (
         <Box className='rent-car-page'>
-            <Stepper activeStep={activeStep}>
+            <Stepper activeStep={activeStep} className='rent-car-steps'>
                 {
                     steps.map((step, index) => (
                         <Step key={index}>
@@ -443,6 +428,7 @@ function RentCar() {
                                             <FormControlLabel
                                                 label='Full insurance'
                                                 name='fullInsurance'
+                                                className='car-insurance-option'
                                                 control={
                                                     <Checkbox
                                                         checked={isFullInsuranceChecked}
@@ -452,6 +438,7 @@ function RentCar() {
                                                 }
                                             />
                                             <FormControlLabel
+                                                className='car-insurance-option'
                                                 control={<Checkbox
                                                     checked={insuranceOptions?.thirdPartyLiability}
                                                     onChange={handleInsuranceOptionsChange}
@@ -460,6 +447,7 @@ function RentCar() {
                                                 label='Third Party Liability'
                                             />
                                             <FormControlLabel
+                                                className='car-insurance-option'
                                                 control={<Checkbox
                                                     checked={insuranceOptions?.collisionDamageWaiver}
                                                     onChange={handleInsuranceOptionsChange}
@@ -468,6 +456,7 @@ function RentCar() {
                                                 label='Collision Damage Waiver'
                                             />
                                             <FormControlLabel
+                                                className='car-insurance-option'
                                                 control={
                                                     <Checkbox
                                                         checked={insuranceOptions?.theftProtection}
@@ -481,7 +470,7 @@ function RentCar() {
                                 </Box>
 
                                 <Box className='rental-period-error'>
-                                    <Typography>{reservationErrorMessage}</Typography>
+                                    <Typography className='rental-period-error-message'>{reservationErrorMessage}</Typography>
                                 </Box>
                             </Box>
                         ) : null
@@ -492,7 +481,7 @@ function RentCar() {
                             <Box className='rental-details'>
                                 <Box className='rental-details-title'>
                                     <AssignmentIcon />
-                                    <Typography component='h1'>Here are the details of the rental agreement!</Typography>
+                                    <Typography className='rental-details-title-text' component='h1'>Here are the details of the rental agreement!</Typography>
                                 </Box>
 
                                 <Box className='rental-details-account-car'>
@@ -501,12 +490,12 @@ function RentCar() {
 
                                         <Box className='user-info'>
                                             <PersonIcon className='profile-icon' />
-                                            <Typography>{user.firstname} {user.lastname}</Typography>
+                                            <Typography className='user-info-detail'>{user.firstname} {user.lastname}</Typography>
                                         </Box>
 
                                         <Box className='user-info'>
                                             <AlternateEmailIcon className='profile-icon' />
-                                            <Typography>{user.email}</Typography>
+                                            <Typography className='user-info-detail'>{user.email}</Typography>
                                         </Box>
 
                                         <Box className='user-info'>
@@ -514,7 +503,7 @@ function RentCar() {
                                             {
                                                 user.phoneNumber ? (
                                                     <Box className='user-valid-phonenumber'>
-                                                        <Typography>{user.phoneNumber}</Typography>
+                                                        <Typography className='user-info-detail'>{user.phoneNumber}</Typography>
                                                     </Box>
                                                 ) : (
                                                     <Box className='user-invalid-phonenumber'>
@@ -555,7 +544,7 @@ function RentCar() {
                                                             </Button>
                                                         </Box>
                                                         <Box className='save-phone-number-message'>
-                                                            <Typography>{phoneNumberMessage}</Typography>
+                                                            <Typography className='save-phone-number-message-text'>{phoneNumberMessage}</Typography>
                                                         </Box>
                                                     </Box>
                                                 )
@@ -564,7 +553,7 @@ function RentCar() {
 
                                         <Box className='user-info'>
                                             <CalendarMonthIcon className='profile-icon' />
-                                            <Typography>{startDate.format('MM/DD')} - {endDate.format('MM/DD/YYYY')}</Typography>
+                                            <Typography className='user-info-detail'>{startDate.format('MM/DD')} - {endDate.format('MM/DD/YYYY')}</Typography>
                                         </Box>
                                     </Box>
 
@@ -577,31 +566,31 @@ function RentCar() {
                                         </Box>
 
                                         <Box className='rented-car-feature'>
-                                            <AddRoadIcon />
-                                            <Typography>{car.KM}</Typography>
+                                            <AddRoadIcon className='profile-icon'/>
+                                            <Typography className='user-info-detail'>{car.KM}</Typography>
                                         </Box>
                                         {
                                             car.Culoare ? (
                                                 <Box className='rented-car-feature'>
-                                                    <PaletteIcon />
-                                                    <Typography className='car-feature-color'>{car.Culoare} {car['Optiuni culoare']}</Typography>
+                                                    <PaletteIcon className='profile-icon'/>
+                                                    <Typography className='user-info-detail'>{car.Culoare} {car['Optiuni culoare']}</Typography>
                                                 </Box>
                                             ) : null
                                         }
                                         <Box className='rented-car-feature'>
-                                            <CalendarMonthIcon />
-                                            <Typography>{car['Anul productiei']}</Typography>
+                                            <CalendarMonthIcon className='profile-icon'/>
+                                            <Typography className='user-info-detail'>{car['Anul productiei']}</Typography>
                                         </Box>
                                         <Box className='rented-car-feature'>
-                                            <LocalGasStationIcon />
-                                            <Typography>{car.Combustibil}</Typography>
+                                            <LocalGasStationIcon className='profile-icon'/>
+                                            <Typography className='user-info-detail'>{car.Combustibil}</Typography>
                                         </Box>
                                     </Box>
                                 </Box>
 
                                 <Box className='rental-price'>
                                     <Typography component='h2' className='rental-price-text'>Rental price: {rentalPrice} EUR</Typography>
-                                    <Typography>{rentalPriceErrorMessage}</Typography>
+                                    <Typography className='rental-period-error-message'>{rentalPriceErrorMessage}</Typography>
                                 </Box>
                             </Box>
                         ) : null
@@ -612,7 +601,7 @@ function RentCar() {
                             <Box className='payment-section'>
                                 <Box className='payment-section-header'>
                                     <Typography className='payment-title'>Payment</Typography>
-                                    <Typography className='payment-subtitle'>Rental Price: {rentalPrice}</Typography>
+                                    <Typography className='payment-subtitle'>Rental Price: {rentalPrice} EUR</Typography>
                                 </Box>
                                 <Box className='payment-content'>
                                     <Elements stripe={stripePromise} options={{
@@ -634,8 +623,8 @@ function RentCar() {
                             </Box>
                         ) : null
                     }
-
                 </Box>
+
                 <Box className='rent-buttons'>
                     <Button onClick={handleBackStep} className='back-button'>Back</Button>
                     {

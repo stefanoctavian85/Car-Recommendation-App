@@ -44,7 +44,7 @@
 .home-title-text,
 .home-subtitle-text {
     text-align: center;
-    color: white !important;
+    color: rgb(38, 38, 38) !important;
 }
 
 .home-title-text {
@@ -53,7 +53,7 @@
 }
 
 .home-subtitle-text {
-    color: rgba(255, 255, 255, 0.727) !important;
+    color: rgb(60, 60, 60) !important;
     font-size: 24px !important;
     font-weight: 400 !important;
 }
@@ -61,7 +61,7 @@
 .home-redirect-register {
     display: flex;
     flex-direction: column;
-    background-color: #1e1e1e;
+    background-color: #333030;
     border-radius: 12px;
     padding: 30px;
     margin: 0 auto;
@@ -95,12 +95,8 @@
     width: 200px;
 }
 
-.login-label {
-    color: #b3b3b3 !important;
-}
-
 .home-register-button {
-    background-color: #4f6df5 !important;
+    background-color: #488eef !important;
     color: white !important;
     padding: 10px 24px !important;
     font-weight: 500 !important;
@@ -124,7 +120,7 @@
 
 .next-section-button svg {
     font-size: 24px !important;
-    color: #1883d0;
+    color: black;
 }
 
 .button-section1 {
@@ -189,8 +185,9 @@
 .home-why-to-choose-us-subtitle-text,
 .recommendations-subtitle-text {
     font-size: 28px !important;
-    color: rgb(221, 221, 221);
-    margin-bottom: 10px !important;
+    color: #333333;
+    margin-bottom: 20px !important;
+    font-weight: 500 !important;
 }
 
 .home-how-it-works-steps {
@@ -220,7 +217,7 @@
 
 .home-step-title,
 .home-reason-title {
-    color: white;
+    color: #333333;
     font-weight: bold !important;
     font-size: 20px !important;
     text-align: center;
@@ -229,7 +226,7 @@
 
 .home-step-subtitle,
 .home-reason-subtitle {
-    color: rgb(200, 200, 200);
+    color: #3f3f3f;
     font-size: 14px !important;
     margin-top: 5px !important;
     text-align: center;
@@ -246,7 +243,7 @@
 }
 
 .asterisk {
-    color: white;
+    color: #333333;
     font-size: 12px !important;
 }
 
@@ -297,7 +294,7 @@
 .home-page-welcome-text {
     margin-top: 30px !important;
     font-size: 28px !important;
-    color: white;
+    color: #222222;
     font-weight: 600 !important;
     margin-bottom: 10px !important;
 }
@@ -305,7 +302,7 @@
 .home-page-subtitle {
     font-size: 18px !important;
     font-weight: 400 !important;
-    color: #b3b3b3 !important;
+    color: #333333 !important;
 }
 
 .home-page-authenticated-content {
@@ -313,7 +310,7 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 200px;
+    gap: 100px;
     margin: 20px 0;
 }
 
@@ -446,7 +443,7 @@
 
 .recommendation-car-detail {
     font-size: 13px !important;
-    color: #b3b3b3 !important;
+    color: white !important;
     background-color: #1e1e1e;
     padding: 6px 12px !important;
     border-radius: 20px;
@@ -466,5 +463,164 @@
 
 .recommendations-redirect-button {
     text-transform: none !important;
+}
 
+@media (max-width: 1024px) {
+    .recommendations-section {
+        padding: 60px;
+    }
+
+    .recommendations-grid {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+    }
+
+    .car-images {
+        height: 160px;
+    }
+
+    .recommendation-car-name {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .recommendations-section {
+        padding: 40px 20px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .recommendations-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .recommendation-content {
+        padding: 16px !important;
+        gap: 12px;
+    }
+
+    .car-images {
+        height: 140px;
+    }
+
+    .recommendation-car-name {
+        font-size: 16px !important;
+    }
+
+    .recommendation-car-details {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .recommendation-car-detail {
+        font-size: 12px !important;
+        padding: 4px 8px !important;
+        flex: none;
+        width: 100%;
+    }
+
+    .recommendations-header-text {
+        font-size: 14px !important;
+    }
+
+    .recommendations-subtitle-text {
+        font-size: 24px !important;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .recommendations-section {
+        padding: 20px 12px;
+        gap: 20px;
+    }
+
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .recommendation-card {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .recommendation-content {
+        padding: 12px !important;
+        gap: 10px;
+    }
+
+    .car-images {
+        height: 120px;
+    }
+
+    .recommendation-car-name {
+        font-size: 15px !important;
+    }
+
+    .recommendation-car-details {
+        gap: 4px;
+    }
+
+    .recommendation-car-detail {
+        font-size: 11px !important;
+        padding: 3px 6px !important;
+    }
+
+    .recommendations-redirect {
+        margin: 8px !important;
+        padding-bottom: 8px !important;
+    }
+
+    .recommendations-redirect-button {
+        font-size: 14px !important;
+        padding: 8px 16px !important;
+    }
+
+    .recommendations-header {
+        padding: 8px 16px;
+    }
+
+    .recommendations-subtitle-text {
+        font-size: 20px !important;
+    }
+}
+
+@media (max-width: 320px) {
+    .recommendations-section {
+        padding: 16px 8px;
+    }
+
+    .recommendations-grid {
+        gap: 8px;
+    }
+
+    .recommendation-content {
+        padding: 10px !important;
+        gap: 8px;
+    }
+
+    .car-images {
+        height: 100px;
+    }
+
+    .recommendation-car-name {
+        font-size: 14px !important;
+    }
+
+    .recommendation-car-detail {
+        font-size: 10px !important;
+        padding: 2px 4px !important;
+    }
+
+    .recommendations-header-text {
+        font-size: 12px !important;
+    }
+
+    .recommendations-subtitle-text {
+        font-size: 18px !important;
+    }
 }

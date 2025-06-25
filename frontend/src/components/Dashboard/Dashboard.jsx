@@ -116,11 +116,17 @@ function Dashboard() {
                         <Box className='card-compare'>
                             <Typography className='card-compare-text'>
                                 {
-                                    todaysRevenue === 0 && lastWeekRevenue === 0
-                                        ? '0%'
-                                        : lastWeekRevenue === 0
-                                            ? 'N/A'
-                                            : `${(((todaysRevenue - lastWeekRevenue) / lastWeekRevenue) * 100).toFixed(2)}%`
+                                    (() => {
+                                        if (todaysRevenue === 0 && lastWeekRevenue === 0) {
+                                            return '0%';
+                                        }
+
+                                        if (lastWeekRevenue === 0) {
+                                            return 'N/A';
+                                        }
+
+                                        return `${(((todaysRevenue - lastWeekRevenue) / lastWeekRevenue) * 100).toFixed(2)}%`;
+                                    })()
                                 }
                             </Typography>
                             {

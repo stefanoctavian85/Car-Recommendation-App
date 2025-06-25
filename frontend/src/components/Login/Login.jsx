@@ -185,7 +185,7 @@ function Login() {
                             }
                         >
                         </Input>
-                        {emailError ? (<FormHelperText error>{emailError}</FormHelperText>) : null}
+                        {emailError ? (<FormHelperText className='login-input-error' error>{emailError}</FormHelperText>) : null}
                     </FormControl>
                 </Box>
                 <Box className='login-form'>
@@ -227,7 +227,7 @@ function Login() {
                             }
                         >
                         </Input>
-                        {passwordError ? (<FormHelperText error>{passwordError}</FormHelperText>) : null}
+                        {passwordError ? (<FormHelperText className='login-input-error' error>{passwordError}</FormHelperText>) : null}
                     </FormControl>
                 </Box>
                 <Box className='login-button'>
@@ -239,7 +239,7 @@ function Login() {
                     </Button>
                 </Box>
                 <Box className='login-error'>
-                    {error ? <Typography component='h2'>{error}</Typography> : null}
+                    {error ? <Typography className='login-error-text' component='h2'>{error}</Typography> : null}
                 </Box>
                 <Box className='redirect-register'>
                     <Typography

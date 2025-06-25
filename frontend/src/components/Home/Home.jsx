@@ -20,6 +20,7 @@ import CarRentalIcon from '@mui/icons-material/CarRental';
 import searchPhoto from '../../assets/search_home_image.jpg';
 import recommendationPhoto from '../../assets/home_image_form.jpg';
 import EmblaCarousel from '../GalleryCarousel/EmblaCarousel.jsx';
+import dashboardPhoto from '../../assets/dashboard_photo.jpg';
 
 const asterisk = 'Already know what you want? Search directly for the desired model!';
 
@@ -59,15 +60,24 @@ function Home() {
                     .then((res) => {
                         if (res.ok) {
                             return res.json();
+                        } else {
+                            return res.json().then((error) => {
+                                throw new Error(error.message || 'Something went wrong!');
+                            });
                         }
                     })
                     .then((data) => {
                         setUser(data.user);
                     })
+                    .catch(() => {
+                        auth.authStore.logout();
+                        auth.setIsAuthenticated(false);
+                        window.location.reload();
+                    });
             }
             const timeout = setTimeout(() => {
                 setIsLoading(false);
-            }, 1000);
+            }, 1500);
             return () => clearTimeout(timeout);
         } else {
             setIsLoading(false);
@@ -75,7 +85,9 @@ function Home() {
     }, []);
 
     useEffect(() => {
-        if (user.cluster) {
+        if (user && user.hasCompletedRecommendation) {
+            setIsLoading(true);
+
             fetch(`${SERVER}/api/users/quick-recommendations`, {
                 method: 'GET',
                 headers: {
@@ -90,6 +102,12 @@ function Home() {
                 .then((data) => {
                     setRecommendations(data.recommendations);
                 })
+            const timeout = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timeout);
+        } else {
+            setIsLoading(false);
         }
     }, [user]);
 
@@ -126,7 +144,14 @@ function Home() {
                     <Box className='home-page-authenticated' ref={heroSectionRef}>
                         <Box className='home-page-welcome'>
                             <Typography className='home-page-welcome-text'>Welcome back, {user.firstname} {user.lastname}!</Typography>
-                            <Typography className='home-page-subtitle'>Looking for your next car? Take a look at your posibilities</Typography>
+                            {
+                                user.status === 'regular' ? (
+                                    <Typography className='home-page-subtitle'>Looking for your next car? Take a look at your posibilities</Typography>
+                                ) : (
+                                    <Typography className='home-page-subtitle'>Check dashboard to see if you have new tickets to solve!</Typography>
+                                )
+                            }
+
                         </Box>
 
                         <Box className='home-page-authenticated-content'>
@@ -148,6 +173,28 @@ function Home() {
                                 </CardActionArea>
                             </Card>
 
+                            {
+                                user.status === 'admin' && (
+                                    <Card className='home-page-card'>
+                                        <CardActionArea
+                                            onClick={redirectToDashboard}
+                                        >
+                                            <CardMedia
+                                                component='img'
+                                                height='140'
+                                                alt='search image'
+                                                src={dashboardPhoto}
+                                                className='home-card-photo'
+                                            />
+                                            <CardContent className='home-card-content'>
+                                                <Typography className='home-card-title'>Dashboard</Typography>
+                                                <Typography className='home-card-subtitle'>Check dashboard to see stats or new tickets!</Typography>
+                                            </CardContent>
+                                        </CardActionArea>
+                                    </Card>
+                                )
+                            }
+
                             <Card className='home-page-card'>
                                 <CardActionArea
                                     onClick={() => navigate('/recommendation')}
@@ -167,25 +214,11 @@ function Home() {
                             </Card>
                         </Box>
 
-                        {
-                            user.status === 'admin' ? (
-                                <Box className='admin-dashboard'>
-                                    <Typography className='admin-dashboard-title'>Admin Dashboard</Typography>
-                                    <Button
-                                        className='admin-dashboard-button'
-                                        variant='contained'
-                                        onClick={redirectToDashboard}
-                                    >
-                                        Dashboard
-                                    </Button>
-                                </Box>
-                            ) : null
-                        }
 
                         <Box className='home-next-section button-section1'>
                             <IconButton
                                 className='next-section-button'
-                                onClick={() => scrollToNextSection(howItWorksSectionRef)}
+                                onClick={() => scrollToNextSection(recommendationsRef)}
                             >
                                 <KeyboardArrowDownIcon />
                             </IconButton>
@@ -256,7 +289,7 @@ function Home() {
             }
 
             {
-                user.cluster ? (
+                user.hasCompletedRecommendation ? (
                     <Box className='recommendations-section' ref={recommendationsRef}>
                         <Box className='recommendations-title'>
                             <Box className='recommendations-header'>

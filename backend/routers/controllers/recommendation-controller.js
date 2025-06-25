@@ -62,6 +62,7 @@ const getRecommendationsByText = async (req, res, next) => {
                 const cars = prediction.cars;
 
                 req.user.cluster = cluster;
+                req.user.hasCompletedRecommendation = true;
                 const user = req.user;
                 await user.save();
 
@@ -132,6 +133,7 @@ const predict = async (req, res, next) => {
             await form.save();
 
             req.user.cluster = cluster;
+            req.user.hasCompletedRecommendation = true;
             const userToSave = req.user;
             await userToSave.save();
             
@@ -152,7 +154,7 @@ const quickRecommendations = async (req, res, next) => {
     try {
         const user = req.user;
 
-        if (!user.cluster) {
+        if (!user.hasCompletedRecommendation) {
             return res.status(404).json({
                 message: 'Cluster not found!',
             });
@@ -160,18 +162,18 @@ const quickRecommendations = async (req, res, next) => {
 
         const userCluster = user.cluster;
 
-        const latestFiveCars = await models.Car.find({ Cluster: userCluster },
+        const latestCars = await models.Car.find({ Cluster: userCluster },
             { Masina: 1, "Anul productiei": 1, Combustibil: 1, "Tip Caroserie": 1, Imagine: 1 })
             .sort({ _id: -1 }).limit(4);
 
-        if (!latestFiveCars) {
+        if (!latestCars) {
             return res.status(404).json({
                 message: 'Cars not found!',
             });
         }
 
         return res.status(200).json({
-            recommendations: latestFiveCars,
+            recommendations: latestCars,
         });
 
     } catch (err) {

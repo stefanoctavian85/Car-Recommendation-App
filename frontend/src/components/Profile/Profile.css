@@ -1,16 +1,15 @@
 .profile-page {
     border-radius: 8px;
-
 }
 
 .profile-tabs {
-    background-color: #1e1e1e;
-    color: #ffffff;
+    background: rgba(215, 220, 225, 0.92);
     padding: 20px;
     border-radius: 8px;
     margin: 100px;
     display: flex;
     flex: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .MuiTabPanel-hidden {
@@ -18,21 +17,23 @@
 }
 
 .profile-tabs .MuiTabs-root {
-    background-color: #2c2c2c;
+    background-color: #f8f9fa;
     border-radius: 8px;
     margin-right: 20px;
     width: 150px;
+    height: 200px;
+    border: 1px solid #e0e6ed;
 }
 
 .profile-tabs .MuiTab-root {
-    color: #a0a0a0;
+    color: black !important;
     text-transform: none;
     margin: 8px 0;
 }
 
 .profile-tabs .MuiTab-root.Mui-selected {
-    color: #ffffff;
-    background-color: #3a3a3a;
+    color: #004ccf;
+    background-color: rgba(79, 172, 254, 0.1);
 }
 
 .profile-tabs .MuiTabs-root.MuiTabs-vertical {
@@ -47,31 +48,35 @@
 .profile-tabs .MuiTabPanel-root {
     flex-grow: 1;
     width: calc(100% - 220px);
-    background-color: #2c2c2c;
+    background-color: #ffffff;
     border-radius: 10px;
+    border: 1px solid #e0e6ed;
 }
 
 .user-information-details {
-    background-color: #2c2c2c;
-    border-radius: 8px;
     padding: 20px;
 }
 
 .user-info {
     display: flex;
-    align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 15px !important;
+}
+
+.user-info-detail {
+    font-size: 18px !important;
+    color: black;
 }
 
 .profile-icon {
     margin-right: 10px;
-    color: #4a9ff9;
+    color: #3d84c3 !important;
 }
 
 .user-invalid-phonenumber {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
     gap: 10px;
+    flex-direction: row !important;
 }
 
 .information-input {
@@ -79,22 +84,22 @@
 }
 
 .information-input .MuiInputLabel-root {
-    color: #a0a0a0;
+    color: black !important;
 }
 
 .information-input .MuiInput-root {
-    color: #ffffff;
-    border-bottom-color: #4a9ff9;
+    color: black;
+    border-bottom-color: #4facfe;
 }
 
 .save-phone-number-button .MuiButton-root {
-    background-color: #4a9ff9;
+    background-color: #4facfe;
     color: #ffffff;
 }
 
 .save-phone-number-message {
     margin-left: 10px;
-    color: #41cc6b;
+    color: #28a745;
 }
 
 .MuiInputAdornment-root .MuiSvgIcon-root {
@@ -115,9 +120,9 @@
 }
 
 .user-documents-title {
-    font-size: 1.5rem !important;
+    font-size: 24px !important;
     font-weight: 500 !important;
-    color: #f0f0f0;
+    color: black;
     margin-bottom: 1rem;
 }
 
@@ -135,7 +140,7 @@
 }
 
 .document-input-title {
-    color: #bbb;
+    color: black;
     margin-bottom: 0.5rem;
     font-size: 0.95rem !important;
 }
@@ -144,17 +149,18 @@
 .driver-license-upload {
     width: 100%;
     padding: 0.8rem;
-    color: #f0f0f0 !important;
-    border: 1px solid #444;
+    color: black !important;
+    border: 1px solid #ced4da;
     border-radius: 4px;
     margin-top: 0.5rem;
     transition: all 0.2s ease;
+    background-color: #f8f9fa;
 }
 
 .id-card-upload:hover,
 .driver-license-upload:hover {
-    background-color: #333;
-    border-color: #666;
+    background-color: #e9ecef;
+    border-color: #4facfe;
 }
 
 .input-file {
@@ -169,21 +175,22 @@
 
 .send-documents Button {
     padding: 0.6rem 2rem;
-    background-color: #1976d2;
+    background-color: #4facfe;
     color: #fff;
     border-radius: 4px;
     font-weight: 500;
     transition: all 0.2s ease;
+    text-transform: none !important;
 }
 
 .send-documents Button:hover {
-    background-color: #1565c0;
+    background-color: #3bb0bb;
 }
 
 .files-message {
     text-align: center;
     margin-top: 1rem;
-    color: #F44336;
+    color: #dc3545;
     font-size: 0.9rem;
 }
 
@@ -212,7 +219,7 @@
 }
 
 .user-reservations-tab {
-    background-color: #2c2c2c;
+    background-color: #ffffff;
     border-radius: 8px;
     padding: 0px;
 }
@@ -232,7 +239,9 @@
 
 .user-reservations-message {
     text-align: center;
-    color: #a0a0a0;
+    color: #2c3e50;
+    font-size: 24px !important;
+    font-weight: 500 !important;
     padding: 40px 0;
 }
 
@@ -246,9 +255,10 @@
 }
 
 .user-rented-car .MuiCard-root {
-    background-color: #3a3a3a;
+    background-color: #f8f9fa;
     border-radius: 8px;
     width: 100%;
+    border: 1px solid #e0e6ed;
 }
 
 .rented-car-images {
@@ -273,18 +283,18 @@
 .rented-car-name {
     font-size: 22px !important;
     font-weight: bold !important;
-    color: #90caf9;
+    color: #004ccf;
     margin: 0 auto !important;
 }
 
 .rented-car-version {
     font-size: 16px !important;
-    color: #b3b3b3;
+    color: black;
     margin: 0 auto !important;
 }
 
 .rented-car-reservation-details {
-    border-top: 1px solid #4a4a4a;
+    border-top: 1px solid #dee2e6;
     display: flex;
     align-items: center;
     padding-top: 15px;
@@ -293,13 +303,13 @@
 .rented-car-start-time,
 .rented-car-end-time {
     font-size: 14px;
-    color: #b3b3b3;
+    color: black;
     margin: 4px auto !important;
 }
 
 .rented-car-time-separator {
     font-size: 14px;
-    color: #b3b3b3;
+    color: black;
 }
 
 .rented-car-extend-button {
@@ -307,20 +317,20 @@
 }
 
 .rented-car-extend-button .MuiButton-root {
-    background-color: #4a9ff9;
+    background-color: #4facfe;
     color: #ffffff;
     text-transform: none;
     padding: 6px 16px;
 }
 
 .rented-car-extend-button .MuiButton-root:hover {
-    background-color: #3d85d8;
+    background-color: rgb(100, 144, 230);
 }
 
 .rented-car-insurance-details {
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid #4a4a4a;
+    border-top: 1px solid #dee2e6;
 }
 
 .rented-car-insurance {
@@ -335,20 +345,20 @@
 }
 
 .check-insurance-icon {
-    color: #41cc6b;
+    color: #28a745;
 }
 
 .cancel-insurance-icon {
-    color: #f44336;
+    color: #dc3545;
 }
 
 .insurance-type {
-    color: #ffffff;
+    color: black;
 }
 
 .rented-car-footer {
     display: flex;
-    border-top: 1px solid #4a4a4a;
+    border-top: 1px solid #dee2e6;
     align-items: center;
 }
 
@@ -361,7 +371,8 @@
     display: flex;
     align-items: center;
     font-size: 18px;
-    color: #4a9ff9;
+    color: #004ccf;
+    font-weight: 500 !important;
     margin: 0;
 }
 
@@ -375,11 +386,11 @@
 }
 
 .checkbox-gdpr {
-    color: white !important;
+    color: #4facfe !important;
     margin-right: 20px !important;
 }
 
 .checkbox-gdpr-label {
     font-size: 14px;
-    color: #b3b3b3;
+    color: #495057;
 }

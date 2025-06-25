@@ -43,6 +43,9 @@ const userSchema = new mongoose.Schema({
     },
     cluster: {
         type: Number,
+    },
+    hasCompletedRecommendation: {
+        type: Boolean,
     }
 }, { collection: 'Users'});
 

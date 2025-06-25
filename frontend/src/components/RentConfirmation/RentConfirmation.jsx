@@ -42,7 +42,6 @@ function RentConfirmation() {
                 })
                 .catch((err) => {
                     navigate('/');
-
                 })
                 .finally(() => {
                     const timeout = setTimeout(() => {

@@ -1,5 +1,5 @@
 import './CarDetails.css';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext';
 import { SERVER } from '../../config/global.jsx';
@@ -127,7 +127,7 @@ function CarDetails() {
                 body: JSON.stringify({
                     cid: car._id,
                     startDate: dayjs(todaysDate).toDate(),
-                    endDate: dayjs(todaysDate).add(1, 'day').toDate(),
+                    endDate: dayjs(todaysDate).toDate(),
                     insuranceOptions: {
                         thirdPartyLiability: false,
                         collisionDamageWaiver: false,
@@ -274,27 +274,27 @@ function CarDetails() {
                 </Box>
                 <Box className='car-feature'>
                     <DirectionsCarIcon />
-                    <Typography>{car?.Masina} {car?.Versiune} {car?.Generatie} </Typography>
+                    <Typography className='car-feature-description'>{car?.Masina} {car?.Versiune} {car?.Generatie} </Typography>
                 </Box>
                 <Box className='car-feature'>
                     <AddRoadIcon />
-                    <Typography>{car.KM}</Typography>
+                    <Typography className='car-feature-description'>{car.KM}</Typography>
                 </Box>
                 {
                     car.Culoare ? (
                         <Box className='car-feature'>
                             <PaletteIcon />
-                            <Typography className='car-feature-color'>{car.Culoare} {car['Optiuni culoare']}</Typography>
+                            <Typography className='car-feature-description'>{car.Culoare} {car['Optiuni culoare']}</Typography>
                         </Box>
                     ) : null
                 }
                 <Box className='car-feature'>
                     <CalendarMonthIcon />
-                    <Typography>{car['Anul productiei']}</Typography>
+                    <Typography className='car-feature-description'>{car['Anul productiei']}</Typography>
                 </Box>
                 <Box className='car-feature'>
                     <LocalGasStationIcon />
-                    <Typography>{car.Combustibil}</Typography>
+                    <Typography className='car-feature-description'>{car.Combustibil}</Typography>
                 </Box>
             </Box>
             <Box className='car-technical-specifications'>
@@ -304,39 +304,39 @@ function CarDetails() {
                 </Box>
                 <Box className='car-tech-spec'>
                     <SpeedIcon />
-                    <Typography>{car['Capacitate cilindrica']} cm3</Typography>
+                    <Typography className='car-tehnical-description'>{car['Capacitate cilindrica']} cm3</Typography>
                 </Box>
                 <Box className='car-tech-spec'>
                     <BoltIcon />
-                    <Typography>{car.Putere} HP</Typography>
+                    <Typography className='car-tehnical-description'>{car.Putere} HP</Typography>
                 </Box>
                 <Box className='car-tech-spec'>
                     <FaCarSide />
-                    <Typography>{car['Tip Caroserie']}</Typography>
+                    <Typography className='car-tehnical-description'>{car['Tip Caroserie']}</Typography>
                 </Box>
                 <Box className='car-tech-spec'>
                     <TbManualGearbox />
-                    <Typography>{car['Cutie de viteze']}</Typography>
+                    <Typography className='car-tehnical-description'>{car['Cutie de viteze']}</Typography>
                 </Box>
                 <Box className='car-tech-spec'>
                     <SettingsIcon />
-                    <Typography>{car.Transmisie}</Typography>
+                    <Typography className='car-tehnical-description'>{car.Transmisie}</Typography>
                 </Box>
                 {
                     car['Emisii CO2'] ? (
                         <Box className='car-tech-spec'>
                             <MdCo2 />
-                            <Typography>{car['Emisii CO2']} g/km</Typography>
+                            <Typography className='car-tehnical-description'>{car['Emisii CO2']} g/km</Typography>
                         </Box>
                     ) : null
                 }
                 <Box className='car-tech-spec'>
                     <LocalGasStationIcon />
-                    <Typography>Urban {car['Consum Urban']} l/100km</Typography>
+                    <Typography className='car-tehnical-description'>Urban {car['Consum Urban']} l/100km</Typography>
                 </Box>
                 <Box className='car-tech-spec'>
                     <LocalGasStationIcon />
-                    <Typography>Extraurban {car['Consum Extraurban']} l/100km</Typography>
+                    <Typography className='car-tehnical-description'>Extraurban {car['Consum Extraurban']} l/100km</Typography>
                 </Box>
             </Box>
             {
@@ -376,7 +376,7 @@ function CarDetails() {
                                         <List className='audio-list'>
                                             {
                                                 audioOptions.map((element, index) => (
-                                                    <ListItem key={index}>{element}</ListItem>
+                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
                                                 ))
                                             }
                                         </List>
@@ -389,7 +389,7 @@ function CarDetails() {
                                         <List className='electronics-list'>
                                             {
                                                 electronicsOptions.map((element, index) => (
-                                                    <ListItem key={index}>{element}</ListItem>
+                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
                                                 ))
                                             }
                                         </List>
@@ -402,7 +402,7 @@ function CarDetails() {
                                         <List className='performance-list'>
                                             {
                                                 performanceOptions.map((element, index) => (
-                                                    <ListItem key={index}>{element}</ListItem>
+                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
                                                 ))
                                             }
                                         </List>
@@ -415,7 +415,7 @@ function CarDetails() {
                                         <List className='safety-list'>
                                             {
                                                 safetyOptions.map((element, index) => (
-                                                    <ListItem key={index}>{element}</ListItem>
+                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
                                                 ))
                                             }
                                         </List>
@@ -428,7 +428,7 @@ function CarDetails() {
                                         <List className='optional-list'>
                                             {
                                                 optionalsOptions.map((element, index) => (
-                                                    <ListItem key={index}>{element}</ListItem>
+                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
                                                 ))
                                             }
                                         </List>
@@ -446,16 +446,16 @@ function CarDetails() {
                     open={open}
                     onClose={handleCloseDialog}
                 >
-                    <DialogTitle>
+                    <DialogTitle className='rent-reject-title'>
                         {"Something went wrong!"}
                     </DialogTitle>
                     <DialogContent>
-                        <DialogContentText>
+                        <DialogContentText className='rent-reject-content'>
                             {alertDialogText}
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button autoFocus onClick={handleCloseDialog} variant='contained'>
+                        <Button className='rent-rejected-button' autoFocus onClick={handleCloseDialog} variant='contained'>
                             Profile
                         </Button>
                     </DialogActions>

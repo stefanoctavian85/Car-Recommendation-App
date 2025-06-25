@@ -92,12 +92,25 @@
 }
 
 @media (max-width: 768px) {
+    
+
     .card-details {
         grid-template-columns: 1fr;
     }
 
     .dashboard-page {
         padding: 1rem;
+    }
+
+    .dashboard-graphics {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 1200px) {
+    .card {
+        max-height: 100px;
     }
 
     .dashboard-graphics {

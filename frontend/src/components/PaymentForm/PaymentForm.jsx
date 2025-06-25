@@ -101,7 +101,7 @@ function PaymentForm({ car, startDate, endDate, insuranceOptions, rentalPrice })
                         variant='contained'
                         className='payment-submit-button'
                         disabled={!stripe}
-                    >Pay Now</Button>
+                    >Pay now</Button>
                 </Box>
             </Box>
 

@@ -77,9 +77,9 @@ function Logs() {
             .then((data) => {
                 const rows = data.logs.map(log => ({
                     id: log._id,
-                    fullname: log.userId.firstname + " " + log.userId.lastname || '',
-                    email: log.userId.email || '',
-                    car: log.carId.Masina || '',
+                    fullname: log.userId?.firstname + " " + log.userId?.lastname || '',
+                    email: log.userId?.email || '',
+                    car: log.carId?.Masina || '',
                     price: log.totalPrice || 0,
                     status: log.status || '',
                     startdate: dayjs(log.startDate).format('YYYY-MM-DD HH:mm') || '',

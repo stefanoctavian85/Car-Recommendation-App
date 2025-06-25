@@ -1,6 +1,6 @@
 import './AdminConversations.css';
 import { Box, FormControl, InputLabel, Select, MenuItem, Typography, Button } from '@mui/material';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import AppContext from '../../state/AppContext';
 import { DataGrid } from '@mui/x-data-grid';
 import { initializeApp } from 'firebase/app';
@@ -156,7 +156,9 @@ function AdminConversations({ router }) {
                             keepNonExistentRowsSelected
                             onRowSelectionModelChange={(index) => {
                                 if (index.length > 0) {
-                                    setSelectedConversationIndex(index[0])
+                                    setSelectedConversationIndex(index[0]);
+                                } else {
+                                    setSelectedConversationIndex('');
                                 }
                             }}
                         />

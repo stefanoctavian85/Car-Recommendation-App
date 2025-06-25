@@ -1,10 +1,9 @@
 .car-details-page {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
+    background: rgba(215, 220, 225, 0.92);
     padding: 20px;
     border-radius: 10px;
-    border: 1px solid #444;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(203, 213, 224, 0.6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     max-width: 1200px;
     margin: 80px auto;
 }
@@ -12,19 +11,19 @@
 .car-make-version {
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid rgba(203, 213, 224, 0.5);
 }
 
 .car-name {
     font-size: 28px !important;
     font-weight: 700 !important;
-    color: #90caf9;
+    color: #2d3748;
     margin-bottom: 5px !important;
 }
 
 .car-version {
     font-size: 18px !important;
-    color: #aaa;
+    color: #4a5568;
     font-weight: 400 !important;
 }
 
@@ -45,10 +44,9 @@
 
 .car-gallery {
     flex: 2;
-    background-color: #252525;
+    background: rgba(8, 47, 74, 0.85);
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid #333;
     max-height: 400px !important;
 }
 
@@ -80,9 +78,9 @@
     flex-direction: column;
     gap: 20px;
     padding: 20px;
-    background-color: #252525;
+    background: rgba(247, 250, 252, 0.85);
     border-radius: 8px;
-    border: 1px solid #333;
+    border: 1px solid rgba(203, 213, 224, 0.4);
 }
 
 .gallery {
@@ -99,64 +97,76 @@
 .rent-container {
     display: flex;
     flex-direction: row;
+    justify-content: center !important;
 }
 
 .rent-text {
     font-size: 20px !important;
     font-weight: 500 !important;
-    color: #fff;
-    display: flex;
-    align-items: center;
+    color: #2d3748;
+    display: flex !important;
+    align-items: center !important;
     margin-bottom: 10px !important;
 }
 
 .full-price-text {
     font-size: 20px !important;
     font-weight: 500 !important;
-    color: #fff;
+    color: #2d3748;
     display: flex;
-    align-items: center;
-    text-align: center !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .price-icon {
     margin: 0 5px;
-    color: #4caf50;
+    color: #3bb0bb;
     font-size: 20px !important;
     position: relative;
     top: 0px !important;
 }
 
 .info-icon {
-    color: #2daabb;
+    color: #00aee0;
     position: relative;
     top: -3px !important;
     font-size: 20px !important;
 }
 
+.car-rent-button {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
 .car-full-price-button Button, .car-rent-button Button {
-    background-color: #4caf50 !important;
+    background: linear-gradient(to right, #4facfe 0%, #3bb0bb 100%) !important;
     color: white !important;
-    width: 100%;
+    width: 40%;
     padding: 10px !important;
     font-weight: 600 !important;
     transition: all 0.3s !important;
-    margin-top: 5px;
 }
 
 .car-full-price-button Button:hover, .car-rent-button Button:hover {
-    background-color: #3d8b40 !important;
+    background: linear-gradient(to right, #3bb0bb 0%, #4facfe 100%) !important;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .car-features,
 .car-technical-specifications {
-    background-color: #252525;
+    background: rgba(247, 250, 252, 0.85);
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 30px;
-    border: 1px solid #333;
+    border: 1px solid rgba(203, 213, 224, 0.4);
+}
+
+.car-feature-description,
+.car-tehnical-description {
+    color: black !important;
+    font-size: 16px !important;
 }
 
 .car-features-title,
@@ -165,20 +175,20 @@
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid rgba(203, 213, 224, 0.5);
 }
 
 .car-features-title svg,
 .car-technical-specifications-title svg {
     margin-right: 10px;
-    color: #4caf50;
+    color: #3bb0bb;
     font-size: 24px !important;
 }
 
 .specifications-title {
     font-size: 24px !important;
     font-weight: 700 !important;
-    color: #fff;
+    color: #2d3748;
 }
 
 .car-feature,
@@ -186,7 +196,7 @@
     display: flex;
     align-items: center;
     padding: 12px 0;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
 }
 
 .car-feature:last-child,
@@ -197,45 +207,33 @@
 .car-feature svg,
 .car-tech-spec svg {
     margin-right: 15px;
-    color: #4caf50;
+    color: #3bb0bb;
     font-size: 20px !important;
 }
 
-.car-feature Typography,
-.car-tech-spec Typography {
-    font-size: 16px !important;
-    color: #ccc;
-    margin-right: 8px !important;
-}
-
-.car-tech-spec Typography {
-    display: flex;
-    align-items: center;
-}
-
 .car-equipments {
-    background-color: #252525;
+    background: rgba(247, 250, 252, 0.85);
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 30px;
-    border: 1px solid #333;
+    border: 1px solid rgba(203, 213, 224, 0.4);
 }
 
 .car-equipments .MuiTabList-root {
     margin-bottom: 20px;
-    background-color: #1e1e1e;
+    background: rgba(241, 245, 249, 0.7);
     border-radius: 8px;
 }
 
 .car-equipments .MuiTab-root {
-    color: #aaa !important;
+    color: #4a5568 !important;
     font-weight: 500 !important;
     text-transform: capitalize !important;
     transition: all 0.3s ease !important;
 }
 
 .car-equipments .MuiTab-root.Mui-selected {
-    color: #4caf50 !important;
+    color: #2d3748 !important;
     font-weight: 700 !important;
 }
 
@@ -249,9 +247,9 @@
 }
 
 .car-equipments .MuiListItem-root {
-    color: #ccc;
+    color: #4a5568;
     padding: 12px 15px !important;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
     transition: background-color 0.3s ease;
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;;
 }
@@ -261,12 +259,12 @@
 }
 
 .car-equipments .MuiListItem-root:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(75, 172, 254, 0.08);
 }
 
 .car-equipments .MuiListItem-root::before {
     content: '•';
-    color: #4caf50;
+    color: #3bb0bb;
     margin-right: 10px;
     font-size: 20px;
     position: relative;
@@ -274,5 +272,24 @@
 }
 
 .rent-car-button {
+    text-transform: none !important;
+    font-size: 20px !important;
+}
+
+.car-options {
+    color: black !important;
+    font-size: 16px !important; 
+}
+
+.rent-reject-title {
+    font-size: 24px !important;
+    font-weight: 500 !important;
+}
+
+.rent-reject-content {
+    color: rgb(36, 36, 36) !important;
+}
+
+.rent-rejected-button {
     text-transform: none !important;
 }

@@ -1,10 +1,11 @@
 .error-page {
     padding: 100px;
+    margin-top: 200px !important;
     display: flex;
     align-items: center;
     flex-direction: column;
     gap: 20px;
-    background-color: #1e1e1e;
+    background: rgba(215, 220, 225, 0.92);
     width: fit-content;
     margin: 0 auto;
     border-radius: 8px;
@@ -12,17 +13,18 @@
 }
 
 .error-emoji {
-    color: #4a9ff9;
+    color: #268af5;
 }
 
 .error-message-text {
     font-size: 24px !important;
     margin-bottom: 20px !important;
-    color: #ffffff;
+    color: black;
 }
 
 .error-home-button {
     text-transform: none !important;
     font-size: 16px !important;
     padding: 10px 12px !important;
+    width: 80px;
 }

@@ -1,5 +1,5 @@
 .navbar {
-    background-image: linear-gradient(135deg, #052f63, #052f63, #052f63) !important;
+    background-image: linear-gradient(to right, #00aee0 0%, #004ccf 100%) !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -40,6 +40,7 @@
 
 .navbar-pages Button {
     font-weight: 500;
+    font-size: 16px !important;
 }
 
 .navbar-settings .MuiSvgIcon-root {
@@ -61,6 +62,7 @@
 .navbar-login-button {
     text-transform: none !important;
     color: white !important;
+    font-size: 16px !important;
 }
 
 .navbar-button {

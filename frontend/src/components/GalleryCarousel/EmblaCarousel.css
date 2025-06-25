@@ -32,7 +32,7 @@
 }
 
 .prev-button, .next-button {
-    background-color: rgba(59, 53, 53, 0.7);
+    background-color: rgba(205, 205, 205, 0.5);
     border-radius: 50%;
     cursor: pointer;
     padding: 5px;

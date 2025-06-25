@@ -46,8 +46,8 @@ const dashboardReports = async (req, res, next) => {
             });
         }
 
-        todaysRevenue = todaysRevenue.toFixed(2);
-        lastWeekRevenue = lastWeekRevenue.toFixed(2);
+        todaysRevenue = parseFloat(todaysRevenue.toFixed(2));
+        lastWeekRevenue = parseFloat(lastWeekRevenue.toFixed(2));
         todaysBookings = reservationsToday.length;
         lastWeekBookings = reservationsLastWeek.length;
 

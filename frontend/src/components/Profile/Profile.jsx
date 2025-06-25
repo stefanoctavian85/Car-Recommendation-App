@@ -59,20 +59,29 @@ function Profile() {
         }
 
         fetch(`${SERVER}/api/users/${userId}/profile`, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${auth.token}`,
-            },
-        })
-            .then(async (res) => {
-                const data = await res.json();
-                if (res.ok) {
-                    setError('');
-                    setAccountInformation(data.user);
-                } else {
-                    setError(data.message);
-                }
-            });
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                    }
+                })
+                    .then((res) => {
+                        if (res.ok) {
+                            return res.json();
+                        } else {
+                            return res.json().then((error) => {
+                                throw new Error(error.message || 'Something went wrong!');
+                            });
+                        }
+                    })
+                    .then((data) => {
+                        setError('');
+                        setAccountInformation(data.user);
+                    })
+                    .catch(() => {
+                        auth.authStore.logout();
+                        auth.setIsAuthenticated(false);
+                        window.location.reload();
+                    });
 
         const timeout = setTimeout(() => {
             setIsLoading(false);
@@ -181,7 +190,6 @@ function Profile() {
             setFileMessage("");
             if (auth.authStore.user.statusAccountVerified !== 'uninitialized') {
                 setFileMessage("You have already sent the documents!");
-                console.log(auth.authStore.user.statusAccountVerified);
                 return;
             } else {
                 setFileMessage("");
@@ -255,18 +263,18 @@ function Profile() {
                                 <Box className='user-information-details'>
                                     <Box className='user-info'>
                                         <PersonIcon className='profile-icon' />
-                                        <Typography>{accountInformation.firstname} {accountInformation.lastname}</Typography>
+                                        <Typography className='user-info-detail'>{accountInformation.firstname} {accountInformation.lastname}</Typography>
                                     </Box>
                                     <Box className='user-info'>
                                         <AlternateEmailIcon className='profile-icon' />
-                                        <Typography>{accountInformation.email}</Typography>
+                                        <Typography className='user-info-detail'>{accountInformation.email}</Typography>
                                     </Box>
                                     <Box className='user-info'>
                                         <LocalPhoneIcon className='profile-icon' />
                                         {
                                             accountInformation.phoneNumber ? (
                                                 <Box className='user-valid-phonenumber'>
-                                                    <Typography>{accountInformation.phoneNumber}</Typography>
+                                                    <Typography className='user-info-detail'>{accountInformation.phoneNumber}</Typography>
                                                 </Box>
                                             ) : (
                                                 <Box className='user-invalid-phonenumber'>
@@ -275,7 +283,7 @@ function Profile() {
                                                         <Input
                                                             id='phone-number-input'
                                                             label='Phone number'
-                                                            type='text'
+                                                            type='number'
                                                             onChange={handlePhoneNumberChange}
                                                             onBlur={handlePhoneNumberLive}
                                                             required
@@ -315,7 +323,7 @@ function Profile() {
                                     </Box>
                                     <Box className='user-info'>
                                         <PriorityHighIcon className='profile-icon' />
-                                        <Typography>{accountInformation.statusAccountVerified ? accountInformation.statusAccountVerified.charAt(0).toUpperCase() + accountInformation.statusAccountVerified.slice(1) : ""}</Typography>
+                                        <Typography className='user-info-detail'>{accountInformation.statusAccountVerified ? accountInformation.statusAccountVerified.charAt(0).toUpperCase() + accountInformation.statusAccountVerified.slice(1) : ""}</Typography>
                                     </Box>
                                 </Box>
                             </TabPanel>

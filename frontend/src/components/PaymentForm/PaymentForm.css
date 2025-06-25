@@ -12,6 +12,7 @@
 
 .payment-submit-button {
     text-transform: none !important;
+    font-size: 20px !important;
 }
 
 .payment-error {
@@ -19,13 +20,13 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .payment-error-message {
     font-size: 24px !important;
     font-weight: bold !important;
-    color: #9f0808;
+    color: #dc3545;
 }
 
 .payment-error-redirect {

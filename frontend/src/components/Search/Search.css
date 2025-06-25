@@ -8,17 +8,23 @@
 
 .search-page {
     max-width: 1000px;
-    margin: 100px auto;
+    margin: 150px auto;
     padding: 30px;
-    background-image: linear-gradient(to right, #1e2936, #121a24);
+    background-image: linear-gradient(to right, #006f9b, #003575);
     border-radius: 15px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.search-car {
+    font-size: 40px !important;
+    margin-right: 2px !important;
+    color: white !important;
 }
 
 .search-title {
     font-size: 2rem !important;
     font-weight: 600 !important;
-    color: #dededf;
+    color: white !important;
     margin-bottom: 20px !important;
     text-align: center;
 }
@@ -37,7 +43,7 @@
 }
 
 .search-input .MuiInputLabel-root {
-    color: #7d8b9d;
+    color: #fefefe;
 }
 
 .search-input .MuiOutlinedInput-root {
@@ -45,19 +51,23 @@
 }
 
 .search-input .MuiOutlinedInput-notchedOutline {
-    border-color: #4b5563;
+    border-color: none !important;
 }
 
 .search-input .MuiSvgIcon-root {
-    color: #718096;
+    color: white;
 }
 
 .search-input .MuiSelect-select {
-    color: #e2e8f0;
+    color: white;
 }
 
 .search-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
-    border-color: #3498db;
+    border-color: #002e4d;
+}
+
+.search-input .MuiInputLabel-root.Mui-focused {
+    color: white !important;
 }
 
 .search-button button {
@@ -69,9 +79,5 @@
     top: 12px;
     margin-bottom: 10px;
     text-transform: none;
-    font-size: 18px !important;
-}
-
-.search-icon {
     font-size: 18px !important;
 }
