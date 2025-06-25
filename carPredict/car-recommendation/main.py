@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import RandomizedSearchCV, learning_curve
 from sklearn.tree import DecisionTreeClassifier
+import seaborn as sns
 
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", None)
@@ -39,6 +40,18 @@ def display_learning_curve():
     plt.legend()
     plt.savefig("processed_data/learning_curve.png")
 
+def model_importances():
+    importances = rfc.feature_importances_
+    importances_df = pd.DataFrame({
+        'Feature': X_train_df.columns,
+        'Importance': importances
+    })
+
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x='Importance', y='Feature', data=importances_df)
+    plt.title("Feature importances")
+    plt.tight_layout()
+    plt.savefig("processed_data/feature_importances.png")
 
 X_train_df = pd.read_csv("processed_data/X_train.csv")
 X_test_df = pd.read_csv("processed_data/X_test.csv")
@@ -68,9 +81,11 @@ y_predict2 = rfc.predict(X_train_df)
 accuracy_train = accuracy_score(y_predict2, y_train)
 print("Train dataset accuracy - ", accuracy_train)
 
+model_importances()
+
 # display_learning_curve()
 
-print("Classification report: \n" + classification_report(y_test, y_predict))
+# print("Classification report: \n" + classification_report(y_test, y_predict))
 # print("Confusion matrix:")
 # print(confusion_matrix(y_test, y_predict))
 

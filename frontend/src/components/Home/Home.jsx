@@ -43,9 +43,9 @@ function Home() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        setIsLoading(true);
         if (auth.token) {
             setToken(auth.token);
-            setIsLoading(true);
 
             if (auth.authStore.getUser()) {
                 setUser(auth.authStore.getUser());

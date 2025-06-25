@@ -193,60 +193,13 @@
     transform: translateY(-1px);
 }
 
-.form-predictions {
-    padding: 10px 0;
-}
-
-.form-predictions .MuiList-root {
-    padding: 0;
-}
-
-.form-predictions .MuiListItem-root {
-    padding: 8px 0;
-}
-
-.select-predicted-car {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    background-color: rgba(255, 255, 255, 0.05);
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
-
-.select-predicted-car:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.predicted-car {
-    color: #e0e0e0;
-    font-size: 16px;
-}
-
-.select-predicted-car button {
-    background-color: #5dadff;
-    color: #121a24;
-    font-weight: 500;
-    padding: 5px 15px;
-    border-radius: 4px;
-    text-transform: none;
-    transition: all 0.2s;
-    min-width: auto;
-}
-
-.select-predicted-car button:hover {
-    background-color: #7ebdff;
-}
-
 .form-typing-error {
     margin-top: 10px;
 }
 
 .form-typing-error-text {
     text-align: center;
-    color: #bf2323;
+    color: #dc3545;
     font-size: 20px !important;
 }
 
@@ -261,7 +214,7 @@
     font-size: 20px !important;
     font-weight: bold !important;
     text-align: center;
-    color: #bf2323;
+    color: #dc3545;
 }
 
 .form-error-button {

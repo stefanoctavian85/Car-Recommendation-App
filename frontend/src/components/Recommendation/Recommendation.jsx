@@ -1,20 +1,19 @@
 import './Recommendation.css';
 import data from '../../assets/data.jsx';
 import { useState, useContext, useEffect } from 'react';
-import { Container, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio, Button, Grid2, Slider, Input, List, ListItem, TextField } from '@mui/material';
+import { Container, Box, Typography, FormControl, RadioGroup, FormControlLabel, Radio, Button, Grid2, Slider, Input, TextField } from '@mui/material';
 import { NumberField } from '@base-ui-components/react/number-field';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
-import { jwtDecode } from 'jwt-decode';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
 const MAX_LENGTH_TEXT = 200;
 
 function Recommendation() {
-    const { auth, cars } = useContext(AppContext);
+    const { auth } = useContext(AppContext);
     const [recommendationType, setRecommendationType] = useState('');
     const [tempRecommendationType, setTempRecommendationType] = useState('');
 
@@ -89,8 +88,18 @@ function Recommendation() {
             if (response.ok) {
                 setPredictions(data.cars);
                 setError('');
+                navigate('/recommendation/results', {
+                        state: {
+                            predictions: data.cars
+                        }
+                    });
             } else {
                 setError(data.message);
+                navigate('/recommendation/results', {
+                        state: {
+                            error: fetchData.message,
+                        }
+                });
             }
         } catch (error) {
             setError(error);
@@ -165,8 +174,6 @@ function Recommendation() {
     }
 
     async function submitForm() {
-        const userId = jwtDecode(auth.token).id;
-
         if (finalResponse === '') {
             setTypingError("Please answer the question!");
         } else {
@@ -193,8 +200,18 @@ function Recommendation() {
                 if (response.ok) {
                     setPredictions(fetchData.cars);
                     setError('');
+                    navigate('/recommendation/results', {
+                        state: {
+                            predictions: fetchData.cars
+                        }
+                    });
                 } else {
                     setError(fetchData.message);
+                    navigate('/recommendation/results', {
+                        state: {
+                            error: fetchData.message,
+                        }
+                    });
                 }
             } catch (error) {
                 setError(error);
@@ -205,20 +222,6 @@ function Recommendation() {
                 return () => clearTimeout(timeout);
             }
         }
-    }
-
-    function selectCar(indexCar) {
-        const selectedCar = predictions[indexCar];
-        const carParts = selectedCar.split(" ");
-        cars.carsStore.setSearchParams({
-            brand: carParts[0],
-            model: carParts[1]
-        });
-        navigate('/cars?' + new URLSearchParams(cars.carsStore.getSearchParams()).toString());
-    }
-
-    function redirectHome() {
-        navigate('/');
     }
 
     if (isLoading) {
@@ -264,7 +267,7 @@ function Recommendation() {
             {
                 recommendationType === 'description' && (<Box>
                     {
-                        predictions.length === 0 ? (
+                        predictions.length === 0 && (
                             <Box>
                                 <Box className='form-description'>
                                     <Typography className='form-description-title'>Please write a detailed message about the type of a car you're looking for</Typography>
@@ -304,38 +307,8 @@ function Recommendation() {
                                     </Box>
                                 </Box>
                             </Box>
-                        ) : predictions.length > 0 ? (
-                            <Box className='form-predictions'>
-                                <List>
-                                    {
-                                        predictions.map((item, indexCar) => (
-                                            <ListItem key={indexCar}>
-                                                <Box className='select-predicted-car'>
-                                                    <Typography className='predicted-car'>{item}</Typography>
-                                                    <Button
-                                                        onClick={() => selectCar(indexCar)}
-                                                    >
-                                                        Select
-                                                    </Button>
-                                                </Box>
-                                            </ListItem>
-                                        ))
-                                    }
-                                </List>
-                            </Box>
-                        ) : (
-                            <Box className='form-error'>
-                                <Typography className='form-error-text'>{error}</Typography>
-                                <Button
-                                    variant='contained'
-                                    className='form-error-button'
-                                    onClick={redirectHome}>
-                                    Home
-                                </Button>
-                            </Box>
                         )
                     }
-
                 </Box>
                 )
             }
@@ -344,7 +317,7 @@ function Recommendation() {
                 recommendationType === 'form' && (<Box>
                     <Box className='form-container'>
                         {
-                            index < maxQuestions ? (
+                            index < maxQuestions && (
                                 <Box className='form-box'>
                                     <Box className='form-question'>
                                         <Typography component='h3' className='question'>
@@ -467,35 +440,6 @@ function Recommendation() {
                                     <Box className='form-typing-error'>
                                         <Typography className='form-typing-error-text'>{typingError}</Typography>
                                     </Box>
-                                </Box>
-                            ) : predictions.length > 0 ? (
-                                <Box className='form-predictions'>
-                                    <List>
-                                        {
-                                            predictions.map((item, indexCar) => (
-                                                <ListItem key={indexCar}>
-                                                    <Box className='select-predicted-car'>
-                                                        <Typography className='predicted-car'>{item}</Typography>
-                                                        <Button
-                                                            onClick={() => selectCar(indexCar)}
-                                                        >
-                                                            Select
-                                                        </Button>
-                                                    </Box>
-                                                </ListItem>
-                                            ))
-                                        }
-                                    </List>
-                                </Box>
-                            ) : (
-                                <Box className='form-error'>
-                                    <Typography className='form-error-text'>{error}</Typography>
-                                    <Button
-                                        variant='contained'
-                                        className='form-error-button'
-                                        onClick={redirectHome}>
-                                        Home
-                                    </Button>
                                 </Box>
                             )
                         }

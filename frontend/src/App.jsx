@@ -11,6 +11,7 @@ import Register from './components/Register/Register.jsx';
 import Search from './components/Search/Search.jsx';
 import Profile from './components/Profile/Profile.jsx';
 import Recommendation from './components/Recommendation/Recommendation.jsx';
+import RecommendationResults from './components/RecommendationResults/RecommendationResults.jsx';
 import Cars from './components/Cars/Cars.jsx';
 import CarDetails from './components/CarDetails/CarDetails.jsx';
 import RentCar from './components/RentCar/RentCar.jsx';
@@ -90,6 +91,10 @@ function App() {
 
               <Route element={<ProtectedRoute />}>
                 <Route path='/recommendation' element={<Recommendation />}></Route>
+              </Route>
+
+              <Route element={<ProtectedRoute />}>
+                <Route path='/recommendation/results' element={<RecommendationResults />}></Route>
               </Route>
 
               <Route element={<ProtectedRoute />}>
