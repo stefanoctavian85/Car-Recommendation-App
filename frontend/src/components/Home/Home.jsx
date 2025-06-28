@@ -85,9 +85,8 @@ function Home() {
     }, []);
 
     useEffect(() => {
+        setIsLoading(true);
         if (user && user.hasCompletedRecommendation) {
-            setIsLoading(true);
-
             fetch(`${SERVER}/api/users/quick-recommendations`, {
                 method: 'GET',
                 headers: {
@@ -143,7 +142,7 @@ function Home() {
                 token ? (
                     <Box className='home-page-authenticated' ref={heroSectionRef}>
                         <Box className='home-page-welcome'>
-                            <Typography className='home-page-welcome-text'>Welcome back, {user.firstname} {user.lastname}!</Typography>
+                            <Typography className='home-page-welcome-text'>Welcome back, {user.firstname}!</Typography>
                             {
                                 user.status === 'regular' ? (
                                     <Typography className='home-page-subtitle'>Looking for your next car? Take a look at your posibilities</Typography>

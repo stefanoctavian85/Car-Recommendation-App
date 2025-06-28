@@ -10,7 +10,7 @@ apiRouter.post('/users/recommendations-by-text', controllers.recommendation.getR
 apiRouter.post('/users/forms', controllers.recommendation.predict);
 apiRouter.get('/users/quick-recommendations', controllers.recommendation.quickRecommendations);
 apiRouter.patch('/users/save-phone-number', controllers.profile.savePhoneNumber);
-apiRouter.post('/users/send-documents', middleware.uploadProfileDocuments, controllers.profile.sendDocuments, controllers.profile.checkDocuments);
+apiRouter.post('/users/send-documents', middleware.uploadProfileDocuments, controllers.profile.sendDocuments);
 
 apiRouter.get('/reservations/:cid', controllers.reservation.getReservations);
 apiRouter.get('/reservations/check-another-reservation/:uid/:cid', controllers.reservation.checkAnotherReservation);

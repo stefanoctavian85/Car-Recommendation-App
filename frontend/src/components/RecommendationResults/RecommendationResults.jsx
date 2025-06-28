@@ -21,7 +21,8 @@ function RecommendationResults() {
 
         if (!auth.isAuthenticated) {
             navigate('/login');
-        } else {
+            return;
+        } else if (predictions.length === 0) {
             setError('Internal Server Error! Please try again later!');
         }
 

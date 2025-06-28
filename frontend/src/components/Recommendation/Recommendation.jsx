@@ -89,16 +89,16 @@ function Recommendation() {
                 setPredictions(data.cars);
                 setError('');
                 navigate('/recommendation/results', {
-                        state: {
-                            predictions: data.cars
-                        }
-                    });
+                    state: {
+                        predictions: data.cars
+                    }
+                });
             } else {
                 setError(data.message);
                 navigate('/recommendation/results', {
-                        state: {
-                            error: fetchData.message,
-                        }
+                    state: {
+                        error: fetchData.message,
+                    }
                 });
             }
         } catch (error) {
@@ -423,6 +423,10 @@ function Recommendation() {
                                             </Box>
                                         )
                                     }
+                                    <Box className='form-typing-error'>
+                                        <Typography className='form-typing-error-text'>{typingError}</Typography>
+                                    </Box>
+
                                     <Box className='form-button'>
                                         <Button onClick={() => {
                                             if (index < maxQuestions - 1) {
@@ -435,10 +439,6 @@ function Recommendation() {
                                                 index < maxQuestions - 1 ? 'Next' : 'Save form'
                                             }
                                         </Button>
-                                    </Box>
-
-                                    <Box className='form-typing-error'>
-                                        <Typography className='form-typing-error-text'>{typingError}</Typography>
                                     </Box>
                                 </Box>
                             )

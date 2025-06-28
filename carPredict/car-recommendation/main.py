@@ -81,7 +81,7 @@ y_predict2 = rfc.predict(X_train_df)
 accuracy_train = accuracy_score(y_predict2, y_train)
 print("Train dataset accuracy - ", accuracy_train)
 
-model_importances()
+# model_importances()
 
 # display_learning_curve()
 

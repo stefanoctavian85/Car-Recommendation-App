@@ -59,35 +59,35 @@ function Profile() {
         }
 
         fetch(`${SERVER}/api/users/${userId}/profile`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${auth.token}`,
-                    }
-                })
-                    .then((res) => {
-                        if (res.ok) {
-                            return res.json();
-                        } else {
-                            return res.json().then((error) => {
-                                throw new Error(error.message || 'Something went wrong!');
-                            });
-                        }
-                    })
-                    .then((data) => {
-                        setError('');
-                        setAccountInformation(data.user);
-                    })
-                    .catch(() => {
-                        auth.authStore.logout();
-                        auth.setIsAuthenticated(false);
-                        window.location.reload();
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${auth.token}`,
+            }
+        })
+            .then((res) => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    return res.json().then((error) => {
+                        throw new Error(error.message || 'Something went wrong!');
                     });
+                }
+            })
+            .then((data) => {
+                setError('');
+                setAccountInformation(data.user);
+            })
+            .catch(() => {
+                auth.authStore.logout();
+                auth.setIsAuthenticated(false);
+                window.location.reload();
+            });
 
         const timeout = setTimeout(() => {
             setIsLoading(false);
         }, 1500);
         return () => clearTimeout(timeout);
-    }, [auth.token]);
+    }, []);
 
     useEffect(() => {
         setIsLoading(true);
@@ -213,10 +213,13 @@ function Profile() {
                 });
 
                 const data = await response.json();
-                setFileMessage(data.message);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 3000);
+                if (data.documentsSent) {
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    setFileMessage(data.message);
+                }
             }
         } else {
             setFileMessage("You must agree to the processing of your documents in order to continue.");
