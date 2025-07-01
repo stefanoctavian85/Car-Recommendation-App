@@ -31,21 +31,25 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = JSON.parse(localStorage.getItem("token"));
-    
-    if (storedToken) {
-      authStore.checkAuthStatus();
-      setIsAuthenticated(authStore.getAuthStatus());
-      setToken(storedToken);
-    } else {
-      setIsAuthenticated(false);
-      setToken('');
-    }
+    const checkAuth = async () => {
+      const storedToken = JSON.parse(localStorage.getItem("token"));
 
-    const timeout = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    return () => clearTimeout(timeout);
+      if (storedToken) {
+        await authStore.checkAuthStatus();
+        setIsAuthenticated(authStore.getAuthStatus());
+        setToken(storedToken);
+      } else {
+        setIsAuthenticated(false);
+        setToken('');
+      }
+
+      const timeout = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      return () => clearTimeout(timeout);
+    };
+
+    checkAuth();
   }, []);
 
   if (loading) {

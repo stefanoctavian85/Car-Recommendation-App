@@ -24,9 +24,7 @@ const dashboardReports = async (req, res, next) => {
         let todaysBookings = 0, lastWeekBookings = 0;
 
         if (reservationsToday.length > 0) {
-            reservationsToday.map((element) => {
-                todaysRevenue += element.totalPrice;
-            });
+            todaysRevenue = reservationsToday.reduce((sum, element) => sum + element.totalPrice, 0);
         }
 
 
@@ -41,9 +39,7 @@ const dashboardReports = async (req, res, next) => {
         });
 
         if (reservationsLastWeek.length > 0) {
-            reservationsLastWeek.map((element) => {
-                lastWeekRevenue += element.totalPrice;
-            });
+            lastWeekRevenue = reservationsLastWeek.reduce((sum, element) => sum + element.totalPrice, 0);
         }
 
         todaysRevenue = parseFloat(todaysRevenue.toFixed(2));
@@ -119,7 +115,7 @@ const getDataForCharts = async (req, res, next) => {
 
         if (reservationsLastMonth.length === 0) {
             return res.status(404).json({
-                message: 'No reservation was made in this period of time!',
+                message: 'No reservation was made in this month!',
             });
         }
 
@@ -132,7 +128,6 @@ const getDataForCharts = async (req, res, next) => {
         for (let i = 0; i < weeksCount; i++) {
             filteredData.push({ week: weeks[i] });
         }
-
 
         reservationsLastMonth.forEach((reservation) => {
             const car = reservation.carId._doc;
@@ -189,10 +184,10 @@ const getLogs = async (req, res, next) => {
                 path: 'carId',
                 select: 'Masina'
             });
-
-        if (!logs) {
+        
+        if (logs.length === 0) {
             return res.status(404).json({
-                message: 'Logs not found',
+                message: 'There are no reservation logs in the selected period of time!',
             });
         }
 

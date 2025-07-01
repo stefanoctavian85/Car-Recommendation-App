@@ -1,3 +1,5 @@
+import { SERVER } from "../../config/global";
+
 class AuthStore {
     constructor() {
         this.isAuthenticated = false;
@@ -5,7 +7,7 @@ class AuthStore {
         this.user = '';
     }
 
-    checkAuthStatus() {
+    async checkAuthStatus() {
         const token = JSON.parse(localStorage.getItem("token"));
         this.token = token;
 
@@ -20,7 +22,7 @@ class AuthStore {
         const payload = JSON.parse(atob(arrayToken[1]));
         const currentTime = Math.floor(new Date().getTime() / 1000);
         const expirationTime = payload.exp;
-        
+
         if (expirationTime < currentTime) {
             localStorage.removeItem("token");
             this.isAuthenticated = false;
@@ -31,6 +33,28 @@ class AuthStore {
 
         this.isAuthenticated = true;
         this.token = token;
+        await this.getUserData(payload.id);
+    }
+
+    async getUserData(userId) {
+        try {
+            const response = await fetch(`${SERVER}/api/users/${userId}/profile`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                }
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Something went wrong!');
+            }
+
+            const data = await response.json();
+            this.user = data.user;
+        } catch (err) {
+            this.user = '';
+            console.error(err);
+        }
     }
 
     setIsAuthenticated(isAuthenticated) {

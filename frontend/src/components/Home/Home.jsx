@@ -68,6 +68,7 @@ function Home() {
                     })
                     .then((data) => {
                         setUser(data.user);
+                        auth.authStore.setUser(data.user);
                     })
                     .catch(() => {
                         auth.authStore.logout();

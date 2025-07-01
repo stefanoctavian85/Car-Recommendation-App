@@ -1,7 +1,6 @@
 import { Box, Button, Typography } from '@mui/material';
 import './Ticket.css';
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import AppContext from '../../state/AppContext';
 import { SERVER } from '../../config/global.jsx';
 import Chat from '../Chat/Chat.jsx';
@@ -14,8 +13,6 @@ function Ticket({ state, router }) {
 
     const [documentsMessage, setDocumentsMessage] = useState("");
     const [error, setError] = useState('');
-
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (state && state.conversationId && auth.token) {
@@ -31,32 +28,42 @@ function Ticket({ state, router }) {
                     if (res.ok) {
                         setError('');
                         setConversationInfo(data.conversationInfo);
+                                    console.log(data.conversationInfo)
                     } else {
                         setError(data.message);
                     }
                 })
-                .catch(() => {
-                    setError("Something went wrong!")
-                })
-                ;
-
+                .catch((error) => {
+                    setError(error.message || "Something went wrong!")
+                });
         } else {
-            navigate('/');
+            setError("Conversation not found!");
         }
     }, [state, auth.token]);
 
     async function closeChat() {
         if (conversationId) {
-            await fetch(`${SERVER}/api/chat/close-conversation`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ conversationId })
-            });
+            try {
+                const response = await fetch(`${SERVER}/api/chat/close-conversation`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ conversationId })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    setError('');
+                    router.navigate('/tickets');
+                } else {
+                    setError(data.message || "Something went wrong!");
+                }
+            } catch (err) {
+                setError(err);
+            }
         }
-        router.navigate('/tickets');
     }
 
     async function approveDocuments() {
@@ -67,7 +74,7 @@ function Ticket({ state, router }) {
                     'Authorization': `Bearer ${auth.token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ uid: conversationInfo.id })
+                body: JSON.stringify({ uid: conversationInfo.userId })
             })
                 .then(async (res) => {
                     const data = await res.json();
@@ -75,7 +82,6 @@ function Ticket({ state, router }) {
                         setError('');
                         setDocumentsMessage(data.message);
                     } else {
-                        console.log(data.message);
                         setError(data.message);
                     }
                 })
@@ -155,8 +161,8 @@ function Ticket({ state, router }) {
                         </Box>
                     </Box>
                 ) : (
-                    <Box>
-                        <Typography>{error}</Typography>
+                    <Box className='no-data-grid'>
+                        <Typography className='no-data-text'>{error}</Typography>
                     </Box>
                 )
             }

@@ -1,5 +1,5 @@
 import './Dashboard.css';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Box, Card, CardContent, Typography, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { SERVER } from '../../config/global';
 import AppContext from '../../state/AppContext';
@@ -26,7 +26,6 @@ const FILTER_OPTIONS = [{
 
 function Dashboard() {
     const { auth } = useContext(AppContext);
-    const [isLoading, setIsLoading] = useState(false);
 
     const [todaysRevenue, setTodaysRevenue] = useState(0);
     const [lastWeekRevenue, setLastWeekRevenue] = useState(0);
@@ -38,10 +37,10 @@ function Dashboard() {
     const [graphicsFilter, setGraphicsFilter] = useState('Combustibil');
     const [chartData, setChartData] = useState([]);
     const [labelsOptions, setLabelsOptions] = useState(['Diesel', 'Benzina', 'Hibrid']);
+    const [error, setError] = useState('');
+    const [chartError, setChartError] = useState('');
 
     useEffect(() => {
-        setIsLoading(true);
-
         fetch(`${SERVER}/api/dashboard/dashboard-reports`, {
             method: 'GET',
             headers: {
@@ -51,9 +50,14 @@ function Dashboard() {
             .then((res) => {
                 if (res.ok) {
                     return res.json();
+                } else {
+                    return res.json().then(error => {
+                        throw new Error(error.message || 'Something went wrong!');
+                    });
                 }
             })
             .then((data) => {
+                setError('');
                 setTodaysRevenue(data.todaysRevenue);
                 setLastWeekRevenue(data.lastWeekRevenue);
                 setTodaysBookings(data.todaysBookings);
@@ -61,6 +65,9 @@ function Dashboard() {
                 setMostPredictedCar(data.mostPredictedCar);
                 setNumberOfMostPredictedCar(data.numberOfMostPredictedCar);
             })
+            .catch((error) => {
+                setError(error.message);
+            });
 
         fetch(`${SERVER}/api/dashboard/dashboard-charts?filter=${graphicsFilter}`, {
             method: 'GET',
@@ -71,14 +78,18 @@ function Dashboard() {
             .then((res) => {
                 if (res.ok) {
                     return res.json();
+                } else {
+                    return res.json().then(error => {
+                        throw new Error(error.message || 'Something went wrong!');
+                    });
                 }
             })
             .then((data) => {
                 setChartData(data.filteredData);
                 setLabelsOptions(data.labels);
             })
-            .finally(() => {
-                setIsLoading(false);
+            .catch((error) => {
+                setChartError(error.message);
             });
     }, []);
 
@@ -95,122 +106,143 @@ function Dashboard() {
             .then((res) => {
                 if (res.ok) {
                     return res.json();
+                } else {
+                    return res.json().then(error => {
+                        throw new Error(error.message || 'Something went wrong!');
+                    });
                 }
             })
             .then((data) => {
                 setChartData(data.filteredData);
                 setLabelsOptions(data.labels);
             })
+            .catch((error) => {
+                setChartError(error.message);
+            })
     }
 
     return (
         <Box className='dashboard-page'>
-            <Box className='card-details'>
-                <Card className='card'>
-                    <CardContent>
-                        <Typography className='card-header'>Today&apos;s revenue</Typography>
-                        <Box className='card-content-revenue'>
-                            <Typography className='card-content-text'>{todaysRevenue}</Typography>
-                            <EuroIcon />
+            {
+                !error ? (
+                    <Box>
+                        <Box className='card-details'>
+                            <Card className='card'>
+                                <CardContent>
+                                    <Typography className='card-header'>Today&apos;s revenue</Typography>
+                                    <Box className='card-content-revenue'>
+                                        <Typography className='card-content-text'>{todaysRevenue}</Typography>
+                                        <EuroIcon />
+                                    </Box>
+                                    <Box className='card-compare'>
+                                        <Typography className='card-compare-text'>
+                                            {
+                                                (() => {
+                                                    if (todaysRevenue === 0 && lastWeekRevenue === 0) {
+                                                        return '0%';
+                                                    }
+
+                                                    if (lastWeekRevenue === 0) {
+                                                        return 'N/A';
+                                                    }
+
+                                                    return `${(((todaysRevenue - lastWeekRevenue) / lastWeekRevenue) * 100).toFixed(2)}%`;
+                                                })()
+                                            }
+                                        </Typography>
+                                        {
+                                            todaysRevenue < lastWeekRevenue ? (
+                                                <ArrowDownwardIcon className='icon-down' />
+                                            ) : (
+                                                <ArrowUpwardIcon className='icon-up' />
+                                            )
+                                        }
+                                    </Box>
+                                </CardContent>
+                            </Card>
+
+                            <Card className='card'>
+                                <CardContent>
+                                    <Typography className='card-header'>Today&apos;s bookings</Typography>
+                                    <Box className='card-content-revenue'>
+                                        <Typography className='card-content-text'>{todaysBookings}</Typography>
+                                        <BookmarkAddIcon />
+                                    </Box>
+                                    <Box className='card-compare'>
+                                        <Typography className='card-compare-text'>
+                                            {
+                                                todaysBookings === 0 && lastWeekBookings === 0
+                                                    ? '0%'
+                                                    : lastWeekBookings === 0
+                                                        ? 'N/A'
+                                                        : `${(((todaysBookings - lastWeekBookings) / lastWeekBookings) * 100).toFixed(2)}%`
+                                            }
+                                        </Typography>
+                                        {
+                                            todaysBookings < lastWeekBookings ? (
+                                                <ArrowDownwardIcon className='icon-down' />
+                                            ) : (
+                                                <ArrowUpwardIcon className='icon-up' />
+                                            )
+                                        }
+                                    </Box>
+                                </CardContent>
+                            </Card>
+
+                            <Card className='card'>
+                                <CardContent>
+                                    <Typography className='card-header'>Most recommended car</Typography>
+                                    <Box className='card-content-revenue'>
+                                        <Typography className='card-content-text'>{mostPredictedCar}</Typography>
+                                        <CarRentalIcon />
+                                    </Box>
+                                    <Box className='card-compare'>
+                                        <Typography className='card-compare-text'>{numberOfMostPredictedCar}</Typography>
+                                    </Box>
+                                </CardContent>
+                            </Card>
                         </Box>
-                        <Box className='card-compare'>
-                            <Typography className='card-compare-text'>
-                                {
-                                    (() => {
-                                        if (todaysRevenue === 0 && lastWeekRevenue === 0) {
-                                            return '0%';
-                                        }
 
-                                        if (lastWeekRevenue === 0) {
-                                            return 'N/A';
-                                        }
+                        <Box className='dashboard-graphics'>
+                            <FormControl className='dashboard-form'>
+                                <InputLabel id='graphics-filter-label'>Graphics Filter</InputLabel>
+                                <Select
+                                    labelId='graphics-filter-label'
+                                    id='graphics-filter-select'
+                                    value={graphicsFilter}
+                                    label='Graphics filter'
+                                    onChange={handleChange}
+                                >
+                                    {
+                                        FILTER_OPTIONS.map((element, index) => (
+                                            <MenuItem key={index} value={element.value}>{element.label}</MenuItem>
+                                        ))
+                                    }
+                                </Select>
+                            </FormControl>
 
-                                        return `${(((todaysRevenue - lastWeekRevenue) / lastWeekRevenue) * 100).toFixed(2)}%`;
-                                    })()
-                                }
-                            </Typography>
                             {
-                                todaysRevenue < lastWeekRevenue ? (
-                                    <ArrowDownwardIcon className='icon-down' />
-                                ) : (
-                                    <ArrowUpwardIcon className='icon-up' />
-                                )
+                                !chartError ? (
+                                    <BarChart
+                                        dataset={chartData}
+                                        xAxis={[{ scaleType: 'band', dataKey: 'week' }]}
+                                        series={labelsOptions.map(label => ({
+                                            dataKey: label,
+                                            label: label
+                                        }))}
+                                        width={400}
+                                        height={400}
+                                    />
+                                ) : <Box className='dashboard-chart-error'>
+                                    <Typography className='dashboard-chart-error-text'>{chartError}</Typography>
+                                </Box>
                             }
                         </Box>
-                    </CardContent>
-                </Card>
-
-                <Card className='card'>
-                    <CardContent>
-                        <Typography className='card-header'>Today&apos;s bookings</Typography>
-                        <Box className='card-content-revenue'>
-                            <Typography className='card-content-text'>{todaysBookings}</Typography>
-                            <BookmarkAddIcon />
-                        </Box>
-                        <Box className='card-compare'>
-                            <Typography className='card-compare-text'>
-                                {
-                                    todaysBookings === 0 && lastWeekBookings === 0
-                                        ? '0%'
-                                        : lastWeekBookings === 0
-                                            ? 'N/A'
-                                            : `${(((todaysBookings - lastWeekBookings) / lastWeekBookings) * 100).toFixed(2)}%`
-                                }
-                            </Typography>
-                            {
-                                todaysBookings < lastWeekBookings ? (
-                                    <ArrowDownwardIcon className='icon-down' />
-                                ) : (
-                                    <ArrowUpwardIcon className='icon-up' />
-                                )
-                            }
-                        </Box>
-                    </CardContent>
-                </Card>
-
-                <Card className='card'>
-                    <CardContent>
-                        <Typography className='card-header'>Most recommended car</Typography>
-                        <Box className='card-content-revenue'>
-                            <Typography className='card-content-text'>{mostPredictedCar}</Typography>
-                            <CarRentalIcon />
-                        </Box>
-                        <Box className='card-compare'>
-                            <Typography className='card-compare-text'>{numberOfMostPredictedCar}</Typography>
-                        </Box>
-                    </CardContent>
-                </Card>
-            </Box>
-
-            <Box className='dashboard-graphics'>
-                <FormControl className='dashboard-form'>
-                    <InputLabel id='graphics-filter-label'>Graphics Filter</InputLabel>
-                    <Select
-                        labelId='graphics-filter-label'
-                        id='graphics-filter-select'
-                        value={graphicsFilter}
-                        label='Graphics filter'
-                        onChange={handleChange}
-                    >
-                        {
-                            FILTER_OPTIONS.map((element) => (
-                                <MenuItem value={element.value}>{element.label}</MenuItem>
-                            ))
-                        }
-                    </Select>
-                </FormControl>
-
-                <BarChart
-                    dataset={chartData}
-                    xAxis={[{ scaleType: 'band', dataKey: 'week' }]}
-                    series={labelsOptions.map(label => ({
-                        dataKey: label,
-                        label: label
-                    }))}
-                    width={400}
-                    height={400}
-                />
-            </Box>
+                    </Box>
+                ) : <Box className='dashboard-general-error'>
+                    <Typography className='dashboard-general-error-text'>{error}</Typography>
+                </Box>
+            }
         </Box>
     );
 }

@@ -1,6 +1,6 @@
 import './Logs.css';
 import { Box, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AppContext from "../../state/AppContext";
 import { SERVER } from "../../config/global";
 import dayjs from 'dayjs';
@@ -61,6 +61,7 @@ function Logs() {
     const [fetchDate, setFetchDate] = useState(dayjs().format('YYYY-MM-DD 00:00'));
 
     const [logs, setLogs] = useState([]);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         fetch(`${SERVER}/api/dashboard/logs?date=${fetchDate}`, {
@@ -72,9 +73,14 @@ function Logs() {
             .then((res) => {
                 if (res.ok) {
                     return res.json();
+                } else {
+                    return res.json().then((error) => {
+                        throw new Error(error.message || 'Something went wrong!');
+                    })
                 }
             })
             .then((data) => {
+                setError('');
                 const rows = data.logs.map(log => ({
                     id: log._id,
                     fullname: log.userId?.firstname + " " + log.userId?.lastname || '',
@@ -86,6 +92,9 @@ function Logs() {
                     enddate: dayjs(log.endDate).format('YYYY-MM-DD HH:mm') || '',
                 }));
                 setLogs(rows);
+            })
+            .catch((error) => {
+                setError(error.message);
             });
     }, [dateFilter]);
 
@@ -125,8 +134,8 @@ function Logs() {
                         onChange={handleChange}
                     >
                         {
-                            FILTER_OPTIONS.map((element) => (
-                                <MenuItem value={element.value}>{element.label}</MenuItem>
+                            FILTER_OPTIONS.map((element, index) => (
+                                <MenuItem key={index} value={element.value}>{element.label}</MenuItem>
                             ))
                         }
                     </Select>
@@ -134,7 +143,7 @@ function Logs() {
             </Box>
 
             {
-                logs.length > 0 ? (
+                logs.length > 0 && !error ? (
                     <DataGrid
                         className='logs-table'
                         columns={columns}
@@ -151,7 +160,7 @@ function Logs() {
                         keepNonExistentRowsSelected
                     />
                 ) : <Box className='no-data-grid'>
-                    <Typography className='no-data-text'>There are no logs for the selected date.</Typography>
+                    <Typography className='no-data-text'>{error}</Typography>
                 </Box>
             }
         </Box>

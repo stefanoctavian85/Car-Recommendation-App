@@ -23,8 +23,11 @@ const userInformation = async (req, res, next) => {
             });
         }
 
+        const userObj = user.toObject();
+        delete userObj.password;
+
         return res.status(200).json({
-            user
+            user: userObj,
         });
     } catch (err) {
         next(err);
@@ -108,6 +111,9 @@ const validateDocuments = async (user, idCardPath, driverLicensePath) => {
 
         user.statusAccountVerified = isValid ? 'approved' : 'rejected';
         await user.save();
+
+        fs.unlink(idCardPath, () => {});
+        fs.unlink(driverLicensePath, () => {});
     } catch (err) {
         console.error("Error at validating documents: ", err);
     }

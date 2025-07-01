@@ -11,6 +11,7 @@ import { SERVER } from '../../config/global.jsx';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 
 const MAX_LENGTH_TEXT = 200;
+const MIN_LENGTH_TEXT = 30;
 
 function Recommendation() {
     const { auth } = useContext(AppContext);
@@ -53,11 +54,17 @@ function Recommendation() {
     }, [auth.isAuthenticated]);
 
     function selectRecommendationType(e) {
+        setError('');
         setTempRecommendationType(e.target.value);
     }
 
     function redirectToRecommendations() {
-        setRecommendationType(tempRecommendationType);
+        if (tempRecommendationType) {
+            setError('');
+            setRecommendationType(tempRecommendationType);
+        } else {
+            setError('You must select a recommendation method!');
+        }
     }
 
     function setTextForRecommendations(e) {
@@ -67,8 +74,8 @@ function Recommendation() {
     }
 
     async function sendTextForRecommendations() {
-        if (text.length < 30) {
-            setError("A minimum of 30 characters is required to receive a recommendation!")
+        if (text.length < MIN_LENGTH_TEXT) {
+            setError(`A minimum of ${MIN_LENGTH_TEXT} characters is required to receive a recommendation!`)
             return;
         }
 
@@ -251,6 +258,10 @@ function Recommendation() {
                         </FormControl>
                     </Box>
 
+                    <Box className='form-error'>
+                        <Typography className='form-error-text'>{error}</Typography>
+                    </Box>
+
                     <Box className='form-select-redirect form-button'>
                         <Button
                             className='form-select-button'
@@ -283,13 +294,16 @@ function Recommendation() {
                                             value={text}
                                             onChange={setTextForRecommendations}
                                             inputprops={{
-                                                maxLength: 300,
+                                                maxLength: MAX_LENGTH_TEXT,
                                             }}
                                         />
                                     </Box>
 
                                     <Box className='form-description-length'>
-                                        <Typography className='form-max-characters'>{text.length} / {MAX_LENGTH_TEXT} max. number of characters</Typography>
+                                        <Typography
+                                            className='form-max-characters'
+                                            style={{ color: text.length < MIN_LENGTH_TEXT ? '#dc3545' : '#05b305' }}
+                                        >{text.length} / {MAX_LENGTH_TEXT} max. number of characters</Typography>
                                     </Box>
 
                                     <Box className='form-button'>

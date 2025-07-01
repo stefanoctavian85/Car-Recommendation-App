@@ -1,5 +1,5 @@
 import './Chat.css';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Box, FormControl, IconButton, List, ListItem, Typography, Input, InputAdornment, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import MinimizeIcon from '@mui/icons-material/Minimize';
@@ -217,11 +217,17 @@ function Chat({ adminConversationId }) {
                             {
                                 auth.authStore.user.status === 'regular' ? (
                                     <Box className='chat-right-bar'>
-                                        <IconButton className='chat-button-minimize'>
-                                            <MinimizeIcon className='chat-button-icon' onClick={toggleChat} />
+                                        <IconButton
+                                            className='chat-button-minimize'
+                                            onClick={toggleChat}
+                                        >
+                                            <MinimizeIcon className='chat-button-icon' />
                                         </IconButton>
-                                        <IconButton className='chat-button-close'>
-                                            <CloseIcon className='chat-button-icon' onClick={() => setIsCloseChatDialogOpen(true)} />
+                                        <IconButton
+                                            className='chat-button-close'
+                                            onClick={() => setIsCloseChatDialogOpen(true)}
+                                        >
+                                            <CloseIcon className='chat-button-icon' />
                                         </IconButton>
                                     </Box>
                                 ) : null
@@ -315,10 +321,11 @@ function Chat({ adminConversationId }) {
                                                                 />
                                                             </IconButton>
                                                         </FormControl>
-                                                        <IconButton>
+                                                        <IconButton
+                                                            onClick={sendMessage}
+                                                        >
                                                             <SendIcon
                                                                 className='chat-input-button'
-                                                                onClick={sendMessage}
                                                             />
                                                         </IconButton>
                                                     </InputAdornment>

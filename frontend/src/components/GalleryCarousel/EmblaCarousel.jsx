@@ -1,7 +1,7 @@
 import './EmblaCarousel.css';
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from 'embla-carousel-react';
-import { Box, Button, CardMedia, Typography } from "@mui/material";
+import { Box, CardMedia } from "@mui/material";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 
@@ -27,7 +27,9 @@ function EmblaCarousel({ images }) {
         const pattern = /^(https:\/\/[^,]+\/image)/;
         imageLinks.forEach(link => {
             let finalLink = link.trim().match(pattern);
-            links.push(finalLink);
+            if (finalLink) {
+                links.push(finalLink[0]);
+            }
         });
         setFinalLinks(links);
     }, [images]);

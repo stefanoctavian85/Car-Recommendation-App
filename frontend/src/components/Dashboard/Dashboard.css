@@ -79,7 +79,6 @@
 
 .dashboard-graphics {
     margin-top: 25px;
-    display: flex;
 }
 
 .dashboard-form {
@@ -89,6 +88,25 @@
 
 .dashboard-form > .MuiSelect-root {
     background-image: none !important;
+}
+
+.dashboard-general-error {
+    text-align: center;
+    margin-top: 100px;
+}
+
+.dashboard-chart-error {
+    margin-top: 100px;
+    display: flex !important;
+    text-align: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.dashboard-general-error-text,
+.dashboard-chart-error-text {
+    font-size: 24px !important;
+    font-weight: bold !important;
 }
 
 @media (max-width: 768px) {

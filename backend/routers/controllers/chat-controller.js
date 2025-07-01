@@ -172,14 +172,13 @@ const closeChat = async (req, res, next) => {
             }
 
             return res.status(200).json({
-                message: "Chat closed!",
+                message: "Conversation closed!",
             });
         } else {
             return res.status(404).json({
-                message: "Chat not found!",
+                message: "Conversation not found!",
             });
         }
-
     } catch (err) {
         next(err);
     }
@@ -194,7 +193,7 @@ const getConversationInfo = async (req, res, next) => {
         const conversation = snapshot.val();
 
         if (!conversation) {
-            return res.status(400).json({
+            return res.status(404).json({
                 message: "Conversation not found!",
             });
         }
@@ -221,7 +220,6 @@ const getConversationInfo = async (req, res, next) => {
 
             conversationInfo = {
                 ...conversationInfo,
-                'id': userInfo._id,
                 'email': userInfo.email,
                 'userStatus': userInfo.status.charAt(0).toUpperCase() + userInfo.status.slice(1).toLowerCase(),
                 'phoneNumber': userInfo.phoneNumber,

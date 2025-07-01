@@ -26,6 +26,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
+import Error from '../Error/Error.jsx';
 
 const todaysDate = dayjs().format('YYYY-MM-DD');
 
@@ -58,6 +59,7 @@ function CarDetails() {
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     const [alertDialogText, setAlertDialogText] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         setIsLoading(true);
@@ -74,11 +76,19 @@ function CarDetails() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        })
                     }
                 })
                 .then((data) => {
                     setCar(data.car);
                     cars.carsStore.setCar(data.car);
+                })
+                .catch((err) => {
+                    setError(err.message);
+                    setCar('');
                 });
         }
 
@@ -226,241 +236,251 @@ function CarDetails() {
     }
 
     return (
-        <Box className='car-details-page'>
-            <Box className='car-make-version'>
-                <Typography component='h1' className='car-name'>{car.Masina}</Typography>
-                <Typography component='h2' className='car-version'>{car?.Versiune}</Typography>
-            </Box>
-            <Box className='car-gallery-price'>
-                <Box className='car-gallery'>
-                    <EmblaCarousel className='gallery' images={car.Imagine} />
-                </Box>
-                <Box className='car-price'>
-                    <Box className='full-price'>
-                        <Typography className='full-price-text'>
-                            Full Price: <EuroIcon className='price-icon' /> {car.Pret}
-                        </Typography>
-                    </Box>
-                    <Box className='rent-price'>
-                        <Box className='rent-container'>
-                            <Typography className='rent-text'>
-                                Rental Price: From
-                                <EuroIcon className='price-icon' />
-                                {minRentalPrice}/day
-                            </Typography>
-                            <Box className='rent-info'>
-                                <Tooltip title={rentInfoText}>
-                                    <IconButton>
-                                        <InfoIcon className='info-icon' />
-                                    </IconButton>
-                                </Tooltip>
+        <Box>
+            {
+                car ? (
+                    <Box className='car-details-page'>
+                        <Box className='car-make-version'>
+                            <Typography component='h1' className='car-name'>{car.Masina}</Typography>
+                            <Typography component='h2' className='car-version'>{car?.Versiune}</Typography>
+                        </Box>
+                        <Box className='car-gallery-price'>
+                            <Box className='car-gallery'>
+                                <EmblaCarousel className='gallery' images={car.Imagine} />
+                            </Box>
+                            <Box className='car-price'>
+                                <Box className='full-price'>
+                                    <Typography className='full-price-text'>
+                                        Full Price: <EuroIcon className='price-icon' /> {car.Pret}
+                                    </Typography>
+                                </Box>
+                                <Box className='rent-price'>
+                                    <Box className='rent-container'>
+                                        <Typography className='rent-text'>
+                                            Rental Price: From
+                                            <EuroIcon className='price-icon' />
+                                            {minRentalPrice}/day
+                                        </Typography>
+                                        <Box className='rent-info'>
+                                            <Tooltip title={rentInfoText}>
+                                                <IconButton>
+                                                    <InfoIcon className='info-icon' />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Box>
+                                    </Box>
+                                    <Box className='car-rent-button'>
+                                        <Button
+                                            className='rent-car-button'
+                                            onClick={() => {
+                                                setOpen(true);
+                                                rentCar();
+                                            }}>Rent</Button>
+                                    </Box>
+                                </Box>
                             </Box>
                         </Box>
-                        <Box className='car-rent-button'>
-                            <Button
-                                className='rent-car-button'
-                                onClick={() => {
-                                    setOpen(true);
-                                    rentCar();
-                                }}>Rent</Button>
+                        <Box className='car-features'>
+                            <Box className='car-features-title'>
+                                <SettingsIcon />
+                                <Typography className='specifications-title'>Basics</Typography>
+                            </Box>
+                            <Box className='car-feature'>
+                                <DirectionsCarIcon />
+                                <Typography className='car-feature-description'>{car?.Masina} {car?.Versiune} {car?.Generatie} </Typography>
+                            </Box>
+                            <Box className='car-feature'>
+                                <AddRoadIcon />
+                                <Typography className='car-feature-description'>{car.KM}</Typography>
+                            </Box>
+                            {
+                                car.Culoare ? (
+                                    <Box className='car-feature'>
+                                        <PaletteIcon />
+                                        <Typography className='car-feature-description'>{car.Culoare} {car['Optiuni culoare']}</Typography>
+                                    </Box>
+                                ) : null
+                            }
+                            <Box className='car-feature'>
+                                <CalendarMonthIcon />
+                                <Typography className='car-feature-description'>{car['Anul productiei']}</Typography>
+                            </Box>
+                            <Box className='car-feature'>
+                                <LocalGasStationIcon />
+                                <Typography className='car-feature-description'>{car.Combustibil}</Typography>
+                            </Box>
+                        </Box>
+                        <Box className='car-technical-specifications'>
+                            <Box className='car-technical-specifications-title'>
+                                <SettingsIcon />
+                                <Typography className='specifications-title'>Technical specifications</Typography>
+                            </Box>
+                            <Box className='car-tech-spec'>
+                                <SpeedIcon />
+                                <Typography className='car-tehnical-description'>{car['Capacitate cilindrica']} cm3</Typography>
+                            </Box>
+                            <Box className='car-tech-spec'>
+                                <BoltIcon />
+                                <Typography className='car-tehnical-description'>{car.Putere} HP</Typography>
+                            </Box>
+                            <Box className='car-tech-spec'>
+                                <FaCarSide />
+                                <Typography className='car-tehnical-description'>{car['Tip Caroserie']}</Typography>
+                            </Box>
+                            <Box className='car-tech-spec'>
+                                <TbManualGearbox />
+                                <Typography className='car-tehnical-description'>{car['Cutie de viteze']}</Typography>
+                            </Box>
+                            <Box className='car-tech-spec'>
+                                <SettingsIcon />
+                                <Typography className='car-tehnical-description'>{car.Transmisie}</Typography>
+                            </Box>
+                            {
+                                car['Emisii CO2'] ? (
+                                    <Box className='car-tech-spec'>
+                                        <MdCo2 />
+                                        <Typography className='car-tehnical-description'>{car['Emisii CO2']} g/km</Typography>
+                                    </Box>
+                                ) : null
+                            }
+                            <Box className='car-tech-spec'>
+                                <LocalGasStationIcon />
+                                <Typography className='car-tehnical-description'>Urban {car['Consum Urban']} l/100km</Typography>
+                            </Box>
+                            <Box className='car-tech-spec'>
+                                <LocalGasStationIcon />
+                                <Typography className='car-tehnical-description'>Extraurban {car['Consum Extraurban']} l/100km</Typography>
+                            </Box>
+                        </Box>
+                        {
+                            (car['Audio si tehnologie'] || car['Electronice si sisteme de asistenta'] || car['Performanta'] || car['Siguranta'] || car['Confort si echipamente optionale']) ? (
+                                <Box className='car-equipments'>
+                                    <TabContext value={valueTab}>
+                                        <TabList onChange={handleChangeTab} centered>
+                                            {
+                                                car['Audio si tehnologie'] &&
+                                                <Tab label='Audio and technology' value="0" disabled={!car['Audio si tehnologie']}></Tab>
+                                            }
+
+                                            {
+                                                car['Electronice si sisteme de asistenta'] &&
+                                                <Tab label='Electronics and assistance systems' value="1" disabled={!car['Electronice si sisteme de asistenta']}></Tab>
+                                            }
+
+                                            {
+                                                car['Performanta'] &&
+                                                <Tab label='Performance' value="2" disabled={!car['Performanta']}></Tab>
+                                            }
+
+                                            {
+                                                car['Siguranta'] &&
+                                                <Tab label='Safety' value="3" disabled={!car['Siguranta']}></Tab>
+                                            }
+
+                                            {
+                                                car['Confort si echipamente optionale'] &&
+                                                <Tab label='Optionals' value="4" disabled={!car['Confort si echipamente optionale']}></Tab>
+                                            }
+                                        </TabList>
+
+                                        <TabPanel value="0">
+                                            {
+                                                audioOptions.length > 0 ? (
+                                                    <List className='audio-list'>
+                                                        {
+                                                            audioOptions.map((element, index) => (
+                                                                <ListItem className='car-options' key={index}>{element}</ListItem>
+                                                            ))
+                                                        }
+                                                    </List>
+                                                ) : null
+                                            }
+                                        </TabPanel>
+                                        <TabPanel value="1">
+                                            {
+                                                electronicsOptions.length > 0 ? (
+                                                    <List className='electronics-list'>
+                                                        {
+                                                            electronicsOptions.map((element, index) => (
+                                                                <ListItem className='car-options' key={index}>{element}</ListItem>
+                                                            ))
+                                                        }
+                                                    </List>
+                                                ) : null
+                                            }
+                                        </TabPanel>
+                                        <TabPanel value="2">
+                                            {
+                                                performanceOptions.length > 0 ? (
+                                                    <List className='performance-list'>
+                                                        {
+                                                            performanceOptions.map((element, index) => (
+                                                                <ListItem className='car-options' key={index}>{element}</ListItem>
+                                                            ))
+                                                        }
+                                                    </List>
+                                                ) : null
+                                            }
+                                        </TabPanel>
+                                        <TabPanel value="3">
+                                            {
+                                                safetyOptions.length > 0 ? (
+                                                    <List className='safety-list'>
+                                                        {
+                                                            safetyOptions.map((element, index) => (
+                                                                <ListItem className='car-options' key={index}>{element}</ListItem>
+                                                            ))
+                                                        }
+                                                    </List>
+                                                ) : null
+                                            }
+                                        </TabPanel>
+                                        <TabPanel value="4">
+                                            {
+                                                optionalsOptions.length > 0 ? (
+                                                    <List className='optional-list'>
+                                                        {
+                                                            optionalsOptions.map((element, index) => (
+                                                                <ListItem className='car-options' key={index}>{element}</ListItem>
+                                                            ))
+                                                        }
+                                                    </List>
+                                                ) : null
+                                            }
+                                        </TabPanel>
+                                    </TabContext>
+                                </Box>
+                            ) : null
+                        }
+
+                        <Box className='documents-rejected-dialog'>
+                            <Dialog
+                                fullScreen={fullScreen}
+                                open={open}
+                                onClose={handleCloseDialog}
+                            >
+                                <DialogTitle className='rent-reject-title'>
+                                    {"Something went wrong!"}
+                                </DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText className='rent-reject-content'>
+                                        {alertDialogText}
+                                    </DialogContentText>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button className='rent-rejected-button' autoFocus onClick={handleCloseDialog} variant='contained'>
+                                        Profile
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
                         </Box>
                     </Box>
-                </Box>
-            </Box>
-            <Box className='car-features'>
-                <Box className='car-features-title'>
-                    <SettingsIcon />
-                    <Typography className='specifications-title'>Basics</Typography>
-                </Box>
-                <Box className='car-feature'>
-                    <DirectionsCarIcon />
-                    <Typography className='car-feature-description'>{car?.Masina} {car?.Versiune} {car?.Generatie} </Typography>
-                </Box>
-                <Box className='car-feature'>
-                    <AddRoadIcon />
-                    <Typography className='car-feature-description'>{car.KM}</Typography>
-                </Box>
-                {
-                    car.Culoare ? (
-                        <Box className='car-feature'>
-                            <PaletteIcon />
-                            <Typography className='car-feature-description'>{car.Culoare} {car['Optiuni culoare']}</Typography>
-                        </Box>
-                    ) : null
-                }
-                <Box className='car-feature'>
-                    <CalendarMonthIcon />
-                    <Typography className='car-feature-description'>{car['Anul productiei']}</Typography>
-                </Box>
-                <Box className='car-feature'>
-                    <LocalGasStationIcon />
-                    <Typography className='car-feature-description'>{car.Combustibil}</Typography>
-                </Box>
-            </Box>
-            <Box className='car-technical-specifications'>
-                <Box className='car-technical-specifications-title'>
-                    <SettingsIcon />
-                    <Typography className='specifications-title'>Technical specifications</Typography>
-                </Box>
-                <Box className='car-tech-spec'>
-                    <SpeedIcon />
-                    <Typography className='car-tehnical-description'>{car['Capacitate cilindrica']} cm3</Typography>
-                </Box>
-                <Box className='car-tech-spec'>
-                    <BoltIcon />
-                    <Typography className='car-tehnical-description'>{car.Putere} HP</Typography>
-                </Box>
-                <Box className='car-tech-spec'>
-                    <FaCarSide />
-                    <Typography className='car-tehnical-description'>{car['Tip Caroserie']}</Typography>
-                </Box>
-                <Box className='car-tech-spec'>
-                    <TbManualGearbox />
-                    <Typography className='car-tehnical-description'>{car['Cutie de viteze']}</Typography>
-                </Box>
-                <Box className='car-tech-spec'>
-                    <SettingsIcon />
-                    <Typography className='car-tehnical-description'>{car.Transmisie}</Typography>
-                </Box>
-                {
-                    car['Emisii CO2'] ? (
-                        <Box className='car-tech-spec'>
-                            <MdCo2 />
-                            <Typography className='car-tehnical-description'>{car['Emisii CO2']} g/km</Typography>
-                        </Box>
-                    ) : null
-                }
-                <Box className='car-tech-spec'>
-                    <LocalGasStationIcon />
-                    <Typography className='car-tehnical-description'>Urban {car['Consum Urban']} l/100km</Typography>
-                </Box>
-                <Box className='car-tech-spec'>
-                    <LocalGasStationIcon />
-                    <Typography className='car-tehnical-description'>Extraurban {car['Consum Extraurban']} l/100km</Typography>
-                </Box>
-            </Box>
-            {
-                (car['Audio si tehnologie'] || car['Electronice si sisteme de asistenta'] || car['Performanta'] || car['Siguranta'] || car['Confort si echipamente optionale']) ? (
-                    <Box className='car-equipments'>
-                        <TabContext value={valueTab}>
-                            <TabList onChange={handleChangeTab} centered>
-                                {
-                                    car['Audio si tehnologie'] &&
-                                    <Tab label='Audio and technology' value="0" disabled={!car['Audio si tehnologie']}></Tab>
-                                }
-
-                                {
-                                    car['Electronice si sisteme de asistenta'] &&
-                                    <Tab label='Electronics and assistance systems' value="1" disabled={!car['Electronice si sisteme de asistenta']}></Tab>
-                                }
-
-                                {
-                                    car['Performanta'] &&
-                                    <Tab label='Performance' value="2" disabled={!car['Performanta']}></Tab>
-                                }
-
-                                {
-                                    car['Siguranta'] &&
-                                    <Tab label='Safety' value="3" disabled={!car['Siguranta']}></Tab>
-                                }
-
-                                {
-                                    car['Confort si echipamente optionale'] &&
-                                    <Tab label='Optionals' value="4" disabled={!car['Confort si echipamente optionale']}></Tab>
-                                }
-                            </TabList>
-
-                            <TabPanel value="0">
-                                {
-                                    audioOptions.length > 0 ? (
-                                        <List className='audio-list'>
-                                            {
-                                                audioOptions.map((element, index) => (
-                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
-                                                ))
-                                            }
-                                        </List>
-                                    ) : null
-                                }
-                            </TabPanel>
-                            <TabPanel value="1">
-                                {
-                                    electronicsOptions.length > 0 ? (
-                                        <List className='electronics-list'>
-                                            {
-                                                electronicsOptions.map((element, index) => (
-                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
-                                                ))
-                                            }
-                                        </List>
-                                    ) : null
-                                }
-                            </TabPanel>
-                            <TabPanel value="2">
-                                {
-                                    performanceOptions.length > 0 ? (
-                                        <List className='performance-list'>
-                                            {
-                                                performanceOptions.map((element, index) => (
-                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
-                                                ))
-                                            }
-                                        </List>
-                                    ) : null
-                                }
-                            </TabPanel>
-                            <TabPanel value="3">
-                                {
-                                    safetyOptions.length > 0 ? (
-                                        <List className='safety-list'>
-                                            {
-                                                safetyOptions.map((element, index) => (
-                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
-                                                ))
-                                            }
-                                        </List>
-                                    ) : null
-                                }
-                            </TabPanel>
-                            <TabPanel value="4">
-                                {
-                                    optionalsOptions.length > 0 ? (
-                                        <List className='optional-list'>
-                                            {
-                                                optionalsOptions.map((element, index) => (
-                                                    <ListItem className='car-options' key={index}>{element}</ListItem>
-                                                ))
-                                            }
-                                        </List>
-                                    ) : null
-                                }
-                            </TabPanel>
-                        </TabContext>
+                ) : (
+                    <Box className='results-not-found'>
+                        <Error message={error} />
                     </Box>
-                ) : null
+                )
             }
-
-            <Box className='documents-rejected-dialog'>
-                <Dialog
-                    fullScreen={fullScreen}
-                    open={open}
-                    onClose={handleCloseDialog}
-                >
-                    <DialogTitle className='rent-reject-title'>
-                        {"Something went wrong!"}
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText className='rent-reject-content'>
-                            {alertDialogText}
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button className='rent-rejected-button' autoFocus onClick={handleCloseDialog} variant='contained'>
-                            Profile
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            </Box>
         </Box>
     );
 }

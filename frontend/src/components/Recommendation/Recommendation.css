@@ -227,6 +227,10 @@
     text-align: right;
 }
 
+.form-radio-group {
+    margin-bottom: 10px;
+}
+
 .form-max-characters {
-    color: #ffffff;
+    font-weight: 500 !important;
 }

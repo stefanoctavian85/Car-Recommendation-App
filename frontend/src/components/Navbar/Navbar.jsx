@@ -17,9 +17,6 @@ function Navbar() {
 
     useEffect(() => {
         setIsAuthenticated(auth.isAuthenticated);
-        if (!auth.isAuthenticated) {
-            navigate('/');
-        }
     }, [auth.isAuthenticated]);
 
     const handleOpenUserMenu = (event) => {

@@ -128,8 +128,8 @@ function AdminConversations({ router }) {
                         onChange={(e) => setCategoryFilter(e.target.value)}
                     >
                         {
-                            FILTER_OPTIONS.map((element) => (
-                                <MenuItem value={element.value}>{element.label}</MenuItem>
+                            FILTER_OPTIONS.map((element, index) => (
+                                <MenuItem key={index} value={element.value}>{element.label}</MenuItem>
                             ))
                         }
                     </Select>
@@ -137,7 +137,7 @@ function AdminConversations({ router }) {
             </Box>
 
             {
-                conversations.length > 0 ? (
+                !errorMessage && conversations.length > 0 ? (
                     <Box>
                         <DataGrid
                             className='admin-conversations-table'
