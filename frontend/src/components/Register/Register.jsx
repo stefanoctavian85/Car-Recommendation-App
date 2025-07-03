@@ -181,25 +181,29 @@ function Register() {
             email, firstname, lastname, password,
         };
 
-        const response = await fetch(`${SERVER}/auth/register`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(userCredentials)
-        });
+        try {
+            const response = await fetch(`${SERVER}/auth/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(userCredentials)
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            const token = data.token;
-            const user = data.user;
-            localStorage.setItem("token", JSON.stringify(token));
-            auth.authStore.login(token, user);
-            auth.setToken(token);
-            auth.setIsAuthenticated(auth.authStore.getAuthStatus());
-            navigate("/");
-        } else {
-            setError(data.message);
+            const data = await response.json();
+            if (response.ok) {
+                const token = data.token;
+                const user = data.user;
+                localStorage.setItem("token", JSON.stringify(token));
+                auth.authStore.login(token, user);
+                auth.setToken(token);
+                auth.setIsAuthenticated(auth.authStore.getAuthStatus());
+                navigate("/");
+            } else {
+                setError(data.message);
+            }
+        } catch (error) {
+            setError("Something went wrong! Please try again later!");
         }
     }
 

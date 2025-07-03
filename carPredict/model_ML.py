@@ -31,11 +31,13 @@ kprototypes = joblib.load("./car-recommendation/joblib_files/kprototypes_cluster
 mean_mode_values_df = pd.read_csv("./car-recommendation/processed_data/mean_mode_values.csv")
 numerical_columns = ['Anul productiei', 'Capacitate cilindrica', 'Putere', 'Consum Urban', 'Consum Extraurban', 'Pret']
 categorical_columns = ['Combustibil', 'Tip Caroserie', 'Cutie de viteze', 'Transmisie']
+all_columns = numerical_columns + categorical_columns
 
-prompt_template = ("You are a car recommendation assistant! Please, extract car attributes, where NA, please put null."
-                   "Each field must contain a single value! You must return a JSON!\n"
+prompt_template = ("Please, extract car attributes, where NA, please put null."
+                   "Each field must contain a single value! You must return a JSON in the following format: \n"
                    "{format_instructions}\n"
-                   "Text: {text}.")
+                   "Text: {text}."
+                   "No explanations! Each field must be filled with a single value or null, if not present.\n")
 
 
 class Masina(BaseModel):
@@ -53,51 +55,77 @@ class Masina(BaseModel):
 
 @app.route('/transform-text-to-json', methods=['POST'])
 def text_to_json():
-    data = request.get_json()
-    text = data.get('text')
+    try:
+        data = request.get_json()
+        
+        if not data or "text" not in data:
+            return jsonify({"error": "Text is required!"}), 400
 
-    parser = PydanticOutputParser(pydantic_object=Masina)
-    format_instructions = parser.get_format_instructions()
+        text = data.get('text')
 
-    prompt = PromptTemplate(
-        template=prompt_template,
-        input_variables=["text"],
-        partial_variables={"format_instructions": format_instructions},
-    )
+        parser = PydanticOutputParser(pydantic_object=Masina)
+        format_instructions = parser.get_format_instructions()
 
-    chat = ChatOllama(
-        model="llama3.1",
-        temperature=0,
-        format="json"
-    )
-    final_prompt = prompt.format(text=text)
-    response = chat.invoke(final_prompt)
-    car_info = json.loads(response.content)
+        prompt = PromptTemplate(
+            template=prompt_template,
+            input_variables=["text"],
+            partial_variables={"format_instructions": format_instructions},
+        )
 
-    for key in car_info:
-        if car_info[key] is None and key != 'Masina':
-            row = mean_mode_values_df[mean_mode_values_df['Column'] == key]
+        chat = ChatOllama(
+            model="llama3.2:3b",
+            temperature=0,
+            format='json'
+        )
 
-            if not row.empty:
-                value = row['Mean/Mode'].iloc[0]
+        final_prompt = prompt.format(text=text)
+        response = chat.invoke(final_prompt)
 
-                if key in numerical_columns:
-                    car_info[key] = int(float(value))
-                else:
-                    car_info[key] = value
+        try:
+            llm_response = json.loads(response.content)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Model response could not be parsed! Please try another method of recommendation!"}), 500
+        
+        car_info = llm_response['properties']
 
-    return jsonify({
-        "content": json.dumps(car_info),
-    })
+        if car_info is None:
+            return jsonify({"error": "Invalid structure returned by the model! Please try another method of recommendation!"}), 500
+
+        for key in car_info:
+            if car_info[key] is None:
+                row = mean_mode_values_df[mean_mode_values_df['Column'] == key]
+
+                if not row.empty:
+                    value = row['Mean/Mode'].iloc[0]
+
+                    if key in numerical_columns:
+                        car_info[key] = int(float(value))
+                    else:
+                        car_info[key] = value
+
+        return jsonify({
+            "content": json.dumps(car_info),
+        })
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Internal Server Error, please try again later."}), 500
 
 
 @app.route('/chatbot/categorize', methods=['POST'])
 def categorize():
-    data = request.get_json()
-    message = data.get('message')
-    transformed_reply = vectorizer.transform([message])
-    predicted_category = model_chatbot.predict(transformed_reply)
-    return jsonify({"category": predicted_category[0]})
+    try:
+        data = request.get_json()
+
+        if not data or "message" not in data or not isinstance(data["message"], str):
+            return jsonify({"error": "Invalid message input"}), 400
+
+        message = data.get('message')
+        transformed_reply = vectorizer.transform([message])
+        predicted_category = model_chatbot.predict(transformed_reply)
+        return jsonify({"category": predicted_category[0]})
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Internal Server Error, please try again later."}), 500
 
 
 @app.route('/predict', methods=['POST'])
@@ -105,8 +133,15 @@ def predict():
     try:
         data = request.get_json()
 
+        if not data:
+            return jsonify({"error": "Request body is empty!" }), 400
+
         if 'responses' in data:
             responses = np.array(data['responses'])
+            
+            if not isinstance(responses, (list, tuple, np.ndarray)) or len(responses) != 10:
+                return jsonify({"error": "Responses are not a list, tuple or ndarray or are not 10!"}), 400
+
             df = pd.DataFrame([{
                 'Anul productiei': int(responses[0]),
                 'Capacitate cilindrica': int(responses[1]),
@@ -121,6 +156,21 @@ def predict():
             }])
         elif 'content' in data:
             car_data = data['content']
+            missing_keys = [key for key in all_columns if key not in car_data]
+
+            if missing_keys:
+                return jsonify({"error": "Missing keys from text to json!"}), 400
+            
+            for key in numerical_columns:
+                val = car_data.get(key)
+                if not isinstance(val, (int, float)):
+                    return jsonify({"error": f"Value for {key} must be a number"}), 400
+                
+            for key in categorical_columns:
+                val = car_data.get(key)
+                if not isinstance(val, str):
+                    return jsonify({"error": f"Value for {key} must be a string"}), 400
+
             df = pd.DataFrame([{
                 'Anul productiei': car_data['Anul productiei'],
                 'Capacitate cilindrica': car_data['Capacitate cilindrica'],
@@ -133,6 +183,8 @@ def predict():
                 'Consum Urban': car_data['Consum Urban'],
                 'Consum Extraurban': car_data['Consum Extraurban'],
             }])
+        else:
+            return jsonify({"error": "Missing recommendation responses! Please try again later!" }), 500
 
         # df['Combustibil'] = label_encoder_fueltype.transform(df['Combustibil'])
         # df['Tip Caroserie'] = label_encoder_bodytype.transform(df['Tip Caroserie'])
@@ -200,55 +252,78 @@ reader = easyocr.Reader(['ro', 'en'])
 
 @app.route('/validate-documents', methods=['POST'])
 def validate_documents():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    id_card_path = data.get('idCardPath')
-    driver_license_path = data.get('driverLicensePath')
+        if not data:
+            return jsonify({"error": "Request body is empty!" }), 400
+        
+        id_card_path = data.get('idCardPath')
+        driver_license_path = data.get('driverLicensePath')
+        first_name = data.get('firstname')
+        last_name = data.get('lastname')
 
-    identity_card_photo = Image.open(id_card_path).convert("RGB")
-    identity_card_photo = identity_card_photo.resize((identity_card_photo.width * 3, identity_card_photo.height * 3))
-    identity_card_photo = np.array(identity_card_photo)
+        if not all([id_card_path, driver_license_path, first_name, last_name]):
+            return jsonify({"error": "Missing one or more fields: id card, driver license, first name or last name "}), 400
 
-    driver_license_photo = Image.open(driver_license_path).convert("RGB")
-    driver_license_photo = driver_license_photo.resize((driver_license_photo.width * 3, driver_license_photo.height * 3))
-    driver_license_photo = np.array(driver_license_photo)
+        try:
+            identity_card_photo = Image.open(id_card_path).convert("RGB")
+            identity_card_photo = identity_card_photo.resize((identity_card_photo.width * 3, identity_card_photo.height * 3))
+            identity_card_photo = np.array(identity_card_photo)
+        except Exception as e:
+            return jsonify({"error": "ID card OCR failed!"}), 500
 
-    first_name = data.get('firstname')
-    last_name = data.get('lastname')
+        try:
+            driver_license_photo = Image.open(driver_license_path).convert("RGB")
+            driver_license_photo = driver_license_photo.resize((driver_license_photo.width * 3, driver_license_photo.height * 3))
+            driver_license_photo = np.array(driver_license_photo)
+        except Exception as e:
+            return jsonify({"error": "Driver license OCR failed!"}), 500
 
-    result_ID = reader.readtext(identity_card_photo)
-    result_driver_license = reader.readtext(driver_license_photo)
+        try:
+            result_ID = reader.readtext(identity_card_photo)
+            result_driver_license = reader.readtext(driver_license_photo)
+        except Exception as e:
+            print(e)
+            return jsonify({"error": "OCR failed!"}), 500
 
-    full_text_ID = "ID CARD INFO: " + " ".join(text for (_, text, prob) in result_ID if prob > threshold)
-    full_text_driver = "DRIVER LICENSE INFO: " + " ".join(text for (_, text, prob) in result_driver_license if prob > threshold)
+        full_text_ID = "ID CARD INFO: " + " ".join(text for (_, text, prob) in result_ID if prob > threshold)
+        full_text_driver = "DRIVER LICENSE INFO: " + " ".join(text for (_, text, prob) in result_driver_license if prob > threshold)
 
-    parser = PydanticOutputParser(pydantic_object=UserIdentity)
-    format_instructions = parser.get_format_instructions()
+        parser = PydanticOutputParser(pydantic_object=UserIdentity)
+        format_instructions = parser.get_format_instructions()
 
-    prompt = PromptTemplate(
-        template=prompt_OCR,
-        input_variables=["full_text_ID", "full_text_driver", "first_name", "last_name"],
-        partial_variables={"format_instructions": format_instructions},
-    )
+        prompt = PromptTemplate(
+            template=prompt_OCR,
+            input_variables=["full_text_ID", "full_text_driver", "first_name", "last_name"],
+            partial_variables={"format_instructions": format_instructions},
+        )
 
-    chat = ChatOllama(
-        model="llama3.1",
-        temperature=0,
-        format="json"
-    )
+        chat = ChatOllama(
+            model="llama3.1:8b",
+            temperature=0,
+            format="json"
+        )
 
-    final_prompt = prompt.format(
-        full_text_ID=full_text_ID,
-        full_text_driver=full_text_driver,
-        first_name=first_name,
-        last_name=last_name
-    )
+        final_prompt = prompt.format(
+            full_text_ID=full_text_ID,
+            full_text_driver=full_text_driver,
+            first_name=first_name,
+            last_name=last_name
+        )
 
-    response = chat.invoke(final_prompt)
-    user_identity_score = json.loads(response.content)
-    return jsonify({
-        "content": json.dumps(user_identity_score),
-    })
+        response = chat.invoke(final_prompt)
+        try:
+            user_identity_score = json.loads(response.content)
+        except json.JSONDecodeError:
+            return jsonify({"error": "Failed to parse response JSON"}), 500
+
+        return jsonify({
+            "content": json.dumps(user_identity_score),
+        })
+    except Exception as e:
+        print(e)
+        return jsonify({"error": "Internal Server Error, please try again later."}), 500
 
 if __name__ == '__main__':
     app.run(debug=False, use_reloader=False)

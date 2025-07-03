@@ -1,17 +1,19 @@
 import models from "../models/index.js";
-import { jwtDecode } from 'jwt-decode';
+import jwt from 'jsonwebtoken';
 
 export default async (req, res, next) => {
     try {
-        const token = req.headers.authorization;
+        const authHeader = req.headers.authorization;
 
-        if (!token) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
-                message: "Unauthorized",
+                message: "Unauthorized: No token provided!",
             });
         }
+        const token = authHeader.split(' ')[1];
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
-        const email = jwtDecode(token).email;
+        const email = decodedToken.email;
 
         const user = await models.User.findOne({
             email: email,

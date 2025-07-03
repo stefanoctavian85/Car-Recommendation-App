@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import './PaymentForm.css';
 import { useContext, useState } from 'react';
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js';

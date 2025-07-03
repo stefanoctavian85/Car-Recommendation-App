@@ -1,5 +1,5 @@
 import './AdminDashboard.css';
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import AppContext from '../../state/AppContext';
 import { Box, Typography, Stack, createTheme } from '@mui/material';
@@ -47,13 +47,13 @@ const theme = createTheme({
     colorSchemes: { light: true, dark: true },
     breakpoints: {
         values: {
-          xs: 0,
-          sm: 600,
-          md: 600,
-          lg: 1200,
-          xl: 1536,
+            xs: 0,
+            sm: 600,
+            md: 600,
+            lg: 1200,
+            xl: 1536,
         },
-      },
+    },
 });
 
 function CustomAppTitle() {
@@ -186,11 +186,20 @@ function AdminDashboard() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        });
                     }
                 })
                 .then((data) => {
                     setUser(data.user);
                     auth.authStore.setUser(data.user);
+                })
+                .catch(() => {
+                    auth.authStore.logout();
+                    auth.setIsAuthenticated(false);
+                    window.location.reload();
                 })
         } else {
             navigate('/');
@@ -219,7 +228,7 @@ function AdminDashboard() {
                     sidebarFooter: SidebarFooterAccount
                 }}
             >
-                <PageContent pathname={pathname} router={router} state={state}/>
+                <PageContent pathname={pathname} router={router} state={state} />
             </DashboardLayout>
         </AppProvider>
     );

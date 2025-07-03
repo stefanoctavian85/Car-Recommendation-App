@@ -8,7 +8,7 @@ const getRecommendationsByText = async (req, res, next) => {
 
         if (!text || text.length > 300) {
             return res.status(400).json({
-                message: "Invalid text!"
+                message: "Text is required and must be less than 300 characters!"
             });
         }
 
@@ -69,6 +69,10 @@ const getRecommendationsByText = async (req, res, next) => {
                 return res.status(200).json({
                     cars
                 });
+            } else {
+                return res.status(400).json({
+                    message: "No valid car information could be extracted from the text!",
+                })
             }
         } catch (err) {
             return res.status(500).json({
@@ -84,8 +88,20 @@ const predict = async (req, res, next) => {
     try {
         const { questions, responses } = req.body;
         const user = req.user;
+        
+        if (!Array.isArray(questions) || !Array.isArray(responses)) {
+            return res.status(400).json({
+                message: "Questions and responses must be arrays!",
+            });
+        }
 
-        if (responses.length !== 10) {
+        if (!questions || !responses) {
+            return res.status(400).json({
+                message: "Questions and responses are required!",
+            });
+        } 
+
+        if (responses.length !== 10 || questions.length !== 10) {
             return res.status(400).json({
                 message: "Invalid number of inputs",
             });
@@ -156,7 +172,7 @@ const quickRecommendations = async (req, res, next) => {
 
         if (!user.hasCompletedRecommendation) {
             return res.status(404).json({
-                message: 'Cluster not found!',
+                message: 'User has not completed any recommendation method yet!',
             });
         }
 
@@ -166,7 +182,7 @@ const quickRecommendations = async (req, res, next) => {
             { Masina: 1, "Anul productiei": 1, Combustibil: 1, "Tip Caroserie": 1, Imagine: 1 })
             .sort({ _id: -1 }).limit(4);
 
-        if (!latestCars) {
+        if (!latestCars || latestCars.length === 0) {
             return res.status(404).json({
                 message: 'Cars not found!',
             });

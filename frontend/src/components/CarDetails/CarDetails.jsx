@@ -26,7 +26,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
-import Error from '../Error/Error.jsx';
+import ErrorComponent from '../Error/Error.jsx';
 
 const todaysDate = dayjs().format('YYYY-MM-DD');
 
@@ -67,6 +67,13 @@ function CarDetails() {
             setCar(cars.carsStore.getCar());
         } else {
             const id = searchParams.get("id") || '';
+
+            if (!id) {
+                setError('Car ID not provided!');
+                setIsLoading(false);
+                return;
+            }
+
             fetch(`${SERVER}/api/car?id=${id}`, {
                 method: "GET",
                 headers: {
@@ -95,7 +102,7 @@ function CarDetails() {
         if (auth.authStore.getUser()) {
             setUser(auth.authStore.getUser());
         } else {
-            const userId = jwtDecode(auth.authStore.token).id;
+            const userId = jwtDecode(auth.token).id;
             fetch(`${SERVER}/api/users/${userId}/profile`, {
                 method: 'GET',
                 headers: {
@@ -105,11 +112,22 @@ function CarDetails() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        });
                     }
                 })
                 .then((data) => {
                     setUser(data.user);
+                    auth.authStore.setUser(data.user);
                 })
+                .catch(() => {
+                    setUser('');
+                    auth.authStore.logout();
+                    auth.setIsAuthenticated(false);
+                    window.location.reload();
+                });
         }
 
         const timeout = setTimeout(() => {
@@ -121,7 +139,7 @@ function CarDetails() {
     useEffect(() => {
         setIsLoading(true);
 
-        if (car) {
+        if (car && typeof car === 'object') {
             setAudioOptions(parseOptions(car['Audio si tehnologie']));
             setElectronicsOptions(parseOptions(car['Electronice si sisteme de asistenta']));
             setOptionalsOptions(parseOptions(car['Confort si echipamente optionale']));
@@ -148,10 +166,17 @@ function CarDetails() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        });
                     }
                 })
                 .then((data) => {
                     setMinRentalPrice(data.rentalPrice);
+                })
+                .catch(() => {
+                    setMinRentalPrice('-');
                 });
         }
 
@@ -175,10 +200,11 @@ function CarDetails() {
 
     function handleCloseDialog() {
         setOpen(false);
+        setError('');
+    }
 
-        setTimeout(() => {
-            document.getElementById('rent-button')?.focus();
-        }, 100);
+    function handleProfileButton() {
+        setOpen(false);
 
         navigate('/profile', {
             state: {
@@ -198,9 +224,14 @@ function CarDetails() {
             .then((res) => {
                 if (res.ok) {
                     return res.json();
+                } else {
+                    return res.json().then((error) => {
+                        throw new Error(error.message || 'Something went wrong!');
+                    })
                 }
             })
             .then((data) => {
+                setAlertDialogText('');
                 const validations = data.validationPassed;
                 const messages = data.sendMessages;
                 if (validations.validatedDocuments === true && validations.nonexistingReservation === true && validations.underLimit === true) {
@@ -225,6 +256,9 @@ function CarDetails() {
                         setOpen(true);
                     }
                 }
+            })
+            .catch((error) => {
+                setError(error.message);
             });
 
     }
@@ -238,7 +272,11 @@ function CarDetails() {
     return (
         <Box>
             {
-                car ? (
+                error ? (
+                    <Box className='results-not-found'>
+                        <ErrorComponent message={error} />
+                    </Box>
+                ) : car ? (
                     <Box className='car-details-page'>
                         <Box className='car-make-version'>
                             <Typography component='h1' className='car-name'>{car.Masina}</Typography>
@@ -453,33 +491,32 @@ function CarDetails() {
                             ) : null
                         }
 
-                        <Box className='documents-rejected-dialog'>
-                            <Dialog
-                                fullScreen={fullScreen}
-                                open={open}
-                                onClose={handleCloseDialog}
-                            >
-                                <DialogTitle className='rent-reject-title'>
-                                    {"Something went wrong!"}
-                                </DialogTitle>
-                                <DialogContent>
-                                    <DialogContentText className='rent-reject-content'>
-                                        {alertDialogText}
-                                    </DialogContentText>
-                                </DialogContent>
-                                <DialogActions>
-                                    <Button className='rent-rejected-button' autoFocus onClick={handleCloseDialog} variant='contained'>
+                        <Dialog
+                            fullScreen={fullScreen}
+                            open={open}
+                            onClose={handleCloseDialog}
+                        >
+                            <DialogTitle className='rent-reject-title'>
+                                {"Something went wrong!"}
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText className='rent-reject-content'>
+                                    {alertDialogText}
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Box className='rent-rejected-buttons'>
+                                    <Button className='rent-close-button' onClick={handleCloseDialog} variant='contained'>
+                                        Close
+                                    </Button>
+                                    <Button className='rent-rejected-button' onClick={handleProfileButton} variant='contained'>
                                         Profile
                                     </Button>
-                                </DialogActions>
-                            </Dialog>
-                        </Box>
+                                </Box>
+                            </DialogActions>
+                        </Dialog>
                     </Box>
-                ) : (
-                    <Box className='results-not-found'>
-                        <Error message={error} />
-                    </Box>
-                )
+                ) : null
             }
         </Box>
     );

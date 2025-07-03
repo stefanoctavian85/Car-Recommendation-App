@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState,  } from "react";
+import React, { useContext, useEffect, useState, } from "react";
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { Box } from "@mui/material";
 import AppContext from "../../state/AppContext";
@@ -28,11 +28,20 @@ function ProtectedAdminRoute() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        });
                     }
                 })
                 .then((data) => {
                     setUser(data.user);
                     auth.authStore.setUser(data.user);
+                })
+                .catch(() => {
+                    auth.authStore.logout();
+                    auth.setIsAuthenticated(false);
+                    window.location.reload();
                 })
                 .finally(() => {
                     setIsLoading(false);

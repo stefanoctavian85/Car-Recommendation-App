@@ -1,5 +1,4 @@
 import './LoadingScreen.css';
-import React from 'react';
 import { Box, Typography } from '@mui/material';
 import LogoLoadingScreen from '../../assets/LogoLoadingScreen.svg';
 

@@ -20,16 +20,22 @@ async function connectToDatabase() {
 }
 
 async function createAdminUser() {
-    const email = process.env.ADMIN_EMAIL;
-    let admin = await User.findOne({ email });
-    if (!admin) {
-        const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-        admin = await User.create({ email: process.env.ADMIN_EMAIL, password: hashedPassword, firstname: process.env.ADMIN_FIRSTNAME,
-            lastname: process.env.ADMIN_LASTNAME, status: "admin", phoneNumber: process.env.ADMIN_PHONENUMBER });
-        await admin.save();
-        console.log("Admin user has been created!");
-    } else {
-        console.log("Admin user already exists!");
+    try {
+        const email = process.env.ADMIN_EMAIL;
+        let admin = await User.findOne({ email });
+        if (!admin) {
+            const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+            admin = await User.create({
+                email: process.env.ADMIN_EMAIL, password: hashedPassword, firstname: process.env.ADMIN_FIRSTNAME,
+                lastname: process.env.ADMIN_LASTNAME, status: "admin", phoneNumber: process.env.ADMIN_PHONENUMBER
+            });
+            await admin.save();
+            console.log("Admin user has been created!");
+        } else {
+            console.log("Admin user already exists!");
+        }
+    } catch (err) {
+        console.error("Error at creating admin user: ", err);
     }
 }
 
@@ -46,7 +52,7 @@ const connectToFirebase = () => {
             appId: process.env.APP_ID,
             databaseURL: process.env.DATABASE_URL,
         };
-        
+
         const firebase = initializeApp(firebaseConfig);
         database = getDatabase(firebase);
         console.log("Connected to Firebase Realtime Database!");

@@ -8,6 +8,7 @@ import models from "../../models/index.js";
 import path from "path";
 import utils from "../../utils/index.js";
 import mongoose from "mongoose";
+import fs from 'fs';
 
 const sendFirstMessage = async (req, res, next) => {
     const userId = req.user._id.toString();
@@ -48,11 +49,24 @@ const sendFirstMessage = async (req, res, next) => {
 
 const sendMessage = async (req, res, next) => {
     const { message, conversationId } = req.body;
-    const userFullName = req.user.firstname + " " + req.user.lastname;
+
+    if (!message || !conversationId) {
+        return res.status(400).json({
+            message: "Message and conversation ID are required!",
+        });
+    }
+
     try {
+        const userFullName = req.user.firstname + " " + req.user.lastname;
         const conversationRef = ref(database, `conversations/${conversationId}`);
         const snapshot = await get(conversationRef);
         const conversation = snapshot.val();
+
+        if (!conversation) {
+            return res.status(404).json({
+                message: "Conversation not found!",
+            });
+        }
 
         let flaskResponse, response;
 
@@ -70,6 +84,9 @@ const sendMessage = async (req, res, next) => {
                     response = await flaskResponse.json();
                     const conversationRef = ref(database, `conversations/${conversationId}`);
                     await update(conversationRef, { category: response.category });
+                } else {
+                    response = await flaskResponse.json();
+                    console.log(response.message);
                 }
             } catch (error) {
                 console.log("Flask server is not reachable!");
@@ -109,6 +126,12 @@ const attachFilesToConversation = async (req, res, next) => {
         const conversationId = req.body.conversationId;
         const userFullName = req.user.firstname + " " + req.user.lastname;
 
+        if (!files || !conversationId) {
+            return res.status(400).json({
+                message: "Files and conversation ID are required!",
+            });
+        }
+
         let newMessage = {};
         if (conversationId) {
             const messageRef = ref(database, `conversations/${conversationId}/messages`);
@@ -144,14 +167,29 @@ const attachFilesToConversation = async (req, res, next) => {
 const downloadDocuments = async (req, res, next) => {
     try {
         const filename = req.params.filename;
+
+        if (!filename) {
+            return res.status(400).json({
+                message: "File name is required!",
+            });
+        }
+
         const filePath = path.join(utils.pathUtils.filesRootPath, "uploads", filename);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({
+                message: "File not found!",
+            });
+        }
 
         res.download(filePath, (error) => {
             if (error) {
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        message: 'Internal Server Error',
+                    });
+                }
                 console.error(error);
-                res.status(500).json({
-                    message: 'Internal Server Error',
-                });
             }
         })
     } catch (err) {
@@ -187,6 +225,12 @@ const closeChat = async (req, res, next) => {
 const getConversationInfo = async (req, res, next) => {
     const { conversationId } = req.params;
 
+    if (!conversationId) {
+        return res.status(400).json({
+            message: "Conversation ID is required!",
+        });
+    }
+
     try {
         const conversationRef = ref(database, `conversations/${conversationId}`);
         const snapshot = await get(conversationRef);
@@ -210,13 +254,19 @@ const getConversationInfo = async (req, res, next) => {
         if (userId) {
             if (!mongoose.Types.ObjectId.isValid(userId)) {
                 return res.status(400).json({
-                    message: 'Something went wrong! Please try again later!',
+                    message: 'Invalid user ID!',
                 });
             }
 
             const userInfo = await models.User.findOne({
                 _id: userId,
             });
+
+            if (!userInfo) {
+                return res.status(404).json({
+                    message: 'User not found!',
+                });
+            }
 
             conversationInfo = {
                 ...conversationInfo,
@@ -251,10 +301,10 @@ const approveDocumentsByAdmin = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(uid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid user ID!',
             });
         }
-        
+
         const user = await models.User.findOne({
             _id: uid,
         });

@@ -315,7 +315,7 @@ function Chat({ adminConversationId }) {
                                                                 <input
                                                                     className='input-file'
                                                                     type='file'
-                                                                    accept="image/*"
+                                                                    accept="image/jpeg, image/png"
                                                                     onChange={handleFileChange}
                                                                     multiple
                                                                 />

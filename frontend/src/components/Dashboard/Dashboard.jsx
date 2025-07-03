@@ -44,7 +44,7 @@ function Dashboard() {
         fetch(`${SERVER}/api/dashboard/dashboard-reports`, {
             method: 'GET',
             headers: {
-                'Authorization': `${auth.token}`,
+                'Authorization': `Bearer ${auth.token}`,
             },
         })
             .then((res) => {

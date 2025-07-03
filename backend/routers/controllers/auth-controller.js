@@ -5,6 +5,12 @@ import models from "../../models/index.js";
 const login = async (req, res, next) => {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+        return res.status(400).json({
+            message: "Email and password are required!",
+        });
+    }
+
     try {
         let user = await models.User.findOne({
             email: email
@@ -43,6 +49,12 @@ const login = async (req, res, next) => {
 const register = async (req, res, next) => {
     const { email, firstname, lastname, password } = req.body;
 
+    if (!email || !password || !firstname || !lastname) {
+        return res.status(400).json({
+            message: "Email, first name, last name and password are required!",
+        });
+    }
+
     try {
         const userExists = await models.User.findOne({ email: email });
         if (!userExists) {
@@ -65,7 +77,7 @@ const register = async (req, res, next) => {
         } else {
             res.status(400).json({
                 message: "A user with this email already exists!",
-            })
+            });
         }
     } catch (err) {
         next(err);

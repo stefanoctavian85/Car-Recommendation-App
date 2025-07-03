@@ -1,6 +1,7 @@
 .dashboard-page {
     min-height: 100vh;
     padding: 2rem;
+    max-height: 100vh;
 }
 
 .card-details {

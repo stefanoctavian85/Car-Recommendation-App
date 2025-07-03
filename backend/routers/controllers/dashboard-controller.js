@@ -1,7 +1,7 @@
 import models from "../../models/index.js";
 import dayjs from 'dayjs';
 
-const todaysDate = new Date(dayjs().format('YYYY-MM-DD 00:00'));
+const todaysDate = dayjs().startOf('day').toDate();
 const tommorowDate = dayjs(todaysDate).add(1, 'day').toDate();
 const todaysDayIndex = (dayjs().day() + 6) % 7;
 
@@ -15,7 +15,7 @@ const dashboardReports = async (req, res, next) => {
 
         const reservationsToday = await models.Reservation.find({
             createdAt: {
-                $gt: todaysDate,
+                $gte: todaysDate,
                 $lt: tommorowDate
             }
         });
@@ -27,14 +27,14 @@ const dashboardReports = async (req, res, next) => {
             todaysRevenue = reservationsToday.reduce((sum, element) => sum + element.totalPrice, 0);
         }
 
-
         const lastWeekMondayDate = dayjs(todaysDate).subtract(todaysDayIndex + 7, 'day').toDate();
         const lastWeekSundayDate = dayjs(todaysDate).subtract(todaysDayIndex, 'day').toDate();
+        const dayAfterLastWeekSunday = dayjs(lastWeekSundayDate).add(1, 'day').startOf('day').toDate();
 
         const reservationsLastWeek = await models.Reservation.find({
             createdAt: {
-                $lt: lastWeekSundayDate,
-                $gt: lastWeekMondayDate,
+                $gte: lastWeekMondayDate,
+                $lt: dayAfterLastWeekSunday,
             }
         });
 
@@ -55,25 +55,30 @@ const dashboardReports = async (req, res, next) => {
             }
         });
 
-        const carMap = {};
         let mostPredictedCar = '';
         let numberOfMostPredictedCar = 0;
 
-        forms.forEach(form => {
-            form.predictions.forEach(prediction => {
-                if (prediction in carMap) {
-                    carMap[prediction]++;
-                } else {
-                    carMap[prediction] = 1;
+        if (forms.length !== 0) {
+            const carMap = {};
+
+            forms.forEach(form => {
+                if (Array.isArray(form.predictions)) {
+                    form.predictions.forEach(prediction => {
+                        if (prediction in carMap) {
+                            carMap[prediction]++;
+                        } else {
+                            carMap[prediction] = 1;
+                        }
+                    });
                 }
             });
-        });
 
-        const sortedCars = Object.entries(carMap).sort((a, b) => b[1] - a[1]);
+            const sortedCars = Object.entries(carMap).sort((a, b) => b[1] - a[1]);
 
-        if (sortedCars.length > 0) {
-            mostPredictedCar = sortedCars[0][0];
-            numberOfMostPredictedCar = sortedCars[0][1];
+            if (sortedCars.length > 0) {
+                mostPredictedCar = sortedCars[0][0];
+                numberOfMostPredictedCar = sortedCars[0][1];
+            }
         }
 
         return res.status(200).json({
@@ -90,23 +95,33 @@ const getDataForCharts = async (req, res, next) => {
     try {
         const { filter } = req.query;
 
+        if (!filter) {
+            return res.status(400).json({
+                message: "Invalid filter!",
+            })
+        }
+
         if (req.user.status !== 'admin') {
             return res.status(401).json({
                 message: 'Unauthorized',
             });
         }
 
-        const monthDays = dayjs().date();
+        const today = dayjs();
+        const firstDayOfMonth = today.startOf('month');
 
-        const lastMonthDate = dayjs(todaysDate).subtract(monthDays - 1, 'day').toDate();
-        const firstWeekDate = dayjs(lastMonthDate).add(7, 'day').toDate();
-        const secondWeekDate = dayjs(lastMonthDate).add(14, 'day').toDate();
-        const thirdWeekDate = dayjs(lastMonthDate).add(21, 'day').toDate();
-        const fourthWeekDate = dayjs(lastMonthDate).add(28, 'day').toDate();
+        const weekRanges = [];
+        const weeks = ['First Week', 'Second Week', 'Third Week', 'Fourth Week'];
+        for (let i = 0; i < 4; i++) {
+            const start = firstDayOfMonth.add(i * 7, 'day');
+            const end = i === 3 ? firstDayOfMonth.endOf('month') : firstDayOfMonth.add((i + 1) * 7, 'day').subtract(1, 'millisecond');
+            weekRanges.push({ start: start.toDate(), end: end.toDate() });
+        }
 
         const reservationsLastMonth = await models.Reservation.find({
             createdAt: {
-                $gt: lastMonthDate,
+                $gt: firstDayOfMonth.toDate(),
+                $lte: today.endOf('day').toDate(),
             }
         })
             .populate({
@@ -119,25 +134,23 @@ const getDataForCharts = async (req, res, next) => {
             });
         }
 
-        const weeks = ['First Week', 'Second Week', 'Third Week', 'Fourth Week'];
-        const weekRanges = [firstWeekDate, secondWeekDate, thirdWeekDate, fourthWeekDate];
-
-        let filteredData = [];
-        const weeksCount = 4;
-
-        for (let i = 0; i < weeksCount; i++) {
-            filteredData.push({ week: weeks[i] });
-        }
+        let filteredData = weeks.map(week => ({ week }));
 
         reservationsLastMonth.forEach((reservation) => {
-            const car = reservation.carId._doc;
+            if (!reservation.carId) return;
+
+            const car = reservation.carId.toObject();
             const reservationDate = reservation.createdAt;
             if (Object.hasOwn(car, filter)) {
                 const value = car[filter];
+                if (value == null || typeof value !== 'string') {
+                    return;
+                }
 
-                for (let i = 0; i < weeksCount; i++) {
-                    if (reservationDate < weekRanges[i] && reservationDate > weekRanges[i - 1]) {
-                        filteredData[i][value] = filteredData[i][value] ? filteredData[i][value]++ : 1;
+                for (let i = 0; i < 4; i++) {
+                    if (reservationDate >= weekRanges[i].start && reservationDate <= weekRanges[i].end) {
+                        filteredData[i][value] = (filteredData[i][value] || 0) + 1;
+                        break;
                     }
                 }
             }
@@ -152,6 +165,15 @@ const getDataForCharts = async (req, res, next) => {
             })
         });
 
+        filteredData = filteredData.map(weekData => {
+            labels.forEach(label => {
+                if (typeof weekData[label] !== 'number') {
+                    weekData[label] = 0;
+                }
+            })
+            return weekData;
+        })
+
         return res.status(200).json({
             filteredData,
             labels
@@ -164,6 +186,12 @@ const getDataForCharts = async (req, res, next) => {
 const getLogs = async (req, res, next) => {
     try {
         const { date } = req.query;
+
+        if (!date || isNaN(Date.parse(date))) {
+            return res.status(400).json({
+                message: "Invalid or missing date parameter!",
+            })
+        }
 
         if (req.user.status !== 'admin') {
             return res.status(401).json({
@@ -184,7 +212,7 @@ const getLogs = async (req, res, next) => {
                 path: 'carId',
                 select: 'Masina'
             });
-        
+
         if (logs.length === 0) {
             return res.status(404).json({
                 message: 'There are no reservation logs in the selected period of time!',

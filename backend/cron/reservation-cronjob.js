@@ -13,12 +13,16 @@ const completedReservations = async () => {
         });
 
         for (const reservation of completedReservations) {
-            reservation.status = 'completed';
-            await reservation.save();
+            try {
+                reservation.status = 'completed';
+                await reservation.save();
+            } catch (err) {
+                console.error(`Failed to update reservation ${reservation._id}`, err);
+            }
         }
 
         console.log(`Today - ${currentDate.format("DD-MM-YYYY HH:mm")} - expired ${completedReservations.length}`);
-    } catch(err) {
+    } catch (err) {
         console.log("Cron-job completed reservations error: " + err);
     }
 }

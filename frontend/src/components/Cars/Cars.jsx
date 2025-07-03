@@ -1,6 +1,6 @@
 import './Cars.css';
-import React, { useContext, useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppContext from '../../state/AppContext.jsx';
 import { SERVER } from '../../config/global.jsx';
 import { Container, Typography, Box, List, ListItem, Card, CardContent, Grid2, Pagination, Button } from '@mui/material';

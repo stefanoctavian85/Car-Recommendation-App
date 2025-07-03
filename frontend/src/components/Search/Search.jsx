@@ -1,5 +1,5 @@
 import './Search.css';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
 import { Container, Select, MenuItem, InputLabel, FormControl, Button, Box, Typography } from '@mui/material';
@@ -44,6 +44,10 @@ function Search() {
             .then((res) => {
                 if (res.ok) {
                     return res.json();
+                } else {
+                    return res.json().then((error) => {
+                        throw new Error(error.message || '');
+                    })
                 }
             })
             .then((data) => {
@@ -52,6 +56,9 @@ function Search() {
                     label: brand,
                 }));
                 setBrands(options);
+            })
+            .catch(() => {
+                setBrands([]);
             });
 
         fetch(`${SERVER}/api/cars/bodytypes`, {
@@ -63,6 +70,10 @@ function Search() {
             .then((res) => {
                 if (res.ok) {
                     return res.json();
+                } else {
+                    return res.json().then((error) => {
+                        throw new Error(error.message || '');
+                    })
                 }
             })
             .then((data) => {
@@ -71,6 +82,9 @@ function Search() {
                     label: bodytype,
                 }));
                 setBodyTypes(options);
+            })
+            .catch(() => {
+                setBodyTypes([]);
             });
 
         const timeout = setTimeout(() => {

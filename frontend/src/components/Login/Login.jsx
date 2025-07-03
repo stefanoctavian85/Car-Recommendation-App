@@ -1,5 +1,5 @@
 import './Login.css';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SERVER } from '../../config/global.jsx';
 import AppContext from '../../state/AppContext.jsx';
@@ -113,26 +113,29 @@ function Login() {
         const userCredentials = {
             email, password,
         };
+        try {
+            const response = await fetch(`${SERVER}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(userCredentials)
+            });
 
-        const response = await fetch(`${SERVER}/auth/login`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(userCredentials)
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            const token = data.token;
-            const user = data.user;
-            localStorage.setItem("token", JSON.stringify(token));
-            auth.authStore.login(token, user);
-            auth.setToken(token);
-            auth.setIsAuthenticated(auth.authStore.getAuthStatus());
-            navigate("/");
-        } else {
-            setError(data.message);
+            const data = await response.json();
+            if (response.ok) {
+                const token = data.token;
+                const user = data.user;
+                localStorage.setItem("token", JSON.stringify(token));
+                auth.authStore.login(token, user);
+                auth.setToken(token);
+                auth.setIsAuthenticated(auth.authStore.getAuthStatus());
+                navigate("/");
+            } else {
+                setError(data.message);
+            }
+        } catch (error) {
+            setError("Something went wrong! Please try again later!");
         }
     }
 

@@ -353,7 +353,7 @@ function Profile() {
                                                                 <input
                                                                     className='input-file'
                                                                     type='file'
-                                                                    accept="image/*"
+                                                                    accept="image/jpeg, image/png"
                                                                     onChange={(e) => handleFileChange(e, "id-card")}
                                                                 />
                                                             </Button>
@@ -372,7 +372,7 @@ function Profile() {
                                                                 <input
                                                                     className='input-file'
                                                                     type='file'
-                                                                    accept="image/*"
+                                                                    accept="image/jpeg, image/png"
                                                                     onChange={(e) => handleFileChange(e, "driver-license")}
                                                                 />
                                                             </Button>

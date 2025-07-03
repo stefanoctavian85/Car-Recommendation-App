@@ -7,9 +7,9 @@ const userInformation = async (req, res, next) => {
     try {
         const { uid } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(uid)) {
+        if (!uid || !mongoose.Types.ObjectId.isValid(uid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid user id!',
             });
         }
 
@@ -37,6 +37,18 @@ const userInformation = async (req, res, next) => {
 const savePhoneNumber = async (req, res, next) => {
     try {
         const { id, phoneNumber } = req.body;
+
+        if (!id || !phoneNumber) {
+            return res.status(400).json({
+                message: "ID and Phone number are required!",
+            })
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: 'Invalid user id!',
+            });
+        }
 
         const user = await models.User.findOne({
             _id: id,
@@ -70,6 +82,12 @@ const sendDocuments = async (req, res, next) => {
     try {
         const files = req.files;
 
+        if (!files['id-card'] || files['id-card'].length === 0 || !files['driver-license'] || files['driver-license'].length === 0) {
+            return res.status(400).json({
+                message: 'Missing documents!',
+            })
+        };
+        
         const idCardPath = "../backend/" + files['id-card'][0].destination + files['id-card'][0].filename;
         const driverLicensePath = "../backend/" + files['driver-license'][0].destination + files['driver-license'][0].filename;
 
@@ -97,11 +115,16 @@ const validateDocuments = async (user, idCardPath, driverLicensePath) => {
             body: JSON.stringify({
                 idCardPath,
                 driverLicensePath,
+                firstname: user.firstname,
+                lastname: user.lastname,
             })
         });
 
         if (!flaskResponse.ok) {
             const data = await flaskResponse.json();
+            console.log(data.error);
+            user.statusAccountVerified = 'rejected';
+            await user.save();
             return;
         }
 

@@ -22,10 +22,14 @@ const deleteIncompleteConversation = async () => {
             const conversationId = conversationSnap.key;
             const conversationStartingTime = conversationId.split('-')[1];
             const conversationStartDate = dayjs(Number(conversationStartingTime));
-            if (messages.length <= 1 && (((conversation.status === 'closed' || conversation.status === 'solved' ) && conversation.category === 'unknown') || (currentDate.diff(conversationStartDate, 'minute') > 30 && conversation.status === 'open'))) {
+            if (messages.length <= 1 && (((conversation.status === 'closed' || conversation.status === 'solved') && conversation.category === 'unknown') || (currentDate.diff(conversationStartDate, 'minute') > 30 && conversation.status === 'open'))) {
                 const convRef = ref(database, `conversations/${conversationId}`);
-                await remove(convRef);
-                deletedConversations++;
+                try {
+                    await remove(convRef);
+                    deletedConversations++;
+                } catch (error) {
+                    console.error(`Failed to delete conversation ${conversationId}`, error);
+                }
             }
         }
 

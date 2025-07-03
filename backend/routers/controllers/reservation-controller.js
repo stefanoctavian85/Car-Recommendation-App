@@ -1,15 +1,20 @@
 import models from "../../models/index.js";
 import dayjs from 'dayjs';
 import messages from '../../utils/index.js';
-import { CLIENT } from '../../utils/global.js';
 import stripe from '../../utils/stripe-configuration.js';
-
+import mongoose from "mongoose";
 
 const RESERVATIONS_LIMIT_PER_USER = 3;
 
 const getReservations = async (req, res, next) => {
     try {
         const { cid } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(cid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
+            });
+        }
 
         const reservations = await models.Reservation.find({
             carId: cid,
@@ -37,6 +42,12 @@ const getReservations = async (req, res, next) => {
 const checkAnotherReservation = async (req, res, next) => {
     try {
         const { uid, cid } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(cid) || !mongoose.Types.ObjectId.isValid(uid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
+            });
+        }
 
         let validationPassed = {
             validatedDocuments: true,
@@ -86,6 +97,12 @@ const checkDateAvailability = async (req, res, next) => {
     try {
         const { cid, startDate, endDate } = req.body;
 
+        if (!mongoose.Types.ObjectId.isValid(cid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
+            });
+        }
+
         const reservations = await models.Reservation.find({
             carId: cid,
         });
@@ -129,6 +146,12 @@ const insurancePricesPerDay = {
 const calculateRentalPrice = async (req, res, next) => {
     try {
         const { cid, startDate, endDate, insuranceOptions } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(cid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
+            });
+        }
 
         const car = await models.Car.findById({ _id: cid });
 
@@ -193,6 +216,12 @@ const createPaymentIntent = async (req, res, next) => {
     try {
         const { carId, rentalPrice, insuranceOptions, nrDays } = req.body;
 
+        if (!mongoose.Types.ObjectId.isValid(carId)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
+            });
+        }
+
         if (!carId || !rentalPrice || !nrDays) {
             return res.status(400).json({
                 message: 'Missing required fields!',
@@ -200,6 +229,7 @@ const createPaymentIntent = async (req, res, next) => {
         }
 
         const car = await models.Car.findById({ _id: carId });
+
         if (!car) {
             return res.status(404).json({
                 message: 'Car not found!',
@@ -220,7 +250,7 @@ const createPaymentIntent = async (req, res, next) => {
         return res.status(200).json({
             clientSecret: paymentIntent.client_secret,
         });
-    } catch(err) {
+    } catch (err) {
         next(err);
     }
 }
@@ -260,11 +290,17 @@ const checkPayment = async (req, res, next) => {
 const rentCar = async (req, res, next) => {
     try {
         const { cid, startDate, endDate, insuranceOptions, rentalPrice } = req.body;
-
+        
         if (!cid || !startDate || !endDate || !insuranceOptions || !rentalPrice) {
             return res.status(400).json({
                 completed: false,
                 message: 'Missing required fields!',
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(cid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
             });
         }
 
@@ -282,6 +318,12 @@ const rentCar = async (req, res, next) => {
 const getReservationById = async (req, res, next) => {
     try {
         const { uid } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(uid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
+            });
+        }
 
         const reservations = await models.Reservation.find({
             userId: uid,
@@ -334,6 +376,12 @@ const changeRentalDetails = async (req, res, next) => {
             return res.status(400).json({
                 completed: false,
                 message: 'Missing required fields!',
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(cid)) {
+            return res.status(400).json({
+                message: 'Something went wrong! Please try again later!',
             });
         }
 

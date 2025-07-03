@@ -28,7 +28,6 @@ function Ticket({ state, router }) {
                     if (res.ok) {
                         setError('');
                         setConversationInfo(data.conversationInfo);
-                                    console.log(data.conversationInfo)
                     } else {
                         setError(data.message);
                     }

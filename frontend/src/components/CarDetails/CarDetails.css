@@ -290,6 +290,15 @@
     color: rgb(36, 36, 36) !important;
 }
 
-.rent-rejected-button {
+
+.rent-rejected-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.rent-rejected-button,
+.rent-close-button {
     text-transform: none !important;
 }
