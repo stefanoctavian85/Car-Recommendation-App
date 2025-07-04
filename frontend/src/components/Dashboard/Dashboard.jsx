@@ -52,7 +52,7 @@ function Dashboard() {
                     return res.json();
                 } else {
                     return res.json().then(error => {
-                        throw new Error(error.message || 'Something went wrong!');
+                        throw new Error(error.message || 'Dashboard reports are not available!');
                     });
                 }
             })
@@ -66,6 +66,7 @@ function Dashboard() {
                 setNumberOfMostPredictedCar(data.numberOfMostPredictedCar);
             })
             .catch((error) => {
+                console.error(error.message);
                 setError(error.message);
             });
 
@@ -80,7 +81,7 @@ function Dashboard() {
                     return res.json();
                 } else {
                     return res.json().then(error => {
-                        throw new Error(error.message || 'Something went wrong!');
+                        throw new Error(error.message || 'Dashboard charts are not available!');
                     });
                 }
             })
@@ -89,6 +90,7 @@ function Dashboard() {
                 setLabelsOptions(data.labels);
             })
             .catch((error) => {
+                console.error(error.message);
                 setChartError(error.message);
             });
     }, []);
@@ -108,7 +110,7 @@ function Dashboard() {
                     return res.json();
                 } else {
                     return res.json().then(error => {
-                        throw new Error(error.message || 'Something went wrong!');
+                        throw new Error(error.message || 'Dashboard charts are not available!');
                     });
                 }
             })
@@ -117,6 +119,7 @@ function Dashboard() {
                 setLabelsOptions(data.labels);
             })
             .catch((error) => {
+                console.error(error.message);
                 setChartError(error.message);
             })
     }

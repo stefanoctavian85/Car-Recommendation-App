@@ -113,6 +113,7 @@ function Login() {
         const userCredentials = {
             email, password,
         };
+
         try {
             const response = await fetch(`${SERVER}/auth/login`, {
                 method: 'POST',
@@ -135,6 +136,7 @@ function Login() {
                 setError(data.message);
             }
         } catch (error) {
+            console.error(error.message);
             setError("Something went wrong! Please try again later!");
         }
     }

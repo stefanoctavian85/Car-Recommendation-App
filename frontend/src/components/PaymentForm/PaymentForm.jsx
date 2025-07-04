@@ -54,12 +54,22 @@ function PaymentForm({ car, startDate, endDate, insuranceOptions, rentalPrice })
                         .then(res => {
                             if (res.ok) {
                                 return res.json();
+                            } else {
+                                return res.json().then((error) => {
+                                    throw new Error(error.message || 'Payment failed!')
+                                });
                             }
                         })
                         .then(data => {
                             if (data.completed === true) {
                                 navigate(`/rent-confirmation?payment_intent=${result.paymentIntent.id}`);
+                            } else {
+                                setErrorMessage(data.message);
                             }
+                        })
+                        .catch((error) => {
+                            console.error(error.message);
+                            setErrorMessage(error.message);
                         })
                 } else if (location.state.from === '/profile') {
                     fetch(`${SERVER}/api/reservations/change-rental-details`, {
@@ -79,13 +89,23 @@ function PaymentForm({ car, startDate, endDate, insuranceOptions, rentalPrice })
                         .then(res => {
                             if (res.ok) {
                                 return res.json();
+                            } else {
+                                return res.json().then((error) => {
+                                    throw new Error(error.message || 'Changing rental details payment failed!');
+                                })
                             }
                         })
                         .then(data => {
                             if (data.completed === true) {
                                 navigate(`/rent-confirmation?payment_intent=${result.paymentIntent.id}`);
+                            } else {
+                                setErrorMessage(data.message);
                             }
                         })
+                        .catch((error) => {
+                            console.error(error.message);
+                            setErrorMessage(error.message);
+                        });
                 }
             }
         }

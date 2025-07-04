@@ -23,17 +23,22 @@ function Ticket({ state, router }) {
                     'Authorization': `Bearer ${auth.token}`,
                 }
             })
-                .then(async (res) => {
-                    const data = await res.json();
+                .then((res) => {
                     if (res.ok) {
-                        setError('');
-                        setConversationInfo(data.conversationInfo);
+                        return res.json();
                     } else {
-                        setError(data.message);
+                        return res.json().then((error) => {
+                            throw new Error(error.message || "Conversation info couldn't be sent!");
+                        })
                     }
                 })
+                .then((data) => {
+                    setError('');
+                    setConversationInfo(data.conversationInfo);
+                })
                 .catch((error) => {
-                    setError(error.message || "Something went wrong!")
+                    console.error(error.message);
+                    setError(error.message);
                 });
         } else {
             setError("Conversation not found!");
@@ -60,6 +65,7 @@ function Ticket({ state, router }) {
                     setError(data.message || "Something went wrong!");
                 }
             } catch (err) {
+                console.error(error.message);
                 setError(err);
             }
         }
@@ -67,26 +73,27 @@ function Ticket({ state, router }) {
 
     async function approveDocuments() {
         if (conversationId) {
-            await fetch(`${SERVER}/api/chat/approve-documents`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ uid: conversationInfo.userId })
-            })
-                .then(async (res) => {
-                    const data = await res.json();
-                    if (res.ok) {
-                        setError('');
-                        setDocumentsMessage(data.message);
-                    } else {
-                        setError(data.message);
-                    }
-                })
-                .catch((error) => {
-                    setError(error.message);
+            try {
+                const response = await fetch(`${SERVER}/api/chat/approve-documents`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ uid: conversationInfo.userId })
                 });
+
+                const data = await response.json();
+                if (response.ok) {
+                    setError('');
+                    setDocumentsMessage(data.message);
+                } else {
+                    setError(data.message);
+                }
+            } catch (error) {
+                console.error(error.message);
+                setError(error.message);
+            }
         }
     }
 

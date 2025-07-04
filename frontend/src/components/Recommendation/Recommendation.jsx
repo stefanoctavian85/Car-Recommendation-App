@@ -109,7 +109,13 @@ function Recommendation() {
                 });
             }
         } catch (error) {
-            setError(error);
+            console.error(error.message);
+            setError(error.message);
+            navigate('/recommendation/results', {
+                state: {
+                    error: error.message,
+                }
+            });
         } finally {
             const timeout = setTimeout(() => {
                 setIsLoading(false);
@@ -221,7 +227,13 @@ function Recommendation() {
                     });
                 }
             } catch (error) {
-                setError(error);
+                console.error(error.message);
+                setError(error.message);
+                navigate('/recommendation/results', {
+                    state: {
+                        error: error.message,
+                    }
+                });
             } finally {
                 const timeout = setTimeout(() => {
                     setIsLoading(false);

@@ -24,6 +24,7 @@ import LoadingScreen from '../LoadingScreen/LoadingScreen.jsx';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import PaymentForm from '../PaymentForm/PaymentForm.jsx';
+import ErrorComponent from '../Error/Error.jsx';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 const appearence = {
@@ -68,6 +69,7 @@ function RentCar() {
     const [clientSecret, setClientSecret] = useState('');
 
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -104,11 +106,20 @@ function RentCar() {
                     .then((res) => {
                         if (res.ok) {
                             return res.json();
+                        } else {
+                            return res.json().then((error) => {
+                                throw new Error(error.message || 'Something went wrong!');
+                            })
                         }
                     })
                     .then((data) => {
                         setCar(data.car);
                         cars.carsStore.setCar(data.car);
+                    })
+                    .catch((error) => {
+                        console.error(error.message);
+                        setError(error.message);
+                        setCar('');
                     });
             }
         } else {
@@ -128,11 +139,23 @@ function RentCar() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        });
                     }
                 })
                 .then((data) => {
                     setUser(data.user);
+                    auth.authStore.setUser(data.user);
                 })
+                .catch((error) => {
+                    console.error(error.message);
+                    setUser('');
+                    auth.authStore.logout();
+                    auth.setIsAuthenticated(false);
+                    setError(error.message);
+                });
         }
 
         setIsFullInsuranceChecked(insuranceOptions.thirdPartyLiability && insuranceOptions.collisionDamageWaiver && insuranceOptions.theftProtection);
@@ -157,6 +180,10 @@ function RentCar() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || "Something went wrong!");
+                        });
                     }
                 })
                 .then((data) => {
@@ -175,6 +202,10 @@ function RentCar() {
                     });
 
                     setDisabledDates(disabledDates);
+                })
+                .catch((error) => {
+                    console.error(error.message);
+                    setDisabledDates([]);
                 });
         }
 
@@ -211,49 +242,59 @@ function RentCar() {
             } else {
                 setIsLoading(true);
                 setReservationErrorMessage('');
-                const response = await fetch(`${SERVER}/api/reservations/check-availability`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${auth.token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        cid: car._id,
-                        startDate,
-                        endDate
-                    })
-                })
+                try {
+                    const response = await fetch(`${SERVER}/api/reservations/check-availability`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${auth.token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            cid: car._id,
+                            startDate,
+                            endDate
+                        })
+                    });
 
-                const data = await response.json();
-                if (data.available) {
-                    setReservationErrorMessage('');
-                    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-                } else {
-                    setReservationErrorMessage(data.message);
+                    const data = await response.json();
+                    if (response.ok && data.available) {
+                        setReservationErrorMessage('');
+                        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                    } else {
+                        setReservationErrorMessage(data.message || 'Car is not available for the selected date!');
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    setError(error.message);
                 }
 
                 let price = 0;
-                const res = await fetch(`${SERVER}/api/reservations/calculate-rental-price`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${auth.token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        cid: car._id,
-                        startDate,
-                        endDate,
-                        insuranceOptions
-                    })
-                });
+                try {
+                    const res = await fetch(`${SERVER}/api/reservations/calculate-rental-price`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${auth.token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            cid: car._id,
+                            startDate,
+                            endDate,
+                            insuranceOptions
+                        })
+                    });
 
-                const dataPrice = await res.json();
-                if (res.ok) {
-                    price = dataPrice.rentalPrice;
-                    setRentalPrice(dataPrice.rentalPrice);
-                    setRentalPriceErrorMessage('');
-                } else {
-                    setRentalPriceErrorMessage(dataPrice.message);
+                    const dataPrice = await res.json();
+                    if (res.ok) {
+                        price = dataPrice.rentalPrice;
+                        setRentalPrice(dataPrice.rentalPrice);
+                        setRentalPriceErrorMessage('');
+                    } else {
+                        setRentalPriceErrorMessage(dataPrice.message);
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                    setError(error.message);
                 }
 
                 fetch(`${SERVER}/api/reservations/create-payment-intent`, {
@@ -273,10 +314,18 @@ function RentCar() {
                     .then((res) => {
                         if (res.ok) {
                             return res.json();
+                        } else {
+                            return res.json().then((error) => {
+                                throw new Error(error.message || 'Processing payment failed!')
+                            })
                         }
                     })
                     .then((data) => {
                         setClientSecret(data.clientSecret);
+                    })
+                    .catch((error) => {
+                        console.error(error.message);
+                        setError(error.message);
                     });
             }
             const timeout = setTimeout(() => {
@@ -323,19 +372,25 @@ function RentCar() {
         if (!validatePhoneNumber(phoneNumber)) {
             return;
         }
+        try {
+            const response = await fetch(`${SERVER}/api/users/save-phone-number`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: user._id, phoneNumber })
+            });
 
-        const response = await fetch(`${SERVER}/api/users/save-phone-number`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${auth.token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id: user._id, phoneNumber })
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            setPhoneNumberMessage(data.message);
+            const data = await response.json();
+            if (response.ok) {
+                setPhoneNumberMessage(data.message);
+            } else {
+                setPhoneNumberError(data.message || "Phone number couldn't be saved!")
+            }
+        } catch (error) {
+            console.error(error.message);
+            setError(error.message);
         }
     }
 
@@ -362,285 +417,291 @@ function RentCar() {
     }
 
     return (
-        <Box className='rent-car-page'>
-            <Stepper activeStep={activeStep} className='rent-car-steps'>
-                {
-                    steps.map((step, index) => (
-                        <Step key={index}>
-                            <StepLabel>{step}</StepLabel>
-                        </Step>
-                    ))
-                }
-            </Stepper>
-            <Fragment>
-                <Box className='steppers-container'>
+        user && car ? (
+            <Box className='rent-car-page'>
+                <Stepper activeStep={activeStep} className='rent-car-steps'>
                     {
-                        activeStep === 0 ? (
-                            <Box className='rental-period'>
-                                <Box className='rented-car'>
-                                    <Typography component='h1' className='car-name-rental'>{car.Masina}</Typography>
-                                    <Typography component='h2' className='car-version-rental'>{car?.Versiune}</Typography>
-                                </Box>
+                        steps.map((step, index) => (
+                            <Step key={index}>
+                                <StepLabel>{step}</StepLabel>
+                            </Step>
+                        ))
+                    }
+                </Stepper>
+                <Fragment>
+                    <Box className='steppers-container'>
+                        {
+                            activeStep === 0 ? (
+                                <Box className='rental-period'>
+                                    <Box className='rented-car'>
+                                        <Typography component='h1' className='car-name-rental'>{car.Masina}</Typography>
+                                        <Typography component='h2' className='car-version-rental'>{car?.Versiune}</Typography>
+                                    </Box>
 
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DemoContainer components={['DateRangePicker']}>
-                                        <DemoItem component="DateRangePicker">
-                                            <Box className='date-pickers'>
-                                                <DatePicker
-                                                    className='date-picker'
-                                                    label='Start date'
-                                                    disabled={disableStartDate}
-                                                    minDate={currentDate}
-                                                    value={startDate !== '' ? dayjs(startDate) : null}
-                                                    onChange={(date) => setStartDate(date)}
-                                                    shouldDisableDate={(date) => disabledDates.includes(date.format('YYYY-MM-DD'))}
-                                                    slotProps={{
-                                                        field: {
-                                                            clearable: true,
-                                                            onClear: () => setStartDate('')
-                                                        }
-                                                    }}
-                                                />
-                                                <Typography className='date-picker-separator'>-</Typography>
-                                                <DatePicker
-                                                    className='date-picker'
-                                                    label='End date'
-                                                    minDate={disableStartDate === true ? startDate : currentDate}
-                                                    value={endDate !== '' ? dayjs(endDate) : null}
-                                                    onChange={(date) => setEndDate(date)}
-                                                    shouldDisableDate={(date) => disabledDates.includes(date.format('YYYY-MM-DD'))}
-                                                    slotProps={{
-                                                        field: {
-                                                            clearable: true,
-                                                            onClear: () => setEndDate('')
-                                                        }
-                                                    }}
-                                                />
-                                            </Box>
-                                        </DemoItem>
-                                    </DemoContainer>
-                                </LocalizationProvider>
-
-                                <Box className='rental-additional-options'>
-                                    <Box className='rental-insurances'>
-                                        <Typography component='h2' className='car-insurance'>Car Insurances</Typography>
-                                        <FormGroup>
-                                            <FormControlLabel
-                                                label='Full insurance'
-                                                name='fullInsurance'
-                                                className='car-insurance-option'
-                                                control={
-                                                    <Checkbox
-                                                        checked={isFullInsuranceChecked}
-                                                        indeterminate={isIndeterminate}
-                                                        onChange={handleInsuranceOptionsChange}
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DemoContainer components={['DateRangePicker']}>
+                                            <DemoItem component="DateRangePicker">
+                                                <Box className='date-pickers'>
+                                                    <DatePicker
+                                                        className='date-picker'
+                                                        label='Start date'
+                                                        disabled={disableStartDate}
+                                                        minDate={currentDate}
+                                                        value={startDate !== '' ? dayjs(startDate) : null}
+                                                        onChange={(date) => setStartDate(date)}
+                                                        shouldDisableDate={(date) => disabledDates.includes(date.format('YYYY-MM-DD'))}
+                                                        slotProps={{
+                                                            field: {
+                                                                clearable: true,
+                                                                onClear: () => setStartDate('')
+                                                            }
+                                                        }}
                                                     />
-                                                }
-                                            />
-                                            <FormControlLabel
-                                                className='car-insurance-option'
-                                                control={<Checkbox
-                                                    checked={insuranceOptions?.thirdPartyLiability}
-                                                    onChange={handleInsuranceOptionsChange}
-                                                    name='thirdPartyLiability'
-                                                />}
-                                                label='Third Party Liability'
-                                            />
-                                            <FormControlLabel
-                                                className='car-insurance-option'
-                                                control={<Checkbox
-                                                    checked={insuranceOptions?.collisionDamageWaiver}
-                                                    onChange={handleInsuranceOptionsChange}
-                                                    name='collisionDamageWaiver'
-                                                />}
-                                                label='Collision Damage Waiver'
-                                            />
-                                            <FormControlLabel
-                                                className='car-insurance-option'
-                                                control={
-                                                    <Checkbox
-                                                        checked={insuranceOptions?.theftProtection}
-                                                        onChange={handleInsuranceOptionsChange}
-                                                        name='theftProtection'
-                                                    />}
-                                                label='Theft Protection'
-                                            />
-                                        </FormGroup>
-                                    </Box>
-                                </Box>
-
-                                <Box className='rental-period-error'>
-                                    <Typography className='rental-period-error-message'>{reservationErrorMessage}</Typography>
-                                </Box>
-                            </Box>
-                        ) : null
-                    }
-
-                    {
-                        activeStep === 1 ? (
-                            <Box className='rental-details'>
-                                <Box className='rental-details-title'>
-                                    <AssignmentIcon />
-                                    <Typography className='rental-details-title-text' component='h1'>Here are the details of the rental agreement!</Typography>
-                                </Box>
-
-                                <Box className='rental-details-account-car'>
-                                    <Box className='rental-details-account'>
-                                        <Typography component='h2' className='rental-details-account-title'>Reservation details</Typography>
-
-                                        <Box className='user-info'>
-                                            <PersonIcon className='profile-icon' />
-                                            <Typography className='user-info-detail'>{user.firstname} {user.lastname}</Typography>
-                                        </Box>
-
-                                        <Box className='user-info'>
-                                            <AlternateEmailIcon className='profile-icon' />
-                                            <Typography className='user-info-detail'>{user.email}</Typography>
-                                        </Box>
-
-                                        <Box className='user-info'>
-                                            <LocalPhoneIcon className='profile-icon phone-icon' />
-                                            {
-                                                user.phoneNumber ? (
-                                                    <Box className='user-valid-phonenumber'>
-                                                        <Typography className='user-info-detail'>{user.phoneNumber}</Typography>
-                                                    </Box>
-                                                ) : (
-                                                    <Box className='user-invalid-phonenumber'>
-                                                        <FormControl className='information-input'>
-                                                            <InputLabel htmlFor='phone-number-input' className='information-label'>Phone number</InputLabel>
-                                                            <Input
-                                                                id='phone-number-input'
-                                                                label='Phone number'
-                                                                type='text'
-                                                                onChange={handlePhoneNumberChange}
-                                                                onBlur={handlePhoneNumberLive}
-                                                                required
-                                                                endAdornment={
-                                                                    <InputAdornment position='end'>
-                                                                        {
-                                                                            phoneNumberTouched && (
-                                                                                <>
-                                                                                    {
-                                                                                        phoneNumberError ? (
-                                                                                            <ErrorIcon color='error' />
-                                                                                        ) : phoneNumber ? (
-                                                                                            <CheckCircleIcon color='success' />
-                                                                                        ) : null
-                                                                                    }
-                                                                                </>
-                                                                            )
-                                                                        }
-                                                                    </InputAdornment>
-                                                                }
-                                                            ></Input>
-                                                        </FormControl>
-                                                        <Box className='save-phone-number-button'>
-                                                            <Button
-                                                                variant='contained'
-                                                                onClick={savePhoneNumber}
-                                                            >
-                                                                Save
-                                                            </Button>
-                                                        </Box>
-                                                        <Box className='save-phone-number-message'>
-                                                            <Typography className='save-phone-number-message-text'>{phoneNumberMessage}</Typography>
-                                                        </Box>
-                                                    </Box>
-                                                )
-                                            }
-                                        </Box>
-
-                                        <Box className='user-info'>
-                                            <CalendarMonthIcon className='profile-icon' />
-                                            <Typography className='user-info-detail'>{startDate.format('MM/DD')} - {endDate.format('MM/DD/YYYY')}</Typography>
-                                        </Box>
-                                    </Box>
-
-                                    <Box className='rental-details-car'>
-                                        <Typography component='h2' className='rental-details-car-title'>Car details</Typography>
-
-                                        <Box className='rented-car'>
-                                            <Typography component='h1' className='car-name'>{car.Masina}</Typography>
-                                            <Typography component='h2' className='car-version'>{car?.Versiune}</Typography>
-                                        </Box>
-
-                                        <Box className='rented-car-feature'>
-                                            <AddRoadIcon className='profile-icon'/>
-                                            <Typography className='user-info-detail'>{car.KM}</Typography>
-                                        </Box>
-                                        {
-                                            car.Culoare ? (
-                                                <Box className='rented-car-feature'>
-                                                    <PaletteIcon className='profile-icon'/>
-                                                    <Typography className='user-info-detail'>{car.Culoare} {car['Optiuni culoare']}</Typography>
+                                                    <Typography className='date-picker-separator'>-</Typography>
+                                                    <DatePicker
+                                                        className='date-picker'
+                                                        label='End date'
+                                                        minDate={disableStartDate === true ? startDate : currentDate}
+                                                        value={endDate !== '' ? dayjs(endDate) : null}
+                                                        onChange={(date) => setEndDate(date)}
+                                                        shouldDisableDate={(date) => disabledDates.includes(date.format('YYYY-MM-DD'))}
+                                                        slotProps={{
+                                                            field: {
+                                                                clearable: true,
+                                                                onClear: () => setEndDate('')
+                                                            }
+                                                        }}
+                                                    />
                                                 </Box>
-                                            ) : null
-                                        }
-                                        <Box className='rented-car-feature'>
-                                            <CalendarMonthIcon className='profile-icon'/>
-                                            <Typography className='user-info-detail'>{car['Anul productiei']}</Typography>
-                                        </Box>
-                                        <Box className='rented-car-feature'>
-                                            <LocalGasStationIcon className='profile-icon'/>
-                                            <Typography className='user-info-detail'>{car.Combustibil}</Typography>
+                                            </DemoItem>
+                                        </DemoContainer>
+                                    </LocalizationProvider>
+
+                                    <Box className='rental-additional-options'>
+                                        <Box className='rental-insurances'>
+                                            <Typography component='h2' className='car-insurance'>Car Insurances</Typography>
+                                            <FormGroup>
+                                                <FormControlLabel
+                                                    label='Full insurance'
+                                                    name='fullInsurance'
+                                                    className='car-insurance-option'
+                                                    control={
+                                                        <Checkbox
+                                                            checked={isFullInsuranceChecked}
+                                                            indeterminate={isIndeterminate}
+                                                            onChange={handleInsuranceOptionsChange}
+                                                        />
+                                                    }
+                                                />
+                                                <FormControlLabel
+                                                    className='car-insurance-option'
+                                                    control={<Checkbox
+                                                        checked={insuranceOptions?.thirdPartyLiability}
+                                                        onChange={handleInsuranceOptionsChange}
+                                                        name='thirdPartyLiability'
+                                                    />}
+                                                    label='Third Party Liability'
+                                                />
+                                                <FormControlLabel
+                                                    className='car-insurance-option'
+                                                    control={<Checkbox
+                                                        checked={insuranceOptions?.collisionDamageWaiver}
+                                                        onChange={handleInsuranceOptionsChange}
+                                                        name='collisionDamageWaiver'
+                                                    />}
+                                                    label='Collision Damage Waiver'
+                                                />
+                                                <FormControlLabel
+                                                    className='car-insurance-option'
+                                                    control={
+                                                        <Checkbox
+                                                            checked={insuranceOptions?.theftProtection}
+                                                            onChange={handleInsuranceOptionsChange}
+                                                            name='theftProtection'
+                                                        />}
+                                                    label='Theft Protection'
+                                                />
+                                            </FormGroup>
                                         </Box>
                                     </Box>
-                                </Box>
 
-                                <Box className='rental-price'>
-                                    <Typography component='h2' className='rental-price-text'>Rental price: {rentalPrice} EUR</Typography>
-                                    <Typography className='rental-period-error-message'>{rentalPriceErrorMessage}</Typography>
+                                    <Box className='rental-period-error'>
+                                        <Typography className='rental-period-error-message'>{reservationErrorMessage}</Typography>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        ) : null
-                    }
+                            ) : null
+                        }
 
-                    {
-                        activeStep === 2 ? (
-                            <Box className='payment-section'>
-                                <Box className='payment-section-header'>
-                                    <Typography className='payment-title'>Payment</Typography>
-                                    <Typography className='payment-subtitle'>Rental Price: {rentalPrice} EUR</Typography>
+                        {
+                            activeStep === 1 ? (
+                                <Box className='rental-details'>
+                                    <Box className='rental-details-title'>
+                                        <AssignmentIcon />
+                                        <Typography className='rental-details-title-text' component='h1'>Here are the details of the rental agreement!</Typography>
+                                    </Box>
+
+                                    <Box className='rental-details-account-car'>
+                                        <Box className='rental-details-account'>
+                                            <Typography component='h2' className='rental-details-account-title'>Reservation details</Typography>
+
+                                            <Box className='user-info'>
+                                                <PersonIcon className='profile-icon' />
+                                                <Typography className='user-info-detail'>{user.firstname} {user.lastname}</Typography>
+                                            </Box>
+
+                                            <Box className='user-info'>
+                                                <AlternateEmailIcon className='profile-icon' />
+                                                <Typography className='user-info-detail'>{user.email}</Typography>
+                                            </Box>
+
+                                            <Box className='user-info'>
+                                                <LocalPhoneIcon className='profile-icon phone-icon' />
+                                                {
+                                                    user.phoneNumber ? (
+                                                        <Box className='user-valid-phonenumber'>
+                                                            <Typography className='user-info-detail'>{user.phoneNumber}</Typography>
+                                                        </Box>
+                                                    ) : (
+                                                        <Box className='user-invalid-phonenumber'>
+                                                            <FormControl className='information-input'>
+                                                                <InputLabel htmlFor='phone-number-input' className='information-label'>Phone number</InputLabel>
+                                                                <Input
+                                                                    id='phone-number-input'
+                                                                    label='Phone number'
+                                                                    type='text'
+                                                                    onChange={handlePhoneNumberChange}
+                                                                    onBlur={handlePhoneNumberLive}
+                                                                    required
+                                                                    endAdornment={
+                                                                        <InputAdornment position='end'>
+                                                                            {
+                                                                                phoneNumberTouched && (
+                                                                                    <>
+                                                                                        {
+                                                                                            phoneNumberError ? (
+                                                                                                <ErrorIcon color='error' />
+                                                                                            ) : phoneNumber ? (
+                                                                                                <CheckCircleIcon color='success' />
+                                                                                            ) : null
+                                                                                        }
+                                                                                    </>
+                                                                                )
+                                                                            }
+                                                                        </InputAdornment>
+                                                                    }
+                                                                ></Input>
+                                                            </FormControl>
+                                                            <Box className='save-phone-number-button'>
+                                                                <Button
+                                                                    variant='contained'
+                                                                    onClick={savePhoneNumber}
+                                                                >
+                                                                    Save
+                                                                </Button>
+                                                            </Box>
+                                                            <Box className='save-phone-number-message'>
+                                                                <Typography className='save-phone-number-message-text'>{phoneNumberMessage}</Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    )
+                                                }
+                                            </Box>
+
+                                            <Box className='user-info'>
+                                                <CalendarMonthIcon className='profile-icon' />
+                                                <Typography className='user-info-detail'>{startDate.format('MM/DD')} - {endDate.format('MM/DD/YYYY')}</Typography>
+                                            </Box>
+                                        </Box>
+
+                                        <Box className='rental-details-car'>
+                                            <Typography component='h2' className='rental-details-car-title'>Car details</Typography>
+
+                                            <Box className='rented-car'>
+                                                <Typography component='h1' className='car-name'>{car.Masina}</Typography>
+                                                <Typography component='h2' className='car-version'>{car?.Versiune}</Typography>
+                                            </Box>
+
+                                            <Box className='rented-car-feature'>
+                                                <AddRoadIcon className='profile-icon' />
+                                                <Typography className='user-info-detail'>{car.KM}</Typography>
+                                            </Box>
+                                            {
+                                                car.Culoare ? (
+                                                    <Box className='rented-car-feature'>
+                                                        <PaletteIcon className='profile-icon' />
+                                                        <Typography className='user-info-detail'>{car.Culoare} {car['Optiuni culoare']}</Typography>
+                                                    </Box>
+                                                ) : null
+                                            }
+                                            <Box className='rented-car-feature'>
+                                                <CalendarMonthIcon className='profile-icon' />
+                                                <Typography className='user-info-detail'>{car['Anul productiei']}</Typography>
+                                            </Box>
+                                            <Box className='rented-car-feature'>
+                                                <LocalGasStationIcon className='profile-icon' />
+                                                <Typography className='user-info-detail'>{car.Combustibil}</Typography>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+
+                                    <Box className='rental-price'>
+                                        <Typography component='h2' className='rental-price-text'>Rental price: {rentalPrice} EUR</Typography>
+                                        <Typography className='rental-period-error-message'>{rentalPriceErrorMessage}</Typography>
+                                    </Box>
                                 </Box>
-                                <Box className='payment-content'>
-                                    <Elements stripe={stripePromise} options={{
-                                        clientSecret: clientSecret,
-                                        locale: 'en',
-                                        appearance: appearence,
-                                    }}>
-                                        {
-                                            clientSecret && <PaymentForm
-                                            car={car}
-                                            startDate={startDate}
-                                            endDate={endDate}
-                                            insuranceOptions={insuranceOptions}
-                                            rentalPrice={rentalPrice}
-                                            />
-                                        }
-                                    </Elements>
+                            ) : null
+                        }
+
+                        {
+                            activeStep === 2 ? (
+                                <Box className='payment-section'>
+                                    <Box className='payment-section-header'>
+                                        <Typography className='payment-title'>Payment</Typography>
+                                        <Typography className='payment-subtitle'>Rental Price: {rentalPrice} EUR</Typography>
+                                    </Box>
+                                    <Box className='payment-content'>
+                                        <Elements stripe={stripePromise} options={{
+                                            clientSecret: clientSecret,
+                                            locale: 'en',
+                                            appearance: appearence,
+                                        }}>
+                                            {
+                                                clientSecret && <PaymentForm
+                                                    car={car}
+                                                    startDate={startDate}
+                                                    endDate={endDate}
+                                                    insuranceOptions={insuranceOptions}
+                                                    rentalPrice={rentalPrice}
+                                                />
+                                            }
+                                        </Elements>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        ) : null
-                    }
-                </Box>
+                            ) : null
+                        }
+                    </Box>
 
-                <Box className='rent-buttons'>
-                    <Button onClick={handleBackStep} className='back-button'>Back</Button>
-                    {
-                        activeStep !== 2 ? (
-                            <Button onClick={handleNextStep} className='next-stepper-button'>
-                                {
-                                    activeStep < 2 ? 'Next' :
-                                        activeStep === 2 ? 'Pay' : 'See your rented cars now!'
-                                }
-                            </Button>
-                        ) : null
-                    }
+                    <Box className='rent-buttons'>
+                        <Button onClick={handleBackStep} className='back-button'>Back</Button>
+                        {
+                            activeStep !== 2 ? (
+                                <Button onClick={handleNextStep} className='next-stepper-button'>
+                                    {
+                                        activeStep < 2 ? 'Next' :
+                                            activeStep === 2 ? 'Pay' : 'See your rented cars now!'
+                                    }
+                                </Button>
+                            ) : null
+                        }
 
-                </Box>
-            </Fragment>
-        </Box>
+                    </Box>
+                </Fragment>
+            </Box>
+        ) : (
+            <Box className='results-not-found'>
+                <ErrorComponent message={error} />
+            </Box>
+        )
     );
 }
 

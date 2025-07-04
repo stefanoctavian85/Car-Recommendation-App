@@ -46,8 +46,8 @@ function Search() {
                     return res.json();
                 } else {
                     return res.json().then((error) => {
-                        throw new Error(error.message || '');
-                    })
+                        throw new Error(error.message || 'Something went wrong!');
+                    });
                 }
             })
             .then((data) => {
@@ -57,7 +57,8 @@ function Search() {
                 }));
                 setBrands(options);
             })
-            .catch(() => {
+            .catch((error) => {
+                console.error(error.message);
                 setBrands([]);
             });
 
@@ -72,8 +73,8 @@ function Search() {
                     return res.json();
                 } else {
                     return res.json().then((error) => {
-                        throw new Error(error.message || '');
-                    })
+                        throw new Error(error.message || 'Something went wrong!');
+                    });
                 }
             })
             .then((data) => {
@@ -83,7 +84,8 @@ function Search() {
                 }));
                 setBodyTypes(options);
             })
-            .catch(() => {
+            .catch((error) => {
+                console.error(error.message);
                 setBodyTypes([]);
             });
 
@@ -104,6 +106,10 @@ function Search() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        })
                     }
                 })
                 .then((data) => {
@@ -117,6 +123,10 @@ function Search() {
                     }, 500);
                     return () => clearTimeout(timeout);
                 })
+                .catch((error) => {
+                    console.error(error.message);
+                    setModels([]);
+                });
         } else {
             setIsModelDisabled(true);
             setModels([]);
@@ -156,7 +166,7 @@ function Search() {
         <Container className='search-container'>
             <Box className='search-page'>
                 <Box className='search-header'>
-                    <DirectionsCarIcon className='search-car'/>
+                    <DirectionsCarIcon className='search-car' />
                     <Typography className='search-title'>
                         Looking for a car to rent?
                     </Typography>

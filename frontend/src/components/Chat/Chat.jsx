@@ -45,11 +45,20 @@ function Chat({ adminConversationId }) {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || "First message couldn't be sent!");
+                        })
                     }
                 })
                 .then((data) => {
                     setConversationId(data.conversationId);
                     setConversationStatus('open');
+                })
+                .catch((error) => {
+                    console.error(error.message);
+                    setConversationStatus('closed');
+                    setIsChatOpen(false);
                 });
         } else if (auth.authStore.user.status === 'admin' && adminConversationId !== '') {
             setIsChatOpen(true);
@@ -99,14 +108,23 @@ function Chat({ adminConversationId }) {
     async function closeChat() {
         setIsCloseChatDialogOpen(false);
         if (conversationId) {
-            await fetch(`${SERVER}/api/chat/close-conversation`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${auth.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ conversationId })
-            });
+            try {
+                const response = await fetch(`${SERVER}/api/chat/close-conversation`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${auth.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ conversationId })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.message || "Chat couldn't be closed!");
+                }
+            } catch (error) {
+                console.error(error.message);
+            }
         }
         setConversationId('');
         setConversation([]);
@@ -118,17 +136,25 @@ function Chat({ adminConversationId }) {
 
         try {
             if (message.trim() !== '') {
-                await fetch(`${SERVER}/api/chat/send-message`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${auth.token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message, conversationId })
-                })
-                    .finally(() => {
+                try {
+                    const response = await fetch(`${SERVER}/api/chat/send-message`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${auth.token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message, conversationId })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
                         setMessage('');
-                    })
+                    } else {
+                        throw new Error(data.message || "Message couldn't be sent!");
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                }
             }
 
             if (documents.length > 0) {
@@ -137,16 +163,24 @@ function Chat({ adminConversationId }) {
                 documents.forEach((doc) => {
                     formData.append('documents', doc);
                 });
-                fetch(`${SERVER}/api/chat/attach-documents`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${auth.token}`,
-                    },
-                    body: formData,
-                })
-                    .finally(() => {
-                        setDocuments([]);
+                try {
+                    const response = await fetch(`${SERVER}/api/chat/attach-documents`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${auth.token}`,
+                        },
+                        body: formData,
                     });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        setDocuments([]);
+                    } else {
+                        throw new Error(data.message || "The documents couldn't be attached!");
+                    }
+                } catch (error) {
+                    console.error(error.message);
+                }
             }
         } catch (err) {
             console.log(err);
@@ -180,6 +214,10 @@ function Chat({ adminConversationId }) {
                 .then((res) => {
                     if (res.ok) {
                         return res.blob();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || "The documents couldn't be downloaded!");
+                        });
                     }
                 })
                 .then((blob) => {
@@ -193,6 +231,9 @@ function Chat({ adminConversationId }) {
                         document.body.removeChild(link);
                     }
                 })
+                .catch((error) => {
+                    console.error(error.message);
+                });
         }
     }
 
@@ -282,7 +323,28 @@ function Chat({ adminConversationId }) {
                                                             {
                                                                 message.sender === 'admin' ? (
                                                                     <Box className='chat-message-admin'>
-                                                                        <Typography className='message-text'>{message.message}</Typography>
+                                                                        {
+                                                                            message.type === 'text' && (
+                                                                                <Typography className='message-text'>{message.message}</Typography>
+                                                                            )
+                                                                        }
+
+
+                                                                        {
+                                                                            message.type === 'document' && (
+                                                                                <Box className='chat-message-admin-documents'>
+                                                                                    <Typography className='message-text'>{message.message}</Typography>
+                                                                                    <Box className='document-message-right-part'>
+                                                                                        <IconButton
+                                                                                            className='chat-button-open'
+                                                                                            onClick={() => downloadDocuments(message)}
+                                                                                        >
+                                                                                            <DownloadIcon className='chat-icon' />
+                                                                                        </IconButton>
+                                                                                    </Box>
+                                                                                </Box>
+                                                                            )
+                                                                        }
                                                                     </Box>
                                                                 ) : null
                                                             }

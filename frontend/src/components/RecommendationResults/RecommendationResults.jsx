@@ -12,7 +12,7 @@ function RecommendationResults() {
     const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(location.state?.error || '');
+    const [error, setError] = useState(location.state?.error || 'No recommedations could be given!');
 
     const predictions = location.state?.predictions || [];
 

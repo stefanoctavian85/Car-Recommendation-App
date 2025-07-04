@@ -13,7 +13,7 @@ function Error({ message }) {
             </Box>
 
             <Box className='error-message'>
-                <Typography className='error-message-text'>{message}</Typography>
+                <Typography className='error-message-text'>{message || "Something went wrong! Please try again later!"}</Typography>
             </Box>
 
             <Box className='error-home'>

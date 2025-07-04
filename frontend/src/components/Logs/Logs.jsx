@@ -75,7 +75,7 @@ function Logs() {
                     return res.json();
                 } else {
                     return res.json().then((error) => {
-                        throw new Error(error.message || 'Something went wrong!');
+                        throw new Error(error.message || 'Logs are not available!');
                     })
                 }
             })
@@ -94,6 +94,7 @@ function Logs() {
                 setLogs(rows);
             })
             .catch((error) => {
+                console.error(error.message);
                 setError(error.message);
             });
     }, [dateFilter]);

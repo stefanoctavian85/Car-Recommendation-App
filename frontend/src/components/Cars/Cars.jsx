@@ -58,16 +58,20 @@ function Cars() {
     }, [searchParams, currentPage]);
 
     function getCars(webParams, currentPage) {
+        setIsLoading(true);
         fetch(`${SERVER}/api/cars?brand=${webParams.brand}&model=${webParams.model}&bodytype=${webParams.bodytype}&price=${webParams.price}&page=${currentPage}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${auth.token}`,
-                'Content-Type': 'application/json',
             },
         })
             .then((res) => {
                 if (res.ok) {
                     return res.json();
+                } else {
+                    return res.json().then((error) => {
+                        throw new Error(error.message || "No results found!")
+                    });
                 }
             })
             .then((data) => {
@@ -75,26 +79,48 @@ function Cars() {
                 setTotalCars(data.totalCars);
                 setTotalPages(data.totalPages);
             })
+            .catch((error) => {
+                console.error(error.message);
+            });
+
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }
 
     function handlePageChange(event, page) {
         setIsLoading(true);
-        const webParams = {
-            brand: searchParams.get("brand") || '',
-            model: searchParams.get("model") || '',
-            bodytype: searchParams.get("bodytype") || '',
-            price: searchParams.get("price") || '',
+
+        const currentParams = new URLSearchParams(window.location.search);
+
+        let webParams = {};
+
+        if (Object.keys(cars.carsStore.searchParams).length !== 0) {
+            webParams = {
+                brand: cars.carsStore.searchParams.get("brand") || '',
+                model: cars.carsStore.searchParams.get("model") || '',
+                bodytype: cars.carsStore.searchParams.get("bodytype") || '',
+                price: cars.carsStore.searchParams.get("price") || '',
+            }
+        } else {
+            webParams = {
+                brand: currentParams.get("brand") || '',
+                model: currentParams.get("model") || '',
+                bodytype: currentParams.get("bodytype") || '',
+                price: currentParams.get("price") || '',
+            }
         }
 
         const filteredParams = Object.fromEntries(
-            Object.entries(webParams).filter(([_, value]) => value)
+            Object.entries(webParams).filter(([_, value]) => value && value !== '')
         );
-
+        
         setCurrentPage(page);
-
+        
         navigate('/cars?' + new URLSearchParams(filteredParams).toString() + '&page=' + page);
 
-        getCars(filteredParams, page);
+        getCars(webParams, page);
         window.scrollTo(0, 0);
         const timeout = setTimeout(() => {
             setIsLoading(false);
@@ -104,7 +130,7 @@ function Cars() {
 
     function seeDetails(index) {
         cars.carsStore.setCar(carOffers[index]);
-        navigate('/car-details?' + new URLSearchParams({ id: carOffers[index]._id}).toString());
+        navigate('/car-details?' + new URLSearchParams({ id: carOffers[index]._id }).toString());
     }
 
     if (isLoading) {
@@ -121,7 +147,7 @@ function Cars() {
             </Box>
             <Box className='cars-results'>
                 {
-                    carOffers.length > 0 ? (
+                    (carOffers.length > 0 && totalCars > 0) ? (
                         <Box className='results-container'>
                             <List className='results-list'>
                                 {
@@ -130,8 +156,7 @@ function Cars() {
                                             className='result-car'
                                             key={index}
                                         >
-                                            <Card
-                                            >
+                                            <Card>
                                                 <CardContent className='results'>
                                                     <Box className='results-car-images'>
                                                         <EmblaCarousel images={element.Imagine} />
@@ -182,7 +207,7 @@ function Cars() {
                                                                 <Box className='results-button'>
                                                                     <Button onClick={() => seeDetails(index)}>
                                                                         <Typography component='h3' className='results-select-button'>Select</Typography>
-                                                                        <ShoppingCartIcon className='shop-icon'/>
+                                                                        <ShoppingCartIcon className='shop-icon' />
                                                                     </Button>
                                                                 </Box>
                                                             </Grid2>

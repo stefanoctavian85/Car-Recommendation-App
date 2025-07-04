@@ -56,8 +56,8 @@ function EmblaCarousel({ images }) {
                 </Box>
 
                 <Box className='embla__buttons'>
-                    <NavigateBeforeIcon className='prev-button' onClick={scrollPrev}/>
-                    <NavigateNextIcon className='next-button' onClick={scrollNext} />
+                    <NavigateBeforeIcon role='button' aria-label='Previous image' className='prev-button' onClick={scrollPrev}/>
+                    <NavigateNextIcon role='button' aria-label='Next image' className='next-button' onClick={scrollNext} />
                 </Box>
             </Box>
         </Box>

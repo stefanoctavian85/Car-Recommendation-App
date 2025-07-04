@@ -93,8 +93,9 @@ function CarDetails() {
                     setCar(data.car);
                     cars.carsStore.setCar(data.car);
                 })
-                .catch((err) => {
-                    setError(err.message);
+                .catch((error) => {
+                    console.error(error.message);
+                    setError(error.message);
                     setCar('');
                 });
         }
@@ -122,7 +123,8 @@ function CarDetails() {
                     setUser(data.user);
                     auth.authStore.setUser(data.user);
                 })
-                .catch(() => {
+                .catch((error) => {
+                    console.error(error.message);
                     setUser('');
                     auth.authStore.logout();
                     auth.setIsAuthenticated(false);
@@ -175,7 +177,8 @@ function CarDetails() {
                 .then((data) => {
                     setMinRentalPrice(data.rentalPrice);
                 })
-                .catch(() => {
+                .catch((error) => {
+                    console.error(error.message);
                     setMinRentalPrice('-');
                 });
         }
@@ -258,6 +261,7 @@ function CarDetails() {
                 }
             })
             .catch((error) => {
+                console.error(error.message);
                 setError(error.message);
             });
 

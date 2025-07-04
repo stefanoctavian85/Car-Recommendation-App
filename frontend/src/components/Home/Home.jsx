@@ -70,7 +70,8 @@ function Home() {
                         setUser(data.user);
                         auth.authStore.setUser(data.user);
                     })
-                    .catch(() => {
+                    .catch((error) => {
+                        console.error(error.message);
                         auth.authStore.logout();
                         auth.setIsAuthenticated(false);
                         window.location.reload();
@@ -97,10 +98,18 @@ function Home() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        })
                     }
                 })
                 .then((data) => {
                     setRecommendations(data.recommendations);
+                })
+                .catch((error) => {
+                    console.error(error.message);
+                    setRecommendations([]);
                 })
             const timeout = setTimeout(() => {
                 setIsLoading(false);

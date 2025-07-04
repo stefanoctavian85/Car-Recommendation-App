@@ -203,6 +203,7 @@ function Register() {
                 setError(data.message);
             }
         } catch (error) {
+            console.error(error.message);
             setError("Something went wrong! Please try again later!");
         }
     }

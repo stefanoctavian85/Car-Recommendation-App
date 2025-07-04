@@ -6,10 +6,13 @@ import { useContext, useEffect, useState } from 'react';
 import { SERVER } from '../../config/global';
 import AppContext from '../../state/AppContext';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
+import ErrorComponent from '../Error/Error.jsx';
 
 function RentConfirmation() {
     const { auth } = useContext(AppContext);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
     const location = useLocation();
 
     let navigate = useNavigate();
@@ -33,15 +36,20 @@ function RentConfirmation() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Payment confirmation failed!');
+                        })
                     }
                 })
                 .then((data) => {
                     if (data.succeeded === false) {
-                        navigate('/');
+                        setError('Payment confirmation failed!');
                     }
                 })
-                .catch((err) => {
-                    navigate('/');
+                .catch((error) => {
+                    console.error(error.message);
+                    setError('Payment confirmation failed!');
                 })
                 .finally(() => {
                     const timeout = setTimeout(() => {
@@ -65,31 +73,35 @@ function RentConfirmation() {
     }
 
     return (
-        <Box className='rent-confirmation-page'>
-            <Box className='rental-final'>
-                <Box className='rental-final-success'>
-                    <Typography component='h1' className='rental-final-title'>Congratulations!</Typography>
-                    <EmojiEmotionsIcon className='success-icon' />
-                </Box>
-                <Box className='rental-final-content'>
-                    <Typography component='h2' className='rental-final-subtitle'>The payment was successful!</Typography>
-                    <Typography component='h3' className='rental-final-text'>
-                        Thank you for trusting us and our services!
-                        From now on, you can see your new car on your profile!
-                    </Typography>
-                    <Typography className='team-message'>The CarMinds team wishes you safe travels and enjoy your car!</Typography>
-                </Box>
+        !error ? (
+            <Box className='rent-confirmation-page'>
+                <Box className='rental-final'>
+                    <Box className='rental-final-success'>
+                        <Typography component='h1' className='rental-final-title'>Congratulations!</Typography>
+                        <EmojiEmotionsIcon className='success-icon' />
+                    </Box>
+                    <Box className='rental-final-content'>
+                        <Typography component='h2' className='rental-final-subtitle'>The payment was successful!</Typography>
+                        <Typography component='h3' className='rental-final-text'>
+                            Thank you for trusting us and our services!
+                            From now on, you can see your new car on your profile!
+                        </Typography>
+                        <Typography className='team-message'>The CarMinds team wishes you safe travels and enjoy your car!</Typography>
+                    </Box>
 
-                <Box className='rental-final-button'>
-                    <Button
-                        variant='contained'
-                        className='see-rented-cars-button'
-                        onClick={() => seeRentedCars()}
-                    >
-                        Profile
-                    </Button>
+                    <Box className='rental-final-button'>
+                        <Button
+                            variant='contained'
+                            className='see-rented-cars-button'
+                            onClick={() => seeRentedCars()}
+                        >
+                            Profile
+                        </Button>
+                    </Box>
                 </Box>
             </Box>
+        ) : <Box className='results-not-found'>
+            <ErrorComponent message={error} />
         </Box>
     );
 }

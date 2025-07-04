@@ -93,11 +93,21 @@ function SidebarFooterAccount() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Something went wrong!');
+                        });
                     }
                 })
                 .then((data) => {
                     setUser(data.user);
                     auth.authStore.setUser(data.user);
+                })
+                .catch((error) => {
+                    console.error(error.message);
+                    auth.authStore.logout();
+                    auth.setIsAuthenticated(false);
+                    window.location.reload();
                 })
         } else {
             navigate('/');
@@ -196,7 +206,8 @@ function AdminDashboard() {
                     setUser(data.user);
                     auth.authStore.setUser(data.user);
                 })
-                .catch(() => {
+                .catch((error) => {
+                    console.error(error.message);
                     auth.authStore.logout();
                     auth.setIsAuthenticated(false);
                     window.location.reload();

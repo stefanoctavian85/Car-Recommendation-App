@@ -77,7 +77,8 @@ function Profile() {
                 setError('');
                 setAccountInformation(data.user);
             })
-            .catch(() => {
+            .catch((error) => {
+                console.error(error.message);
                 auth.authStore.logout();
                 auth.setIsAuthenticated(false);
                 window.location.reload();
@@ -118,10 +119,17 @@ function Profile() {
                 .then((res) => {
                     if (res.ok) {
                         return res.json();
+                    } else {
+                        return res.json().then((error) => {
+                            throw new Error(error.message || 'Reservations not found!');
+                        })
                     }
                 })
                 .then((data) => {
                     setRentedCars(data.rentedCars);
+                })
+                .catch((error) => {
+                    console.error(error);
                 });
 
             const timeout = setTimeout(() => {
@@ -161,18 +169,25 @@ function Profile() {
             return;
         }
 
-        const response = await fetch(`${SERVER}/api/users/save-phone-number`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${auth.token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id: accountInformation._id, phoneNumber })
-        });
+        try {
+            const response = await fetch(`${SERVER}/api/users/save-phone-number`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${auth.token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: accountInformation._id, phoneNumber })
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            setPhoneNumberMessage(data.message);
+            const data = await response.json();
+            if (response.ok) {
+                setPhoneNumberMessage(data.message);
+            } else {
+                setPhoneNumberError(data.message || "Phone number couldn't be saved!")
+            }
+        } catch (error) {
+            console.error(error.message);
+            setError(error.message);
         }
     }
 

@@ -12,7 +12,7 @@ const getReservations = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(cid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid car ID!',
             });
         }
 
@@ -20,7 +20,7 @@ const getReservations = async (req, res, next) => {
             carId: cid,
         });
 
-        if (!reservations) {
+        if (reservations.length === 0) {
             return res.status(404).json({
                 message: messages.reservationMessages.RESERVATION_NOT_FOUND,
             })
@@ -45,7 +45,7 @@ const checkAnotherReservation = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(cid) || !mongoose.Types.ObjectId.isValid(uid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid car ID or user ID!',
             });
         }
 
@@ -99,7 +99,7 @@ const checkDateAvailability = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(cid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid car ID!',
             });
         }
 
@@ -109,7 +109,7 @@ const checkDateAvailability = async (req, res, next) => {
 
         let isAvailable = true;
 
-        if (!reservations) {
+        if (reservations.length === 0) {
             return res.status(200).json({
                 available: isAvailable,
             })
@@ -149,7 +149,7 @@ const calculateRentalPrice = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(cid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid car ID!',
             });
         }
 
@@ -199,7 +199,7 @@ const calculateRentalPrice = async (req, res, next) => {
 
         if (rentalPrice === 0 || rentalPrice === undefined) {
             return res.status(404).json({
-                message: 'Something went wrong...',
+                message: 'Something went wrong at rental price! Please try again later!',
             });
         }
 
@@ -218,7 +218,7 @@ const createPaymentIntent = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(carId)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid car ID!',
             });
         }
 
@@ -237,7 +237,7 @@ const createPaymentIntent = async (req, res, next) => {
         }
 
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: rentalPrice * 100,
+            amount: Math.round(rentalPrice * 100),
             currency: 'eur',
             metadata: {
                 userId: req.user._id.toString(),
@@ -300,7 +300,8 @@ const rentCar = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(cid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                completed: false,
+                message: 'Invalid car ID!',
             });
         }
 
@@ -321,7 +322,7 @@ const getReservationById = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(uid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid user ID!',
             });
         }
 
@@ -330,7 +331,7 @@ const getReservationById = async (req, res, next) => {
             status: 'confirmed',
         });
 
-        if (!reservations) {
+        if (reservations.length === 0) {
             return res.status(404).json({
                 message: 'The user has not made any reservations yet!',
             });
@@ -381,7 +382,7 @@ const changeRentalDetails = async (req, res, next) => {
 
         if (!mongoose.Types.ObjectId.isValid(cid)) {
             return res.status(400).json({
-                message: 'Something went wrong! Please try again later!',
+                message: 'Invalid car ID!',
             });
         }
 
