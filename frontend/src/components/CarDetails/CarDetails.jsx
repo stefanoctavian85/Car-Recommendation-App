@@ -175,7 +175,7 @@ function CarDetails() {
                     }
                 })
                 .then((data) => {
-                    setMinRentalPrice(data.rentalPrice);
+                    setMinRentalPrice(parseFloat(Number(data.rentalPrice).toFixed(2)));
                 })
                 .catch((error) => {
                     console.error(error.message);
@@ -293,7 +293,7 @@ function CarDetails() {
                             <Box className='car-price'>
                                 <Box className='full-price'>
                                     <Typography className='full-price-text'>
-                                        Full Price: <EuroIcon className='price-icon' /> {car.Pret}
+                                        Full Price: <EuroIcon className='price-icon' /> {parseFloat(car.Pret.toFixed(2))}
                                     </Typography>
                                 </Box>
                                 <Box className='rent-price'>

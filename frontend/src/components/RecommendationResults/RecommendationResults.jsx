@@ -22,7 +22,7 @@ function RecommendationResults() {
         if (!auth.isAuthenticated) {
             navigate('/login');
             return;
-        } else if (predictions.length === 0) {
+        } else if (predictions.length === 0 && !location.state?.error) {
             setError('Internal Server Error! Please try again later!');
         }
 

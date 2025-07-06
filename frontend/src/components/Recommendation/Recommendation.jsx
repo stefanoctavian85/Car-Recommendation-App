@@ -104,7 +104,7 @@ function Recommendation() {
                 setError(data.message);
                 navigate('/recommendation/results', {
                     state: {
-                        error: fetchData.message,
+                        error: data.message,
                     }
                 });
             }
@@ -125,7 +125,7 @@ function Recommendation() {
     }
 
     function handleFinalResponse(e) {
-        if (e.target.value !== '') {
+        if (e.target.value !== '' || e.target.value !== null || e.target.value !== undefined) {
             if (data[index].type === 'range' && e.target.value >= data[index].min && e.target.value <= data[index].max) {
                 setFinalResponse(e.target.value);
                 setValidResponse(true);
@@ -165,10 +165,12 @@ function Recommendation() {
     }
 
     function handleResponses() {
-        if (finalResponse === '') {
+        if (finalResponse === '' || finalResponse === null || finalResponse === undefined) {
             setTypingError("Please answer the question!");
+            return;
         } else if (finalResponse < data[index].min || finalResponse > data[index].max) {
             setTypingError(`Please insert a value between ${data[index].min} and ${data[index].max}!`);
+            return;
         }
 
         if (validResponse === true && typingError === '') {
@@ -187,7 +189,7 @@ function Recommendation() {
     }
 
     async function submitForm() {
-        if (finalResponse === '') {
+        if (finalResponse === '' || finalResponse === null || finalResponse === undefined) {
             setTypingError("Please answer the question!");
         } else {
             setTypingError('');

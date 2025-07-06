@@ -1,5 +1,5 @@
 import './Navbar.css';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import AppContext from '../../state/AppContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { AppBar, Container, Toolbar, Box, Button, Menu, MenuItem, Typography, Tooltip, List, ListItem } from '@mui/material';
@@ -14,17 +14,23 @@ function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const navigate = useNavigate();
+    const menuAnchorRef = useRef(null);
 
     useEffect(() => {
         setIsAuthenticated(auth.isAuthenticated);
     }, [auth.isAuthenticated]);
 
     const handleOpenUserMenu = (event) => {
-        setAnchorElUser(event.currentTarget);
+        setAnchorElUser(menuAnchorRef.current);
     }
 
     const handleCloseUserMenu = (event) => {
         setAnchorElUser(null);
+
+        if (menuAnchorRef.current) {
+            menuAnchorRef.current.focus();
+        }
+
         if (event.target.textContent === "Profile") {
             navigate('/profile');
         } else if (event.target.textContent === "Log out") {
@@ -96,7 +102,13 @@ function Navbar() {
                     {isAuthenticated ? (
                         <Box className='navbar-settings'>
                             <Tooltip title='Settings'>
-                                <PersonIcon onClick={handleOpenUserMenu} />
+                                <Box
+                                    ref={menuAnchorRef}
+                                    onClick={handleOpenUserMenu}
+                                    tabIndex={0}
+                                >
+                                    <PersonIcon />
+                                </Box>
                             </Tooltip>
 
                             <Menu

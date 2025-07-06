@@ -62,7 +62,7 @@ function PaymentForm({ car, startDate, endDate, insuranceOptions, rentalPrice })
                         })
                         .then(data => {
                             if (data.completed === true) {
-                                navigate(`/rent-confirmation?payment_intent=${result.paymentIntent.id}`);
+                                navigate(`/rent-confirmation?payment_intent=${result.paymentIntent.id}`, { replace: true });
                             } else {
                                 setErrorMessage(data.message);
                             }
@@ -97,7 +97,7 @@ function PaymentForm({ car, startDate, endDate, insuranceOptions, rentalPrice })
                         })
                         .then(data => {
                             if (data.completed === true) {
-                                navigate(`/rent-confirmation?payment_intent=${result.paymentIntent.id}`);
+                                navigate(`/rent-confirmation?payment_intent=${result.paymentIntent.id}`, { replace: true });
                             } else {
                                 setErrorMessage(data.message);
                             }

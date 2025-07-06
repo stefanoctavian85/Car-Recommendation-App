@@ -33,8 +33,9 @@ const getRecommendationsByText = async (req, res, next) => {
             const response = await flaskResponse.json();
             carInfo = JSON.parse(response.content);
         } catch (err) {
+            console.error(err.message);
             return res.status(500).json({
-                message: 'Internal Server Error. Please try again later!',
+                message: err.message,
             });
         }
 
@@ -76,7 +77,7 @@ const getRecommendationsByText = async (req, res, next) => {
             }
         } catch (err) {
             return res.status(500).json({
-                message: 'Internal Server Error. Please try again later!',
+                message: err.message,
             });
         }
     } catch (err) {
@@ -88,7 +89,13 @@ const predict = async (req, res, next) => {
     try {
         const { questions, responses } = req.body;
         const user = req.user;
-        
+
+        if (responses.some(answer => answer === null || answer === undefined)) {
+            return res.status(400).json({
+                message: "Form completed incorrectly! Please respond to all the questions!",
+            });
+        }
+
         if (!Array.isArray(questions) || !Array.isArray(responses)) {
             return res.status(400).json({
                 message: "Questions and responses must be arrays!",
@@ -99,7 +106,7 @@ const predict = async (req, res, next) => {
             return res.status(400).json({
                 message: "Questions and responses are required!",
             });
-        } 
+        }
 
         if (responses.length !== 10 || questions.length !== 10) {
             return res.status(400).json({
@@ -129,36 +136,37 @@ const predict = async (req, res, next) => {
                 return res.status(flaskResponse.status).json({
                     message: data.error,
                 });
-            };
-            
-            const prediction = await flaskResponse.json();
-            const cluster = prediction.cluster;
-            const cars = prediction.cars;
-            
-            const combinedResponses = questions.map((question, index) => ({
-                question,
-                answer: responses[index],
-            }));
+            } else {
+                const prediction = await flaskResponse.json();
+                const cluster = prediction.cluster;
+                const cars = prediction.cars;
 
-            const form = await models.Form.create({
-                userId: user._id,
-                responses: combinedResponses,
-                predictions: cars,
-                cluster: cluster
-            });
-            await form.save();
+                const combinedResponses = questions.map((question, index) => ({
+                    question,
+                    answer: responses[index],
+                }));
 
-            req.user.cluster = cluster;
-            req.user.hasCompletedRecommendation = true;
-            const userToSave = req.user;
-            await userToSave.save();
-            
-            return res.status(200).json({
-                cars
-            });
+                const form = await models.Form.create({
+                    userId: user._id,
+                    responses: combinedResponses,
+                    predictions: cars,
+                    cluster: cluster
+                });
+                await form.save();
+
+                req.user.cluster = cluster;
+                req.user.hasCompletedRecommendation = true;
+                const userToSave = req.user;
+                await userToSave.save();
+
+                return res.status(200).json({
+                    cars
+                });
+            }
         } catch (err) {
+            console.log(err.message);
             return res.status(500).json({
-                message: 'Internal Server Error. Please try again later!',
+                message: err.message,
             });
         }
     } catch (err) {

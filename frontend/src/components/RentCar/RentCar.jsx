@@ -417,7 +417,11 @@ function RentCar() {
     }
 
     return (
-        user && car ? (
+        error ? (
+            <Box className='results-not-found'>
+                <ErrorComponent message={error} />
+            </Box>
+        ) : user && car ? (
             <Box className='rent-car-page'>
                 <Stepper activeStep={activeStep} className='rent-car-steps'>
                     {
@@ -697,11 +701,7 @@ function RentCar() {
                     </Box>
                 </Fragment>
             </Box>
-        ) : (
-            <Box className='results-not-found'>
-                <ErrorComponent message={error} />
-            </Box>
-        )
+        ) : null
     );
 }
 

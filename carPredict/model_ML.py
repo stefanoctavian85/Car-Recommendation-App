@@ -90,6 +90,11 @@ def text_to_json():
 
         if car_info is None:
             return jsonify({"error": "Invalid structure returned by the model! Please try another method of recommendation!"}), 500
+        
+        nr_valid_fields = sum(1 for value in car_info.values() if value is not None)
+        print(nr_valid_fields)
+        if nr_valid_fields < 3:
+            return jsonify({"error": "Too few details provided. The recommendation would be too general! "}), 400
 
         for key in car_info:
             if car_info[key] is None:
@@ -326,4 +331,4 @@ def validate_documents():
         return jsonify({"error": "Internal Server Error, please try again later."}), 500
 
 if __name__ == '__main__':
-    app.run(debug=False, use_reloader=False)
+    app.run(debug=True)

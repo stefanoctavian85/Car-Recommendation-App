@@ -536,7 +536,7 @@ function Profile() {
                                                                             <Box className='rented-car-footer'>
                                                                                 <Box className='rented-car-price'>
                                                                                     <Typography component='h4'>
-                                                                                        Rental price: {rentedCar.totalPrice}
+                                                                                        Rental price: {parseFloat(rentedCar.totalPrice.toFixed(2))}
                                                                                         <EuroIcon />
                                                                                     </Typography>
                                                                                 </Box>
