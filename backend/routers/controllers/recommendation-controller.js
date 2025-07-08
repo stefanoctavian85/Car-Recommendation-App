@@ -1,6 +1,7 @@
 import models from "../../models/index.js";
 import fetch from 'node-fetch';
 import { SERVER } from '../../utils/global.js';
+import pingOllamaToStart from '../../utils/ollama-utils.js';
 
 const getRecommendationsByText = async (req, res, next) => {
     try {
@@ -12,16 +13,32 @@ const getRecommendationsByText = async (req, res, next) => {
             });
         }
 
+        const isReady = await pingOllamaToStart("llama3.2:3b");
+
+
+        if (!isReady) {
+            return res.status(500).json({
+                message: "This recommendation method is not available right now!"
+            });
+        }
+
         let carInfo = {};
 
         try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => {
+                controller.abort();
+            }, 60000);
             const flaskResponse = await fetch(`${SERVER}/transform-text-to-json`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ text }),
+                signal: controller.signal
             });
+
+            clearTimeout(timeout);
 
             if (!flaskResponse.ok) {
                 const data = await flaskResponse.json();
@@ -33,7 +50,11 @@ const getRecommendationsByText = async (req, res, next) => {
             const response = await flaskResponse.json();
             carInfo = JSON.parse(response.content);
         } catch (err) {
-            console.error(err.message);
+            if (err.name === 'AbortError') {
+                console.error("Abort at recommendation method by text", err);
+            } else {
+                console.error(err.message);
+            }
             return res.status(500).json({
                 message: err.message,
             });

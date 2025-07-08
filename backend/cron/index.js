@@ -5,7 +5,7 @@ import recommendationCronJob from './recommendation-cronjob.js';
 
 function startCronJobs() {
     try {
-        cron.schedule('*/5 * * * *', recommendationCronJob.pingOllamaToStart());
+        recommendationCronJob.pingOllamaToStart();
         cron.schedule('*/5 * * * *', reservationsCronJob.completedReservations);
         cron.schedule('*/5 * * * *', chatCronJob.deleteIncompleteConversation);
     } catch (err) {

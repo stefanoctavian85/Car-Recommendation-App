@@ -6,11 +6,12 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_ollama import ChatOllama
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Optional
 from flask_cors import CORS
 import json
 import easyocr
 from PIL import Image
+import unicodedata
 
 app = Flask(__name__)
 CORS(app)
@@ -33,24 +34,34 @@ numerical_columns = ['Anul productiei', 'Capacitate cilindrica', 'Putere', 'Cons
 categorical_columns = ['Combustibil', 'Tip Caroserie', 'Cutie de viteze', 'Transmisie']
 all_columns = numerical_columns + categorical_columns
 
-prompt_template = ("Please, extract car attributes, where NA, please put null."
-                   "Each field must contain a single value! You must return a JSON in the following format: \n"
-                   "{format_instructions}\n"
-                   "Text: {text}."
-                   "No explanations! Each field must be filled with a single value or null, if not present.\n")
+prompt_template = ("Please extract car attributes from the text below. \n"
+                   "If the value is explicitly mentionated, extract it as is. \n" 
+                   "If it isn't mentioned, please return null. Do not guess or infer values. \n"
+                   "If you have something like 'year of production 2024', you must return in the JSON the value for 'Anul productiei' to be 2024 in integer. Same for expressions like 'year', 'production year' etc \n"
+                   "If you have something like 'engine capacity 2000', you must return in the JSON the value for 'Capacitate cilindrica' to be 2000 in integer. Same for expressions like 'cylidrincal capacity' etc. \n" \
+                   "If you have something like 'horsepower 200', you must return in the JSON the value for 'Putere' to be 200 in integer. \n"
+                   "If you see something like 'sedan', 'compact', 'minivan', 'sport', or 'SUV' it reffers to the 'Tip Caroserie' attribute \n"
+                   "Each field must contain a single value! \n"
+                   "You must return a JSON in the following format: \n"
+                   "{format_instructions} \n"
+                   "Text: {text}. \n"
+                   "No explanations! Only return the JSON. \n"
+                   "The user input will be in english, please correlate with the pydantic format instructions. "
+                   "The returned JSON must have all the keys, with the value if user mentioned it, or null if not. \n"
+                   )
 
 
 class Masina(BaseModel):
-    anul_productiei: int = Field(..., alias="Anul productiei")
-    capacitate_cilindrica: int = Field(..., alias="Capacitate cilindrica")
-    Putere: int
-    consum_urban: int = Field(..., alias="Consum Urban")
-    consum_extraurban: int = Field(..., alias="Consum Extraurban")
-    Pret: int
-    Combustibil: Literal['Diesel', 'Electric', 'Gasoline', 'Hibrid']
-    tip_caroserie: Literal['Compact', 'Minivan', 'Sedan', 'Sport', 'SUV'] = Field(..., alias="Tip Caroserie")
-    cutie_viteze: Literal['Manual', 'Automatic'] = Field(..., alias='Cutie de viteze')
-    Transmisie: Literal['FWD', 'RWD', 'AWD']
+    anul_productiei: Optional[int] = Field(None, alias="Anul productiei")
+    capacitate_cilindrica: Optional[int] = Field(None, alias="Capacitate cilindrica")
+    Putere: Optional[int]
+    consum_urban: Optional[int] = Field(None, alias="Consum Urban")
+    consum_extraurban: Optional[int] = Field(None, alias="Consum Extraurban")
+    Pret: Optional[int]
+    Combustibil: Optional[Literal['Diesel', 'Electric', 'Gasoline', 'Hibrid']]
+    tip_caroserie: Optional[Literal['Compact', 'Minivan', 'Sedan', 'Sport', 'SUV']] = Field(None, alias="Tip Caroserie")
+    cutie_viteze: Optional[Literal['Manual', 'Automatic']] = Field(None, alias='Cutie de viteze')
+    Transmisie: Optional[Literal['FWD', 'RWD', 'AWD']]
 
 
 @app.route('/transform-text-to-json', methods=['POST'])
@@ -86,15 +97,22 @@ def text_to_json():
         except json.JSONDecodeError:
             return jsonify({"error": "Model response could not be parsed! Please try another method of recommendation!"}), 500
         
-        car_info = llm_response['properties']
+        car_info = llm_response.get('properties')
 
         if car_info is None:
             return jsonify({"error": "Invalid structure returned by the model! Please try another method of recommendation!"}), 500
         
+        for key in car_info:
+            val = car_info[key]
+            if car_info[key] == "null":
+                car_info[key] = None
+            elif key in numerical_columns and isinstance(val, str) and val.isdigit():
+                car_info[key] = int(val)
+        
         nr_valid_fields = sum(1 for value in car_info.values() if value is not None)
-        print(nr_valid_fields)
+
         if nr_valid_fields < 3:
-            return jsonify({"error": "Too few details provided. The recommendation would be too general! "}), 400
+            return jsonify({"error": "Too few details provided. The recommendation would be too general!"}), 400
 
         for key in car_info:
             if car_info[key] is None:
@@ -143,7 +161,7 @@ def predict():
 
         if 'responses' in data:
             responses = np.array(data['responses'])
-            
+
             if not isinstance(responses, (list, tuple, np.ndarray)) or len(responses) != 10:
                 return jsonify({"error": "Responses are not a list, tuple or ndarray or are not 10!"}), 400
 
@@ -222,33 +240,37 @@ def predict():
         return jsonify({"error": "Internal Server Error, please try again later."}), 500
 
 prompt_OCR = ("I have extracted the following text with an OCR from identity card and driver license.\n"
-              "This text may contain errors, such as misspelled letters, missing characters, or incorrect spacing.\n"
               "Text extracted from ID Card: {full_text_ID}\n"
               "Text extracted from driver license: {full_text_driver}\n"
               "The user provided in the app the following:\n"
               "Last name: {last_name}, First name: {first_name}\n"
               "Your task is to compare the provided names to the OCR-extracted names and calculate a similarity score.\n"
               "STEP BY STEP PROCESS:\n"
-              "1. Identify potential matches in the OCR text for both first name and last name\n"
+              "1. From the OCR extracted text, even if no perfect match is found, try partial matches and assign a score using the rules below. \n" 
               "2. Calculate similarity score for each name using the scoring system: \n"
-              " - Perfect match (100 points): Names are identical\n"
-              " - Near perfect (90-99 points): 1-2 characters differences (OCR errors like Ă vs A)\n"
-              " - Good match (70-89 points): 3-4 characters differences or minor variations\n"
-              " - Partial match (50-69 points): Names are recognizable but with several differences\n"
-              " - Poor match (30-49 points): Some similarity but significat differences\n"
-              " - No match (0-29 points): Names are completely different\n"
-              "3. IMPORTANT! DO NOT TRY to match different names! Stefan is NOT similar to ANDREI\n"
-              "4. Combine scores: average the first name score and last name score to get final score\n"
-              "5. Validation: if final score >= 50, then isValid is true, otherwise false\n"
-              "EXAMPLES: \n"
-              "STEFAN vs stefan = 100 points (perfect match)\n"
-              "Stef vs stefan = 90 points (2 characters)\n"
-              "Andrei vs text without `Andrei` = 0 points (names are completely different)\n"
-              "You must return a JSON with the following structure:\n"
-              "{format_instructions}"
+              "SCORING CRITERIA (be precise):\n"
+              "For each name, assign points based on best match found:\n"
+              "- EXACT MATCH (ignoring diacritics ăâîșț): 100 points\n"
+              "- 1-2 character difference: 85-95 points, example: Stef vs Stefan, there are 2 characters difference\n"
+              "- 3-4 character difference: 70-80 points, example: St vs Stefan, there are 4 characters difference\n"
+              "- 5-6 character difference: 50-65 points\n"
+              "- More than 6 character difference: 20-45 points\n"
+              "- Name not found at all: 0 points - example: Andrei vs Stefan, there are no similarities\n\n" 
+              "- Diacritics, like Ă, Ș, Ț, Â, Î,  must be ignored - treat Ștefan like Stefan\n"
+              "3. Validation: if final score >= 50, then isValid is true, otherwise false\n"
+              "4. Return the JSON in the following structure: {format_instructions_ocr}!\n" 
+              "5. FINAL INSTRUCTIONS:\n"
+              "Return ONLY a single JSON object, and nothing else.\n"
+              "Do NOT return explanations, do NOT return schema, do NOT return lists.\n"
+              "Return STRICTLY the JSON object in the above format, with only the score and isValid keys.\n\n"
               )
 
-threshold = 0.5
+def strip_accents(text):
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn'
+    )
+
+threshold = 0.3
 class UserIdentity(BaseModel):
     score: int
     isValid: bool
@@ -267,6 +289,9 @@ def validate_documents():
         driver_license_path = data.get('driverLicensePath')
         first_name = data.get('firstname')
         last_name = data.get('lastname')
+
+        parser = PydanticOutputParser(pydantic_object=UserIdentity)
+        format_instructions_ocr = parser.get_format_instructions()
 
         if not all([id_card_path, driver_license_path, first_name, last_name]):
             return jsonify({"error": "Missing one or more fields: id card, driver license, first name or last name "}), 400
@@ -292,22 +317,19 @@ def validate_documents():
             print(e)
             return jsonify({"error": "OCR failed!"}), 500
 
-        full_text_ID = "ID CARD INFO: " + " ".join(text for (_, text, prob) in result_ID if prob > threshold)
-        full_text_driver = "DRIVER LICENSE INFO: " + " ".join(text for (_, text, prob) in result_driver_license if prob > threshold)
-
-        parser = PydanticOutputParser(pydantic_object=UserIdentity)
-        format_instructions = parser.get_format_instructions()
+        full_text_ID = "ID CARD INFO: " + strip_accents(" ".join(text for (_, text, prob) in result_ID if prob > threshold))
+        full_text_driver = "DRIVER LICENSE INFO: " + strip_accents(" ".join(text for (_, text, prob) in result_driver_license if prob > threshold))
 
         prompt = PromptTemplate(
             template=prompt_OCR,
             input_variables=["full_text_ID", "full_text_driver", "first_name", "last_name"],
-            partial_variables={"format_instructions": format_instructions},
+            partial_variables={"format_instructions_ocr": format_instructions_ocr},
         )
 
         chat = ChatOllama(
-            model="llama3.1:8b",
+            model="llama3.2:3b",
             temperature=0,
-            format="json"
+            format='json'
         )
 
         final_prompt = prompt.format(
@@ -316,7 +338,7 @@ def validate_documents():
             first_name=first_name,
             last_name=last_name
         )
-
+        
         response = chat.invoke(final_prompt)
         try:
             user_identity_score = json.loads(response.content)

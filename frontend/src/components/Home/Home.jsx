@@ -36,7 +36,7 @@ function Home() {
     const [token, setToken] = useState('');
     const [user, setUser] = useState('');
 
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(auth.token || '');
 
     const [recommendations, setRecommendations] = useState([]);
 
@@ -47,9 +47,7 @@ function Home() {
         if (auth.token) {
             setToken(auth.token);
 
-            if (auth.authStore.getUser()) {
-                setUser(auth.authStore.getUser());
-            } else if (auth.authStore.token) {
+            if (auth.authStore.token) {
                 const userId = jwtDecode(auth.authStore.token).id;
                 fetch(`${SERVER}/api/users/${userId}/profile`, {
                     method: 'GET',
@@ -76,14 +74,14 @@ function Home() {
                         auth.setIsAuthenticated(false);
                         window.location.reload();
                     });
+            } else if (auth.authStore.getUser()) {
+                setUser(auth.authStore.getUser());
             }
-            const timeout = setTimeout(() => {
-                setIsLoading(false);
-            }, 1500);
-            return () => clearTimeout(timeout);
-        } else {
-            setIsLoading(false);
         }
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+        return () => clearTimeout(timeout);
     }, []);
 
     useEffect(() => {
@@ -111,13 +109,11 @@ function Home() {
                     console.error(error.message);
                     setRecommendations([]);
                 })
-            const timeout = setTimeout(() => {
-                setIsLoading(false);
-            }, 1000);
-            return () => clearTimeout(timeout);
-        } else {
-            setIsLoading(false);
         }
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
+        return () => clearTimeout(timeout);
     }, [user]);
 
     function redirectToRegister() {
@@ -149,7 +145,7 @@ function Home() {
     return (
         <Box className='home-page'>
             {
-                token ? (
+                token && user ? (
                     <Box className='home-page-authenticated' ref={heroSectionRef}>
                         <Box className='home-page-welcome'>
                             <Typography className='home-page-welcome-text'>Welcome back, {user.firstname}!</Typography>

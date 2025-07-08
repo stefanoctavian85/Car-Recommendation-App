@@ -2,6 +2,7 @@ import models from "../../models/index.js";
 import fs from 'fs';
 import mongoose from "mongoose";
 import { SERVER } from "../../utils/global.js";
+import pingOllamaToStart from '../../utils/ollama-utils.js';
 
 const userInformation = async (req, res, next) => {
     try {
@@ -87,17 +88,25 @@ const sendDocuments = async (req, res, next) => {
                 message: 'Missing documents!',
             })
         };
-        
+
+        const isReady = await pingOllamaToStart("llama3.2:3b");
+
+        if (!isReady) {
+            return res.status(500).json({
+                message: "Document validation is not available right now! Please create a ticket using the chat!",
+            });
+        }
+
+        res.status(200).json({
+            documentsSent: true,
+        });
+
         const idCardPath = "../backend/" + files['id-card'][0].destination + files['id-card'][0].filename;
         const driverLicensePath = "../backend/" + files['driver-license'][0].destination + files['driver-license'][0].filename;
 
         const user = req.user;
         user.statusAccountVerified = 'pending';
         await user.save();
-
-        res.status(200).json({
-            documentsSent: true,
-        });
 
         validateDocuments(user, idCardPath, driverLicensePath);
     } catch (err) {
@@ -107,6 +116,10 @@ const sendDocuments = async (req, res, next) => {
 
 const validateDocuments = async (user, idCardPath, driverLicensePath) => {
     try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => {
+            controller.abort()
+        }, 60000);
         const flaskResponse = await fetch(`${SERVER}/validate-documents`, {
             method: 'POST',
             headers: {
@@ -117,8 +130,11 @@ const validateDocuments = async (user, idCardPath, driverLicensePath) => {
                 driverLicensePath,
                 firstname: user.firstname,
                 lastname: user.lastname,
-            })
+            }),
+            signal: controller.signal,
         });
+
+        clearTimeout(timeout);
 
         if (!flaskResponse.ok) {
             const data = await flaskResponse.json();
@@ -135,9 +151,16 @@ const validateDocuments = async (user, idCardPath, driverLicensePath) => {
         user.statusAccountVerified = isValid ? 'approved' : 'rejected';
         await user.save();
 
-        fs.unlink(idCardPath, () => {});
-        fs.unlink(driverLicensePath, () => {});
+        fs.unlink(idCardPath, () => { });
+        fs.unlink(driverLicensePath, () => { });
     } catch (err) {
+        if (err.name === 'AbortError') {
+            console.log("Abort at validating documents: ", err)
+        }
+        fs.unlink(idCardPath, () => { });
+        fs.unlink(driverLicensePath, () => { });
+        user.statusAccountVerified = 'rejected';
+        await user.save();
         console.error("Error at validating documents: ", err);
     }
 }
