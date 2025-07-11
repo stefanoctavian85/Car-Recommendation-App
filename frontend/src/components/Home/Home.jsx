@@ -156,7 +156,6 @@ function Home() {
                                     <Typography className='home-page-subtitle'>Check dashboard to see if you have new tickets to solve!</Typography>
                                 )
                             }
-
                         </Box>
 
                         <Box className='home-page-authenticated-content'>

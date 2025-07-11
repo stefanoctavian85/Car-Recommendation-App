@@ -90,7 +90,7 @@ function AdminConversations({ router }) {
                                 id: key,
                                 fullname: conversation.userFullName || '',
                                 category: conversation.category.charAt(0).toUpperCase() + conversation.category.slice(1).toLowerCase() || '',
-                                status: conversation.status.charAt(0).toUpperCase() + conversation.status.slice(1).toLowerCase()  || '',
+                                status: conversation.status.charAt(0).toUpperCase() + conversation.status.slice(1).toLowerCase() || '',
                                 descriptionMessage: descriptionMessage || '',
                             }
                         });
@@ -137,7 +137,7 @@ function AdminConversations({ router }) {
             </Box>
 
             {
-                !errorMessage && conversations.length > 0 ? (
+                conversations.length > 0 ? (
                     <Box>
                         <DataGrid
                             className='admin-conversations-table'
@@ -177,9 +177,13 @@ function AdminConversations({ router }) {
                 </Box>
             }
 
-            <Box className='conversations-error'>
-                <Typography className='admin-conversations-error-message'>{errorMessage}</Typography>
-            </Box>
+            {
+                errorMessage ? (
+                    <Box className='conversations-error'>
+                        <Typography className='admin-conversations-error-message'>{errorMessage}</Typography>
+                    </Box>
+                ) : null
+            }
         </Box>
     );
 }

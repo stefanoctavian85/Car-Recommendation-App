@@ -353,4 +353,4 @@ def validate_documents():
         return jsonify({"error": "Internal Server Error, please try again later."}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

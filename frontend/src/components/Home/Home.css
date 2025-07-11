@@ -465,7 +465,22 @@
     text-transform: none !important;
 }
 
+@media (max-width: 1300px) {
+    .home-page-authenticated {
+        min-width: 500px;
+    }
+
+    .car-images {
+        display: none;
+        height: 160px;
+    }
+}
+
 @media (max-width: 1024px) {
+    .home-page-authenticated {
+        min-width: 500px;
+    }
+
     .recommendations-section {
         padding: 60px;
     }
@@ -473,10 +488,11 @@
     .recommendations-grid {
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
         gap: 20px;
+        min-width: 100%;
     }
 
     .car-images {
-        height: 160px;
+        display: none;
     }
 
     .recommendation-car-name {
