@@ -466,6 +466,22 @@
 }
 
 @media (max-width: 1300px) {
+    .home-landing-page {
+        min-width: 1000px;
+    }
+
+    .home-header {
+        min-width: 350px;
+    }
+
+    .home-how-it-works-section {
+        min-width: 1000px;
+    }
+
+    .home-why-to-choose-us-section {
+        min-width: 1000px;
+    }
+
     .home-page-authenticated {
         min-width: 500px;
     }

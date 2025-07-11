@@ -21,6 +21,7 @@ import CarsStore from './state/stores/CarsStore.jsx';
 import AdminDashboard from './components/AdminDashboard/AdminDashboard.jsx';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen.jsx';
 import RentConfirmation from './components/RentConfirmation/RentConfirmation.jsx';
+import ErrorComponent from './components/Error/Error.jsx';
 
 function App() {
   const [authStore] = useState(new AuthStore());
@@ -116,6 +117,8 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path='/rent-confirmation' element={<RentConfirmation />}></Route>
               </Route>
+
+              <Route path='*' element={<ErrorComponent message={'Page not found!'} />}></Route>
             </Route>
 
           </Routes>
