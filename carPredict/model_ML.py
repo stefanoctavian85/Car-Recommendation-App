@@ -182,7 +182,7 @@ def predict():
             missing_keys = [key for key in all_columns if key not in car_data]
 
             if missing_keys:
-                return jsonify({"error": "Missing keys from text to json!"}), 400
+                return jsonify({"error": "The text was too ambiguous! Please be more specific, especially regarding production year, engine capacity or horsepower."}), 400
             
             for key in numerical_columns:
                 val = car_data.get(key)
