@@ -59,7 +59,7 @@ npm start
 ### 4. Start the Flask ML Server
 ```bash
 cd carPredict
-pip install -r requirements.txt
+pip install flask scikit-learn joblib easyocr nltk langchain pydantic
 python model_ML.py
 ```
 
