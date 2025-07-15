@@ -87,4 +87,4 @@ Car-Recommendation-App/
 
 ## 📌 Status
 
-This app is currently under active development and was created as a final year Bachelor's thesis project.
+This app was created as a final year Bachelor's thesis project.
